@@ -79,10 +79,8 @@ public class Teleop extends OpMode{
         }
 
         //speeds of drive motors
-        frontleftPOWER = leftGP1Y;
-        backleftPOWER = leftGP1Y;
-        frontrightPOWER = rightGP1Y;
-        backrightPOWER = rightGP1Y;
+        frontleftPOWER = backleftPOWER = leftGP1Y;
+        frontrightPOWER = backrightPOWER = rightGP1Y;
 
         maxPOWER = Math.abs(frontleftPOWER);
         if (Math.abs(backleftPOWER) > maxPOWER) {

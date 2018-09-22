@@ -114,7 +114,8 @@ public class Vision extends LinearOpMode {
     private static final float mmPerInch        = 25.4f;
     private static final float mmFTCFieldWidth  = (12*6) * mmPerInch;       // the width of the FTC field (from the center point to the outer panels)
     private static final float mmTargetHeight   = (6) * mmPerInch;          // the height of the center of the target image above the floor
-
+    private VectorF translation;
+    private Orientation rotation;
     // Select which camera you want use.  The FRONT camera is the one on the same side as the screen.
     // Valid choices are:  BACK or FRONT
     private static final VuforiaLocalizer.CameraDirection CAMERA_CHOICE = BACK;
@@ -277,13 +278,13 @@ public class Vision extends LinearOpMode {
             // check all the trackable target to see which one (if any) is visible.
             targetVisible = false;
             for (VuforiaTrackable trackable : allTrackables) {
-                if (((VuforiaTrackableDefaultListener)trackable.getListener()).isVisible()) {
+                if (((VuforiaTrackableDefaultListener) trackable.getListener()).isVisible()) {
                     telemetry.addData("Visible Target", trackable.getName());
                     targetVisible = true;
 
                     // getUpdatedRobotLocation() will return null if no new information is available since
                     // the last time that call was made, or if the trackable is not currently visible.
-                    OpenGLMatrix robotLocationTransform = ((VuforiaTrackableDefaultListener)trackable.getListener()).getUpdatedRobotLocation();
+                    OpenGLMatrix robotLocationTransform = ((VuforiaTrackableDefaultListener) trackable.getListener()).getUpdatedRobotLocation();
                     if (robotLocationTransform != null) {
                         lastLocation = robotLocationTransform;
                     }
@@ -294,18 +295,35 @@ public class Vision extends LinearOpMode {
             // Provide feedback as to where the robot is located (if we know).
             if (targetVisible) {
                 // express position (translation) of robot in inches.
-                VectorF translation = lastLocation.getTranslation();
+                translation = lastLocation.getTranslation();
                 telemetry.addData("Pos (in)", "{X, Y, Z} = %.1f, %.1f, %.1f",
                         translation.get(0) / mmPerInch, translation.get(1) / mmPerInch, translation.get(2) / mmPerInch);
 
                 // express the rotation of the robot in degrees.
-                Orientation rotation = Orientation.getOrientation(lastLocation, EXTRINSIC, XYZ, DEGREES);
+                rotation = Orientation.getOrientation(lastLocation, EXTRINSIC, XYZ, DEGREES);
                 telemetry.addData("Rot (deg)", "{Roll, Pitch, Heading} = %.0f, %.0f, %.0f", rotation.firstAngle, rotation.secondAngle, rotation.thirdAngle);
-            }
-            else {
+            } else {
                 telemetry.addData("Visible Target", "none");
             }
             telemetry.update();
         }
+    }
+    public double getRobotX(){
+        return translation.get(0) / mmPerInch;
+    }
+    public double getRobotY(){
+        return translation.get(1) / mmPerInch;
+    }
+    public double getRobotZ(){
+        return translation.get(2) / mmPerInch;
+    }
+    public double getRobotRoll(){
+        return rotation.firstAngle;
+    }
+    public double getRobotPitch(){
+        return rotation.secondAngle;
+    }
+    public double getRobotHeading(){
+        return rotation.thirdAngle;
     }
 }

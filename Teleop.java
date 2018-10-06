@@ -72,8 +72,8 @@ public class Teleop extends OpMode{
 
         //remove slight touches
         if (Math.abs(leftGP1Y) < 0.05) {
-                leftGP1Y = 0;
-            }
+            leftGP1Y = 0;
+        }
         if (Math.abs(leftGP1X) < 0.05) {
             leftGP1X = 0;
         }

@@ -122,12 +122,16 @@ public class Vision extends LinearOpMode {
 
     private OpenGLMatrix lastLocation = null;
     private boolean targetVisible = false;
-
+    private boolean silverVisible = false;
     /**
      * {@link #vuforia} is the variable we will use to store our instance of the Vuforia
      * localization engine.
      */
     VuforiaLocalizer vuforia;
+    int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+    VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
+
+
 
     @Override public void runOpMode() {
         /*
@@ -135,20 +139,19 @@ public class Vision extends LinearOpMode {
          * We can pass Vuforia the handle to a camera preview resource (on the RC phone);
          * If no camera monitor is desired, use the parameterless constructor instead (commented out below).
          */
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
-
-        // VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
-
-        parameters.vuforiaLicenseKey = VUFORIA_KEY ;
+        parameters.vuforiaLicenseKey = VUFORIA_KEY;
         parameters.cameraDirection   = CAMERA_CHOICE;
-
-        //  Instantiate the Vuforia engine
         vuforia = ClassFactory.getInstance().createVuforia(parameters);
 
+        //  Instantiate the Vuforia engine
+
+        VuforiaTrackables minerals = this.vuforia.loadTrackablesFromAsset("Minerals_OT");
+        VuforiaTrackable silver = minerals.get(0);
+        silver.setName("silver");
         // Load the data sets that for the trackable objects. These particular data
         // sets are stored in the 'assets' part of our application.
         VuforiaTrackables targetsRoverRuckus = this.vuforia.loadTrackablesFromAsset("RoverRuckus");
+
         VuforiaTrackable blueRover = targetsRoverRuckus.get(0);
         blueRover.setName("Blue-Rover");
         VuforiaTrackable redFootprint = targetsRoverRuckus.get(1);
@@ -157,6 +160,8 @@ public class Vision extends LinearOpMode {
         frontCraters.setName("Front-Craters");
         VuforiaTrackable backSpace = targetsRoverRuckus.get(3);
         backSpace.setName("Back-Space");
+
+
 
         // For convenience, gather together all the trackable objects in one easily-iterable collection */
         List<VuforiaTrackable> allTrackables = new ArrayList<VuforiaTrackable>();
@@ -228,6 +233,9 @@ public class Vision extends LinearOpMode {
                 .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, -90));
         backSpace.setLocation(backSpaceLocationOnField);
 
+        OpenGLMatrix mineral1 = OpenGLMatrix
+                .translation((float)Math.sqrt(2), (float)(2*Math.sqrt(2)), 0);
+
         /**
          * Create a transformation matrix describing where the phone is on the robot.
          *
@@ -273,6 +281,7 @@ public class Vision extends LinearOpMode {
 
         /** Start tracking the data sets we care about. */
         targetsRoverRuckus.activate();
+        minerals.activate();
         while (opModeIsActive()) {
 
             // check all the trackable target to see which one (if any) is visible.
@@ -291,7 +300,12 @@ public class Vision extends LinearOpMode {
                     break;
                 }
             }
+            for (VuforiaTrackable trackable : minerals) {
+                if (((VuforiaTrackableDefaultListener) trackable.getListener()).isVisible()) {
 
+                    silverVisible = true;
+                }
+            }
             // Provide feedback as to where the robot is located (if we know).
             if (targetVisible) {
                 // express position (translation) of robot in inches.
@@ -326,4 +340,8 @@ public class Vision extends LinearOpMode {
     public double getRobotHeading(){
         return rotation.thirdAngle;
     }
+    public boolean seesSilver(){
+        return silverVisible;
+    }
+
 }

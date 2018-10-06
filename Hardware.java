@@ -17,6 +17,8 @@ public class Hardware {
     //******************************
 
     //Lift Motors*******************
+    public DcMotor leftLiftMotor = null;
+    public DcMotor rightLiftMotor = null;
     //******************************
 
     //Servos************************
@@ -40,7 +42,7 @@ public class Hardware {
 
         this.hwMap = hwMap;
         period.reset();
-
+        period.startTime();
         //init drive motors
         frontLeftMotor = hwMap.dcMotor.get("front_left");
         frontRightMotor = hwMap.dcMotor.get("front_right");
@@ -57,6 +59,23 @@ public class Hardware {
         backLeftMotor.setPower(0);
         backRightMotor.setPower(0);
 
+        //init lift motors
+        leftLiftMotor = hwMap.dcMotor.get("left_lift");
+        rightLiftMotor = hwMap.dcMotor.get("right_lift");
+
+        leftLiftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightLiftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        leftLiftMotor.setPower(0);
+        rightLiftMotor.setPower(0);
+
     }
 
+    public double getTime(){
+        return period.time();
+    }
+
+    public void sleepTau(long millis) throws InterruptedException {
+        period.wait(millis);
+    }
 }

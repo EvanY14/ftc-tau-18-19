@@ -146,8 +146,10 @@ public class Vision extends LinearOpMode {
         //  Instantiate the Vuforia engine
 
         VuforiaTrackables minerals = this.vuforia.loadTrackablesFromAsset("Minerals_OT");
-        VuforiaTrackable silver = minerals.get(0);
+        VuforiaTrackable silver = minerals.get(1);
         silver.setName("silver");
+        VuforiaTrackable gold = minerals.get(0);
+        gold.setName("gold");
         // Load the data sets that for the trackable objects. These particular data
         // sets are stored in the 'assets' part of our application.
         VuforiaTrackables targetsRoverRuckus = this.vuforia.loadTrackablesFromAsset("RoverRuckus");
@@ -166,6 +168,7 @@ public class Vision extends LinearOpMode {
         // For convenience, gather together all the trackable objects in one easily-iterable collection */
         List<VuforiaTrackable> allTrackables = new ArrayList<VuforiaTrackable>();
         allTrackables.addAll(targetsRoverRuckus);
+        allTrackables.addAll(minerals);
 
         /**
          * In order for localization to work, we need to tell the system where each target is on the field, and
@@ -320,7 +323,7 @@ public class Vision extends LinearOpMode {
                 telemetry.addData("Visible Target", "none");
             }
             telemetry.update();
-        }
+        }//ur mom gey
     }
     public double getRobotX(){
         return translation.get(0) / mmPerInch;

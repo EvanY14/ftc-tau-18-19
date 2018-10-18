@@ -40,7 +40,7 @@ import com.qualcomm.robotcore.util.Range;
             robot.init(hardwareMap);
 
             telemetry.addData("Readiness", "Press Play to start");
-            //telemetry.addData("If you notice this", "You are COOL!!! (Evan was here)");
+            //telemetry.addData("If you notice this", "You are COOL!!! (Charles was here)");
             updateTelemetry(telemetry);
         }
 

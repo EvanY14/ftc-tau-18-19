@@ -40,7 +40,7 @@ import com.qualcomm.robotcore.util.Range;
             robot.init(hardwareMap);
 
             telemetry.addData("Readiness", "Press Play to start");
-            //telemetry.addData("If you notice this", "You are COOL!!! (Charles was here)");
+            telemetry.addData("If you notice this", "You are COOL!!! (Charles was here)");
             updateTelemetry(telemetry);
         }
 
@@ -72,11 +72,11 @@ import com.qualcomm.robotcore.util.Range;
              */
 
             //Read controller input
-            //Left and right are opposite; front and back are same
-            leftGP1Y = -gamepad1.left_stick_y;
+
+            leftGP1Y = gamepad1.left_stick_y;
             //leftGP1X = gamepad1.left_stick_x;
             //rightGP1X = gamepad1.right_stick_x;
-            rightGP1Y = -gamepad1.right_stick_y;
+            rightGP1Y = gamepad1.right_stick_y;
 
             //remove slight touches
             if (Math.abs(leftGP1Y) < 0.05) {
@@ -109,10 +109,10 @@ import com.qualcomm.robotcore.util.Range;
             }
 
             //setting powers to motors
-            robot.frontRightMotor.setPower(frontrightPOWER);
+            robot.frontRightMotor.setPower(-frontrightPOWER);
             robot.frontLeftMotor.setPower(frontleftPOWER);
-            robot.backRightMotor.setPower(backleftPOWER);
-            robot.backLeftMotor.setPower(backrightPOWER);
+            robot.backRightMotor.setPower(-backrightPOWER);
+            robot.backLeftMotor.setPower(backleftPOWER);
 
 
         }

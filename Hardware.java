@@ -1,8 +1,9 @@
+
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.util.ElapsedTime;
+        import com.qualcomm.robotcore.hardware.DcMotor;
+        import com.qualcomm.robotcore.hardware.HardwareMap;
+        import com.qualcomm.robotcore.util.ElapsedTime;
 
 /**
  * Created by Evan Yu on 9/16/2018.
@@ -17,8 +18,7 @@ public class Hardware {
     //******************************
 
     //Lift Motors*******************
-    public DcMotor leftLiftMotor = null;
-    public DcMotor rightLiftMotor = null;
+
     //******************************
 
     //Servos************************
@@ -60,14 +60,14 @@ public class Hardware {
         backRightMotor.setPower(0);
 
         //init lift motors
-        leftLiftMotor = hwMap.dcMotor.get("left_lift");
+        /*leftLiftMotor = hwMap.dcMotor.get("left_lift");
         rightLiftMotor = hwMap.dcMotor.get("right_lift");
 
         leftLiftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightLiftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         leftLiftMotor.setPower(0);
-        rightLiftMotor.setPower(0);
+        rightLiftMotor.setPower(0);*/
 
     }
 

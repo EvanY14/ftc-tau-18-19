@@ -1,9 +1,8 @@
-
 package org.firstinspires.ftc.teamcode;
 
-        import com.qualcomm.robotcore.hardware.DcMotor;
-        import com.qualcomm.robotcore.hardware.HardwareMap;
-        import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 /**
  * Created by Evan Yu on 9/16/2018.
@@ -18,7 +17,8 @@ public class Hardware {
     //******************************
 
     //Lift Motors*******************
-
+   /* public DcMotor leftLiftMotor = null;
+    public DcMotor rightLiftMotor = null;*/
     //******************************
 
     //Servos************************
@@ -43,6 +43,7 @@ public class Hardware {
         this.hwMap = hwMap;
         period.reset();
         period.startTime();
+
         //init drive motors
         frontLeftMotor = hwMap.dcMotor.get("front_left");
         frontRightMotor = hwMap.dcMotor.get("front_right");

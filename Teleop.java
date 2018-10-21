@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 /**
@@ -19,6 +20,7 @@ public class Teleop extends OpMode{
     Hardware robot = new Hardware();
 
     //Drive variables
+    private boolean slowDrive = false;
     private double leftGP1X = 0;
     private double leftGP1Y = 0;
     private double rightGP1X = 0;
@@ -30,7 +32,9 @@ public class Teleop extends OpMode{
     private double backleftPOWER = 0;
     private double backrightPOWER = 0;
     private double maxPOWER = 1;
-
+    private double endTimeA = 0;
+    private boolean endGameSpeed = false;
+    private double endTimeB = 0;
 
     @Override
     public void init() {
@@ -38,7 +42,7 @@ public class Teleop extends OpMode{
         updateTelemetry(telemetry);
 
         robot.init(hardwareMap);
-
+        telemetry.addData("HardwareMap", hardwareMap);
         telemetry.addData("Readiness", "Press Play to start");
         telemetry.addData("If you notice this", "You are COOL!!! (Charles was here)");
         updateTelemetry(telemetry);
@@ -73,6 +77,17 @@ public class Teleop extends OpMode{
 
         //Read controller input
 
+        if(gamepad1.a && robot.getTime() > endTimeA){
+            endTimeA = robot.getTime() + 1;
+            slowDrive = !slowDrive;
+            maxPOWER = slowDrive?(2.0/3):1;
+
+        }
+        if(gamepad1.b && robot.getTime() > endTimeB){
+            endTimeB = robot.getTime() + 1;
+            endGameSpeed = !endGameSpeed;
+            maxPOWER = endGameSpeed?0.25:1;
+        }
         leftGP1Y = gamepad1.left_stick_y;
         //leftGP1X = gamepad1.left_stick_x;
         //rightGP1X = gamepad1.right_stick_x;
@@ -87,17 +102,22 @@ public class Teleop extends OpMode{
         }
 
         if (Math.abs(rightGP1Y) < 0.05) {
-            leftGP1Y = 0;
+            rightGP1Y = 0;
         }
         if (Math.abs(rightGP1X) < 0.05) {
-            leftGP1X = 0;
+            rightGP1X = 0;
         }
 
         //speeds of drive motors
         frontleftPOWER = backleftPOWER = leftGP1Y;
         frontrightPOWER = backrightPOWER = rightGP1Y;
 
-        maxPOWER = Math.abs(frontleftPOWER);
+        frontleftPOWER = maxPOWER * frontleftPOWER;
+        frontrightPOWER = maxPOWER * frontrightPOWER;
+        backleftPOWER = maxPOWER * backleftPOWER;
+        backrightPOWER = maxPOWER * backrightPOWER;
+
+        /*maxPOWER = Math.abs(frontleftPOWER);
         if (Math.abs(backleftPOWER) > maxPOWER) {
             maxPOWER = Math.abs(backleftPOWER);
         }
@@ -106,14 +126,17 @@ public class Teleop extends OpMode{
         }
         if (Math.abs(frontrightPOWER) > maxPOWER) {
             maxPOWER = Math.abs(frontrightPOWER);
-        }
+        }*/
 
         //setting powers to motors
         robot.frontRightMotor.setPower(frontrightPOWER);
         robot.frontLeftMotor.setPower(frontleftPOWER);
         robot.backRightMotor.setPower(backrightPOWER);
         robot.backLeftMotor.setPower(backleftPOWER);
-
+        telemetry.addData("Left gamepad power", leftGP1Y);
+        telemetry.addData("Right gamepad power", rightGP1Y);
+        telemetry.addData("Slow drive", slowDrive);
+        telemetry.addData("Endgame speed", endGameSpeed);
 
     }
 

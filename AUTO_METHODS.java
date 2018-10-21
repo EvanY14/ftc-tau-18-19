@@ -58,6 +58,8 @@ class AUTO_METHODS extends LinearOpMode {
     private int frontLeftMotorPosition = 0;
     private int frontRightMotorPosition = 0;
 
+    private final double ticksPerRotation = 1120;
+    private final double robotRotationRadius = 6.5;
     //Use if all motor positions should be the same
     private int motorPosition = 0;
 
@@ -69,6 +71,7 @@ class AUTO_METHODS extends LinearOpMode {
     /*@Override
     public void init(){}
 
+
     @Override
     public void loop(){}*/
     public void hardwareMapPrint(){
@@ -79,7 +82,7 @@ class AUTO_METHODS extends LinearOpMode {
         telemetry.addData("Readiness", "NOT READY TO START, PLEASE WAIT");
         telemetry.update();
 //clickity clackity
-        robot.init(hardwareMap);
+        robot.init_auto(hardwareMap);
         // Set up our telemetry dashboard
         telemetry.addData("Readiness", "Press Play to start");
         telemetry.update();
@@ -98,7 +101,10 @@ class AUTO_METHODS extends LinearOpMode {
     }
 
 
-    //Auto methods to call
+    /*Auto methods to call
+      Right is forwards, left is backwards
+      All distances have to be multiplied by ticksPerRotation and divided by 6 * Pi
+     */
 
 
    /* public void getLocationOnField() {
@@ -125,25 +131,22 @@ class AUTO_METHODS extends LinearOpMode {
 
     //drive forward certain distance at certain speed(speed should be no more than 1), distance is in inches
     public void driveForward(double speed, double distance){
-        robot.frontLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot.frontRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot.backRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot.backLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         speed(speed);
-        motorPosition += (int)((distance / (6 * Math.PI)) * 1120);
-        telemetry.addData("Motor position", robot.backLeftMotor.getCurrentPosition());
-        telemetry.addData("Right motor position", robot.backRightMotor.getCurrentPosition());
+        motorPosition = (int)((distance / (6 * Math.PI)) * ticksPerRotation);
         robot.frontLeftMotor.setTargetPosition(robot.frontLeftMotor.getCurrentPosition()- motorPosition);
         robot.backLeftMotor.setTargetPosition(robot.backLeftMotor.getCurrentPosition()- motorPosition);
         robot.frontRightMotor.setTargetPosition(robot.frontRightMotor.getCurrentPosition() + motorPosition);
         robot.backRightMotor.setTargetPosition(robot.backRightMotor.getCurrentPosition() + motorPosition);
-        telemetry.addData("Motor position", robot.backLeftMotor.getCurrentPosition());
-        telemetry.addData("Right motor position", robot.backRightMotor.getCurrentPosition());
     }
 
     public void turnDegrees(double speed, double degree){
         speed(speed);
-
+        double distance = (degree * (2 * robotRotationRadius * Math.PI) / 360);
+        motorPosition = (int)((distance / (6*Math.PI)) * ticksPerRotation);
+        robot.frontLeftMotor.setTargetPosition(robot.frontLeftMotor.getCurrentPosition()+ motorPosition);
+        robot.backLeftMotor.setTargetPosition(robot.backLeftMotor.getCurrentPosition()+ motorPosition);
+        robot.frontRightMotor.setTargetPosition(robot.frontRightMotor.getCurrentPosition() + motorPosition);
+        robot.backRightMotor.setTargetPosition(robot.backRightMotor.getCurrentPosition() + motorPosition);
     }
     /*public void scanMinerals(){
         if(vision.seesSilver()){

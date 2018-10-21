@@ -19,9 +19,18 @@ public class Auto_TEST extends AUTO_METHODS {
         //telemetry.update();
         setUp();
         driveForward(0.5, 12);
-        sleep(3000);
-        telemetry.addData("Status", "Drove forawrd");
+        telemetry.addData("Status", "Drove forward");
         telemetry.update();
+        sleepTau(2000);
+        turnDegrees(0.5, 90);
+        telemetry.addData("Status", "Turned 90 degrees left");
+        telemetry.update();
+        sleepTau(1500);
+        turnDegrees(0.5,-90);
+        telemetry.addData("Status", "turned 90 degrees right");
+        telemetry.update();
+        sleepTau(1500);
+
     }
 }
         /*driveForward(0.5, 12.0);

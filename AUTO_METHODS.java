@@ -39,7 +39,7 @@ import static org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerA
 class AUTO_METHODS extends LinearOpMode {
     Hardware robot = new Hardware();
 
-    //org.firstinspires.ftc.teamcode.Vision vision = new org.firstinspires.ftc.teamcode.Vision();
+    //Vision vision = new Vision();
 
     private double leftSpeed = 0;
     private double rightSpeed = 0;
@@ -107,7 +107,7 @@ class AUTO_METHODS extends LinearOpMode {
      */
 
 
-   /* public void getLocationOnField() {
+   /*public void getLocationOnField() {
         location.set(0, vision.getRobotX());
         location.set(1, vision.getRobotY());
         location.set(2, vision.getRobotZ());
@@ -153,7 +153,7 @@ class AUTO_METHODS extends LinearOpMode {
 
         }
     }*/
-    public void sleepTau(long milliSec){try{Thread.sleep(milliSec);Log.i(TAG,"IMU Heading: "+imu.getAngularOrientation().firstAngle);}catch(InterruptedException e){throw new RuntimeException(e);}}
+    public void sleepTau(long milliSec){try{Thread.sleep(milliSec);}catch(InterruptedException e){throw new RuntimeException(e);}}
 
     @Override
     public void runOpMode() throws InterruptedException {}

@@ -11,6 +11,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+//import org.firstinspires.ftc.teamcode.Vision;
+import org.firstinspires.ftc.robotcontroller.external.samples.Vision1;
 import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -39,7 +41,7 @@ import static org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerA
 class AUTO_METHODS extends LinearOpMode {
     Hardware robot = new Hardware();
 
-    //Vision vision = new Vision();
+    //Vision1 vision = new Vision1();
 
     private double leftSpeed = 0;
     private double rightSpeed = 0;
@@ -57,11 +59,16 @@ class AUTO_METHODS extends LinearOpMode {
     private int backRightMotorPosition = 0;
     private int frontLeftMotorPosition = 0;
     private int frontRightMotorPosition = 0;
+    private double vuMarkEnd = 0;
 
     private final double ticksPerRotation = 1120;
     private final double robotRotationRadius = 6.5;
     //Use if all motor positions should be the same
     private int motorPosition = 0;
+
+    /*
+    Vision variables
+     */
 
     public AUTO_METHODS(){}
 
@@ -83,6 +90,7 @@ class AUTO_METHODS extends LinearOpMode {
         telemetry.update();
 //clickity clackity
         robot.init_auto(hardwareMap);
+        //robot.imageTrackables.activate();
         // Set up our telemetry dashboard
         telemetry.addData("Readiness", "Press Play to start");
         telemetry.update();
@@ -100,7 +108,15 @@ class AUTO_METHODS extends LinearOpMode {
         robot.backRightMotor.setPower(speed);
     }
 
-
+   /* public String leftGetVu() {
+        RelicRecoveryVuMark vumark = RelicRecoveryVuMark.from(robot.imageTemplate);
+        vuMarkEnd = robot.getTime() + 4;
+        while (vuMarkEnd > robot.getTime()) {
+            if (vumark != RelicRecoveryVuMark.UNKNOWN) {
+                return "" + vumark;
+            }
+        }
+    }*/
     /*Auto methods to call
       Right is forwards, left is backwards
       All distances have to be multiplied by ticksPerRotation and divided by 6 * Pi
@@ -108,12 +124,16 @@ class AUTO_METHODS extends LinearOpMode {
 
 
    /*public void getLocationOnField() {
+       telemetry.addData("Status:", "About to run opmode");
+       vision.location();
+       telemetry.addData("Status:", "ran opmode");
         location.set(0, vision.getRobotX());
         location.set(1, vision.getRobotY());
         location.set(2, vision.getRobotZ());
         location.set(3, vision.getRobotHeading());
         telemetry.addData("Location", "X:" + location.get(0) + "," + "Y:" + location.get(1) + "Z:" + location.get(2));
-    }*/
+        telemetry.update();
+   }*/
 
     /*public void unhang() {
         //time it takes to drop robot

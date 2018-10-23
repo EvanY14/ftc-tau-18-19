@@ -18,7 +18,7 @@ import com.qualcomm.robotcore.util.Range;
 @TeleOp(name = "Tau Teleop", group = "Tau")
 public class Teleop extends OpMode{
     Hardware robot = new Hardware();
-
+   // AUTO_METHODS auto = new AUTO_METHODS();
     //Drive variables
     private boolean slowDrive = false;
     private double leftGP1X = 0;
@@ -76,7 +76,8 @@ public class Teleop extends OpMode{
              */
 
         //Read controller input
-
+        telemetry.addData("Status:", "About to get location");
+        //auto.getLocationOnField();
         if(gamepad1.a && robot.getTime() > endTimeA){
             endTimeA = robot.getTime() + 1;
             slowDrive = !slowDrive;

@@ -18,6 +18,7 @@ public class Auto_TEST extends AUTO_METHODS {
         //telemetry.addData("Status", "initialized");
         //telemetry.update();
         setUp();
+        //getLocationOnField();
         driveForward(0.5, 12);
         telemetry.addData("Status", "Drove forward");
         telemetry.update();

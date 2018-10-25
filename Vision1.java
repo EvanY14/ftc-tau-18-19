@@ -27,7 +27,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.robotcontroller.external.samples;
+package org.firstinspires.ftc.teamcode;
+
+import android.util.Log;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -41,6 +43,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.XYZ;
@@ -91,7 +94,7 @@ import java.util.List;
  * is explained below.
  */
 
-//@TeleOp(name="Concept: Vuforia Rover Nav", group ="Concept")
+@TeleOp(name="Concept: Vuforia Rover Nav", group ="Concept")
 //@Disabled
 public class Vision1 extends LinearOpMode {
 
@@ -107,19 +110,21 @@ public class Vision1 extends LinearOpMode {
      * Once you've obtained a license key, copy the string from the Vuforia web site
      * and paste it in to your code on the next line, between the double quotes.
      */
-    private static final String VUFORIA_KEY = "AUTPgLj/////AAABmftxO0IFGU3urmaLhFDDt+04jQVVUEnMoybqfXkW+2kDybcXkSk00wQ1RARTA6i+W3x8pWjVDY/xcKrLUwZZKYSdeSlSWW+nMK4s5AEaTS8K0Re8OrF3JF3zmHz4julP101iBl7+dpVOEFw10laj2E0q0bvw9vqvXMMjg8J3zdXiDS4zzHPRl0Iwx6iaH4ZmmE4VqXiJ8kXrZ9bc897oR4FcC01mF+cX3x6oi5e8ZpQanSDPp2/IBbvUxi/oe2ImrNpZTczvZLMwYMTQqgfeN9Ewz5KtCbAwfCLARiW5QZ/EOOdlLfGIPXGYesLuVPswhWP5HCCCrberCUZ+y+2OGj7+SlesgFSD8qwWNMQh+Erx";
-
+    //private static final String VUFORIA_KEY = "AUTPgLj/////AAABmftxO0IFGU3urmaLhFDDt+04jQVVUEnMoybqfXkW+2kDybcXkSk00wQ1RARTA6i+W3x8pWjVDY/xcKrLUwZZKYSdeSlSWW+nMK4s5AEaTS8K0Re8OrF3JF3zmHz4julP101iBl7+dpVOEFw10laj2E0q0bvw9vqvXMMjg8J3zdXiDS4zzHPRl0Iwx6iaH4ZmmE4VqXiJ8kXrZ9bc897oR4FcC01mF+cX3x6oi5e8ZpQanSDPp2/IBbvUxi/oe2ImrNpZTczvZLMwYMTQqgfeN9Ewz5KtCbAwfCLARiW5QZ/EOOdlLfGIPXGYesLuVPswhWP5HCCCrberCUZ+y+2OGj7+SlesgFSD8qwWNMQh+Erx";
+    //private static final String VUFORIA_KEY = "AUTPgLj/////AAABmftxO0IFGU3urmaLhFDDt+04jQVVUEnMoybqfXkW+2kDybcXkSk00wQ1RARTA6i+W3x8pWjVDY/xcKrLUwZZKYSdeSlSWW+nMK4s5AEaTS8K0Re8OrF3JF3zmHz4julP101iBl7+dpVOEFw10laj2E0q0bvw9vqvXMMjg8J3zdXiDS4zzHPRl0Iwx6iaH4ZmmE4VqXiJ8kXrZ9bc897oR4FcC01mF+cX3x6oi5e8ZpQanSDPp2/IBbvUxi/oe2ImrNpZTczvZLMwYMTQqgfeN9Ewz5KtCbAwfCLARiW5QZ/EOOdlLfGIPXGYesLuVPswhWP5HCCCrberCUZ+y+2OGj7+SlesgFSD8qwWNMQh+Erx";
+    private static final String VUFORIA_KEY = "AU3tWrT/////AAABmTbiSaA0u0INl1gX/y9hmRZQwBT57dc0kO5I7Zb61dxOopDQi27gEAR58k/TLH1i4HlBTzGfhYJPuQoBj+3H+48N9CKzq9yQu74XqpxpH4JOvh7BJ5PRrXJ9ri//zSVu40DG8rEB9PUBhnO8IXzxDxtyCa9CuNIjnOMtxNz7YoNUIYOmP0yZ/M7UDHeWYcmmeG85jD9Poc4a0WskDHwVkomyfaXArBswEOIJNBS+O6otEkAMrHC51XiUVM5D0r76uI2EfI7Vu/TQ762jD+Zym/4nNfSyW+KRTnq2ZLoC1HgCbboTpHeiQ/41Vsdy6DJrcBtK+uen7+qqDbMlciMXAA+mpOLSsDJNEc3qpzh6B0D9";
     // Since ImageTarget trackables use mm to specifiy their dimensions, we must use mm for all the physical dimension.
     // We will define some constants and conversions here
     private static final float mmPerInch        = 25.4f;
     private static final float mmFTCFieldWidth  = (12*6) * mmPerInch;       // the width of the FTC field (from the center point to the outer panels)
     private static final float mmTargetHeight   = (6) * mmPerInch;          // the height of the center of the target image above the floor
 
-    private VectorF translation;
+    private VectorF translation = VectorF.length(3);
+    private ArrayList<Double> location = new ArrayList<>();
     private Orientation rotation;
     // Select which camera you want use.  The FRONT camera is the one on the same side as the screen.
     // Valid choices are:  BACK or FRONT
-    private static final VuforiaLocalizer.CameraDirection CAMERA_CHOICE = FRONT;
+    private static final VuforiaLocalizer.CameraDirection CAMERA_CHOICE = BACK;
 
     private OpenGLMatrix lastLocation = null;
     private boolean targetVisible = false;
@@ -130,27 +135,38 @@ public class Vision1 extends LinearOpMode {
      */
     VuforiaLocalizer vuforia;
 
-    @Override public void runOpMode() {}
-    public void location(){
+    @Override public void runOpMode() {
+        telemetry.addData("location", getLocation().get(0));
+        sleep(5000);
+        telemetry.addData("x", getRobotX());
+        sleep(5000);
+    }
+    public ArrayList<Double> getLocation(){
+        String Tag = "Error message";
+        Log.d(Tag, "test");
         /*
          * Configure Vuforia by creating a Parameter object, and passing it to the Vuforia engine.
          * We can pass Vuforia the handle to a camera preview resource (on the RC phone);
          * If no camera monitor is desired, use the parameterless constructor instead (commented out below).
          */
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
-
-        // VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
-
+        telemetry.addData("Status:", "Starting location method");
+        Log.d(Tag, "Started");
+        /*int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        int cameraMonitorViewId = 1;
+        Log.d(Tag, "created cameraMonitorViewId variable");
+       VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
+        Log.d(Tag, "finished start");
+       //VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
         parameters.vuforiaLicenseKey = VUFORIA_KEY ;
         parameters.cameraDirection   = CAMERA_CHOICE;
 
         //  Instantiate the Vuforia engine
         vuforia = ClassFactory.getInstance().createVuforia(parameters);
-
+*/
         // Load the data sets that for the trackable objects. These particular data
         // sets are stored in the 'assets' part of our application.
         VuforiaTrackables targetsRoverRuckus = this.vuforia.loadTrackablesFromAsset("RoverRuckus");
+        Log.d(Tag,"about to add vumarks");
         VuforiaTrackable blueRover = targetsRoverRuckus.get(0);
         blueRover.setName("Blue-Rover");
         VuforiaTrackable redFootprint = targetsRoverRuckus.get(1);
@@ -163,7 +179,8 @@ public class Vision1 extends LinearOpMode {
         // For convenience, gather together all the trackable objects in one easily-iterable collection */
         List<VuforiaTrackable> allTrackables = new ArrayList<VuforiaTrackable>();
         allTrackables.addAll(targetsRoverRuckus);
-
+        telemetry.addData("Status:", "Added all of the vumarks");
+        Log.d(Tag, "added vumarks");
         /**
          * In order for localization to work, we need to tell the system where each target is on the field, and
          * where the phone resides on the robot.  These specifications are in the form of <em>transformation matrices.</em>
@@ -265,17 +282,19 @@ public class Vision1 extends LinearOpMode {
         /**  Let all the trackable listeners know where the phone is.  */
         for (VuforiaTrackable trackable : allTrackables)
         {
-            ((VuforiaTrackableDefaultListener)trackable.getListener()).setPhoneInformation(phoneLocationOnRobot, parameters.cameraDirection);
+            ((VuforiaTrackableDefaultListener)trackable.getListener()).setPhoneInformation(phoneLocationOnRobot, BACK);
         }
 
         /** Wait for the game to begin */
         telemetry.addData(">", "Press Play to start tracking");
         telemetry.update();
-        waitForStart();
+        //waitForStart();
 
         /** Start tracking the data sets we care about. */
         targetsRoverRuckus.activate();
-        while (opModeIsActive()) {
+        telemetry.addData("Status", "begin");
+        Log.d(Tag, "activated target tracking");
+        while (true) {
 
             // check all the trackable target to see which one (if any) is visible.
             targetVisible = false;
@@ -301,24 +320,27 @@ public class Vision1 extends LinearOpMode {
                 telemetry.addData("Pos (in)", "{X, Y, Z} = %.1f, %.1f, %.1f",
                         translation.get(0) / mmPerInch, translation.get(1) / mmPerInch, translation.get(2) / mmPerInch);
 
+                location.add((double)(translation.get(0)/mmPerInch));
+                location.add((double)(translation.get(1)/mmPerInch));
+                location.add((double)(translation.get(2))/mmPerInch);
                 // express the rotation of the robot in degrees.
                 rotation = Orientation.getOrientation(lastLocation, EXTRINSIC, XYZ, DEGREES);
                 telemetry.addData("Rot (deg)", "{Roll, Pitch, Heading} = %.0f, %.0f, %.0f", rotation.firstAngle, rotation.secondAngle, rotation.thirdAngle);
+                return location;
             }
             else {
                 telemetry.addData("Visible Target", "none");
             }
             telemetry.update();
+
         }
     }
-    public double getRobotX(){
-        return translation.get(0) / mmPerInch;
-    }
+    public double getRobotX(){return location.get(0) / mmPerInch;}
     public double getRobotY(){
-        return translation.get(1) / mmPerInch;
+        return location.get(1) / mmPerInch;
     }
     public double getRobotZ(){
-        return translation.get(2) / mmPerInch;
+        return location.get(2) / mmPerInch;
     }
     public double getRobotRoll(){
         return rotation.firstAngle;

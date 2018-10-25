@@ -12,13 +12,18 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
+
+//import org.firstinspires.ftc.teamcode.Vision1;
+
 /**
  * Created by Evan Yu on 9/16/2018.
  */
 @TeleOp(name = "Tau Teleop", group = "Tau")
 public class Teleop extends OpMode{
     Hardware robot = new Hardware();
-   // AUTO_METHODS auto = new AUTO_METHODS();
+    //Log.d("Error message", "about to instantiate vision class");
+    //Vision1 vision = new Vision1();
+    AUTO_METHODS auto = new AUTO_METHODS();
     //Drive variables
     private boolean slowDrive = false;
     private double leftGP1X = 0;
@@ -42,10 +47,12 @@ public class Teleop extends OpMode{
         updateTelemetry(telemetry);
 
         robot.init(hardwareMap);
+        Log.d("Error message", "initialized robot with vision");
         telemetry.addData("HardwareMap", hardwareMap);
         telemetry.addData("Readiness", "Press Play to start");
         telemetry.addData("If you notice this", "You are COOL!!! (Charles was here)");
         updateTelemetry(telemetry);
+
     }
 
     @Override
@@ -78,6 +85,18 @@ public class Teleop extends OpMode{
         //Read controller input
         telemetry.addData("Status:", "About to get location");
         //auto.getLocationOnField();
+        try {
+            Log.d("Error message", " about to start location method in teleop class");
+           auto.getLocation();
+        }catch(IndexOutOfBoundsException e){
+            telemetry.addData("Status:", "exception caught");
+            telemetry.addData("Error", e);
+            stop();
+
+        }
+        telemetry.addData("Robot x:", auto.getRobotX());
+        telemetry.addData("Robot y:", auto.getRobotY());
+        telemetry.addData("Robot z:", auto.getRobotZ());
         if(gamepad1.a && robot.getTime() > endTimeA){
             endTimeA = robot.getTime() + 1;
             slowDrive = !slowDrive;

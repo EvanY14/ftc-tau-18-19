@@ -39,7 +39,7 @@ public class Hardware {
 
     //Vision************************
     OpenGLMatrix lastLocation = null;
-    private VuforiaLocalizer vuforia;
+    public VuforiaLocalizer vuforia;
     public VuforiaTrackable imageTemplate;
     public VuforiaTrackables imageTrackables;
 
@@ -82,14 +82,15 @@ public class Hardware {
 
 
         //Vision stuff
-        /*int cameraMonitorViewId = hwMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hwMap.appContext.getPackageName());
+        int cameraMonitorViewId = hwMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hwMap.appContext.getPackageName());
         VuforiaLocalizer.Parameters Vuparameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
         Vuparameters.vuforiaLicenseKey = "AUTPgLj/////AAABmftxO0IFGU3urmaLhFDDt+04jQVVUEnMoybqfXkW+2kDybcXkSk00wQ1RARTA6i+W3x8pWjVDY/xcKrLUwZZKYSdeSlSWW+nMK4s5AEaTS8K0Re8OrF3JF3zmHz4julP101iBl7+dpVOEFw10laj2E0q0bvw9vqvXMMjg8J3zdXiDS4zzHPRl0Iwx6iaH4ZmmE4VqXiJ8kXrZ9bc897oR4FcC01mF+cX3x6oi5e8ZpQanSDPp2/IBbvUxi/oe2ImrNpZTczvZLMwYMTQqgfeN9Ewz5KtCbAwfCLARiW5QZ/EOOdlLfGIPXGYesLuVPswhWP5HCCCrberCUZ+y+2OGj7+SlesgFSD8qwWNMQh+Erx";
         Vuparameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
         this.vuforia = ClassFactory.createVuforiaLocalizer(Vuparameters);
-        imageTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
-        imageTemplate = imageTrackables.get(0);
-        imageTemplate.setName("roverVuMarkTemplate");*/
+        imageTrackables = this.vuforia.loadTrackablesFromAsset("RoverRuckus");
+        //imageTemplate = imageTrackables.get(0);
+        //imageTemplate.setName("roverVuMarkTemplate");
+        imageTrackables.activate();
         //init lift motors
         /*leftLiftMotor = hwMap.dcMotor.get("left_lift");
         rightLiftMotor = hwMap.dcMotor.get("right_lift");

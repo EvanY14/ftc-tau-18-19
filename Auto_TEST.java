@@ -17,8 +17,8 @@ public class Auto_TEST extends AUTO_METHODS {
         //robot.setUp();
         //telemetry.addData("Status", "initialized");
         //telemetry.update();
-        setUp();
-        //getLocationOnField();
+        setUp(hardwareMap);
+        getLocationOnField();
         driveForward(0.5, 12);
         telemetry.addData("Status", "Drove forward");
         telemetry.update();

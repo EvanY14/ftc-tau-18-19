@@ -23,7 +23,7 @@ public class Teleop extends OpMode{
     Hardware robot = new Hardware();
     //Log.d("Error message", "about to instantiate vision class");
     //Vision1 vision = new Vision1();
-    AUTO_METHODS auto = new AUTO_METHODS();
+   // AUTO_METHODS auto = new AUTO_METHODS();
     //Drive variables
     private boolean slowDrive = false;
     private double leftGP1X = 0;
@@ -43,7 +43,7 @@ public class Teleop extends OpMode{
 
     @Override
     public void init() {
-        telemetry.addData("Readiness", "NOT READY TO START, PLEASE WAIT");
+       telemetry.addData("Readiness", "NOT READY TO START, PLEASE WAIT");
         updateTelemetry(telemetry);
 
         robot.init(hardwareMap);
@@ -73,7 +73,9 @@ public class Teleop extends OpMode{
         //*****************
         //Game Controller 1
         //*****************
-
+        //Log.d("Status", "Starting loop");
+        //auto.sleepTau(2000);
+        //telemetry.addData("Status", "about to get an error");
 
             /*
                     Y
@@ -83,20 +85,24 @@ public class Teleop extends OpMode{
              */
 
         //Read controller input
-        telemetry.addData("Status:", "About to get location");
+        //telemetry.addData("Status:", "About to get location");
         //auto.getLocationOnField();
-        try {
+        /*try {
             Log.d("Error message", " about to start location method in teleop class");
            auto.getLocation();
         }catch(IndexOutOfBoundsException e){
             telemetry.addData("Status:", "exception caught");
             telemetry.addData("Error", e);
+            //telemetry.update();
             stop();
 
-        }
+        }*/
+        /*Log.d("Status", "finished location method and back in teleop");
         telemetry.addData("Robot x:", auto.getRobotX());
         telemetry.addData("Robot y:", auto.getRobotY());
         telemetry.addData("Robot z:", auto.getRobotZ());
+        telemetry.update();*/
+
         if(gamepad1.a && robot.getTime() > endTimeA){
             endTimeA = robot.getTime() + 1;
             slowDrive = !slowDrive;
@@ -108,9 +114,8 @@ public class Teleop extends OpMode{
             endGameSpeed = !endGameSpeed;
             maxPOWER = endGameSpeed?0.25:1;
         }
+
         leftGP1Y = gamepad1.left_stick_y;
-        //leftGP1X = gamepad1.left_stick_x;
-        //rightGP1X = gamepad1.right_stick_x;
         rightGP1Y = -gamepad1.right_stick_y;
 
         //remove slight touches
@@ -153,10 +158,11 @@ public class Teleop extends OpMode{
         robot.frontLeftMotor.setPower(frontleftPOWER);
         robot.backRightMotor.setPower(backrightPOWER);
         robot.backLeftMotor.setPower(backleftPOWER);
-        telemetry.addData("Left gamepad power", leftGP1Y);
-        telemetry.addData("Right gamepad power", rightGP1Y);
+        telemetry.addData("Left game pad power", leftGP1Y);
+        telemetry.addData("Right game pad power", rightGP1Y);
         telemetry.addData("Slow drive", slowDrive);
         telemetry.addData("Endgame speed", endGameSpeed);
+        telemetry.update();
 
     }
 

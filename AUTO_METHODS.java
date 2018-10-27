@@ -105,11 +105,12 @@ public class AUTO_METHODS extends LinearOpMode {
         telemetry.addData("HardwareMap",hardwareMap);
         telemetry.update();
     }
-    public void setUp(){
+
+    public void setUp(HardwareMap hwMap){
         telemetry.addData("Readiness", "NOT READY TO START, PLEASE WAIT");
         telemetry.update();
 //clickity clackity
-        robot.init_auto(hardwareMap);
+        robot.init_auto(hwMap);
         //robot.imageTrackables.activate();
         // Set up our telemetry dashboard
         telemetry.addData("Readiness", "Press Play to start");
@@ -128,16 +129,7 @@ public class AUTO_METHODS extends LinearOpMode {
         robot.backRightMotor.setPower(speed);
     }
 
-    /*public String leftGetVu() {
-        VuforiaRoverRuckus vumark =VuforiaRoverRuckus.(robot.imageTrackables);
-        vuMarkEnd = robot.getTime() + 4;
-        while (vuMarkEnd > robot.getTime()) {
-            if (vumark != VuforiaRoverRuckus.UNKNOWN) {
-                return "" + vumark;
-            }
-        }
-        return  ""+vumark;
-    }*/
+
     /*Auto methods to call
       Right is forwards, left is backwards
       All distances have to be multiplied by ticksPerRotation and divided by 6 * Pi
@@ -323,7 +315,7 @@ public class AUTO_METHODS extends LinearOpMode {
          * Next, translate the camera lens to where it is on the robot.
          * In this example, it is centered (left to right), but 110 mm forward of the middle of the robot, and 200 mm above ground level.
          */
-
+        Log.d(Tag, "Initialized vumarks");
         final int CAMERA_FORWARD_DISPLACEMENT  = 110;   // eg: Camera is 110 mm in front of robot center
         final int CAMERA_VERTICAL_DISPLACEMENT = 200;   // eg: Camera is 200 mm above ground
         final int CAMERA_LEFT_DISPLACEMENT     = 0;     // eg: Camera is ON the robot's center line
@@ -346,9 +338,13 @@ public class AUTO_METHODS extends LinearOpMode {
 
         /** Start tracking the data sets we care about. */
         //targetsRoverRuckus.activate();
+        Log.d(Tag, "About to start loop");
         telemetry.addData("Status", "begin");
+        int runCounter = 0;
         while (true) {
-
+        Log.d("Status", "in loop");
+        runCounter += 1;
+        Log.d("Num times run", "" + runCounter);
             // check all the trackable target to see which one (if any) is visible.
             targetVisible = false;
             for (VuforiaTrackable trackable : allTrackables) {
@@ -383,10 +379,14 @@ public class AUTO_METHODS extends LinearOpMode {
             }
             else {
                 telemetry.addData("Visible Target", "none");
+                if(runCounter > 500){
+                    break;
+                }
             }
-            telemetry.update();
+            //telemetry.update();
 
         }
+        return location;
     }
     public double getRobotX(){
         return translation.get(0) / mmPerInch;

@@ -186,7 +186,39 @@ public class AUTO_METHODS extends LinearOpMode {
 
         }
     }*/
-    public ArrayList<Double> getLocation(){
+   
+    public double getRobotX(){
+        return translation.get(0) / mmPerInch;
+    }
+    public double getRobotY(){
+        return translation.get(1) / mmPerInch;
+    }
+    public double getRobotZ(){
+        return translation.get(2) / mmPerInch;
+    }
+    public double getRobotRoll(){
+        return rotation.firstAngle;
+    }
+    public double getRobotPitch(){
+        return rotation.secondAngle;
+    }
+    public double getRobotHeading(){
+        return rotation.thirdAngle;
+    }
+    public void sleepTau(long milliSec){try{Thread.sleep(milliSec);}catch(InterruptedException e){throw new RuntimeException(e);}}
+    
+    public void dropArm() {
+    	robot.markerClawServo.setPosition(95);
+    }
+    
+    public void raiseArm() {
+    	robot.markerClawServo.setPosition(0);
+    }
+
+    @Override
+    public void runOpMode() throws InterruptedException {}
+}
+ public ArrayList<Double> getLocation(){
         String Tag = "Error message";
         Log.d(Tag, "test");
         /*
@@ -388,34 +420,3 @@ public class AUTO_METHODS extends LinearOpMode {
         }
         return location;
     }
-    public double getRobotX(){
-        return translation.get(0) / mmPerInch;
-    }
-    public double getRobotY(){
-        return translation.get(1) / mmPerInch;
-    }
-    public double getRobotZ(){
-        return translation.get(2) / mmPerInch;
-    }
-    public double getRobotRoll(){
-        return rotation.firstAngle;
-    }
-    public double getRobotPitch(){
-        return rotation.secondAngle;
-    }
-    public double getRobotHeading(){
-        return rotation.thirdAngle;
-    }
-    public void sleepTau(long milliSec){try{Thread.sleep(milliSec);}catch(InterruptedException e){throw new RuntimeException(e);}}
-    
-    public void dropArm() {
-    	robot.markerClawServo.setPosition(95);
-    }
-    
-    public void raiseArm() {
-    	robot.markerClawServo.setPosition(0);
-    }
-
-    @Override
-    public void runOpMode() throws InterruptedException {}
-}

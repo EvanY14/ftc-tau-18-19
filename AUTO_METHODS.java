@@ -407,6 +407,14 @@ public class AUTO_METHODS extends LinearOpMode {
         return rotation.thirdAngle;
     }
     public void sleepTau(long milliSec){try{Thread.sleep(milliSec);}catch(InterruptedException e){throw new RuntimeException(e);}}
+    
+    public void dropArm() {
+    	robot.markerClawServo.setPosition(95);
+    }
+    
+    public void raiseArm() {
+    	robot.markerClawServo.setPosition(0);
+    }
 
     @Override
     public void runOpMode() throws InterruptedException {}

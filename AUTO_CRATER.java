@@ -15,7 +15,7 @@ public class AUTO_CRATER extends AUTO_METHODS{
         sleepTau(2000);
         turnDegrees(0.5, 45);
         sleepTau(2000);
-        driveForward(0.5, 24);
+        driveForward(0.5, 21);      //21
         sleepTau(2000);
         turnDegrees(0.5, Math.atan(7.0));
         sleepTau(2000);

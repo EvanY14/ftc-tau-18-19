@@ -30,6 +30,10 @@ public class Teleop extends OpMode{
     private double leftGP1Y = 0;
     private double rightGP1X = 0;
     private double rightGP1Y = 0;
+    private double leftGP2X = 0;
+    private double leftGP2Y = 0;
+    private double rightGP2X = 0;
+    private double rightGP2Y = 0;
     private double GP2X = 0;
     private double GP2Y = 0;
     private double frontleftPOWER = 0;
@@ -40,6 +44,10 @@ public class Teleop extends OpMode{
     private double endTimeA = 0;
     private boolean endGameSpeed = false;
     private double endTimeB = 0;
+    private final double leftLiftBottom = -8495;
+    private final double rightLiftBottom = -8498;
+    private final double leftLiftTop = -3034;
+    private final double rightLiftTop = -3048;
 
     @Override
     public void init() {
@@ -153,15 +161,43 @@ public class Teleop extends OpMode{
             maxPOWER = Math.abs(frontrightPOWER);
         }*/
 
+        /**************************
+         *********Gamepad 2********
+         **************************/
+        leftGP2Y = gamepad2.left_stick_y;
+        rightGP2Y = gamepad2.right_stick_y;
+        if(Math.abs(leftGP2Y) < 0.05){
+            leftGP2Y = 0;
+        }
+        if(Math.abs(rightGP2Y) < 0.05){
+            rightGP1Y = 0;
+        }
+        if(Math.abs(robot.leftLiftMotor.getCurrentPosition()) < 3034 && -leftGP2Y < 0 )
+            leftGP2Y = 0;
+        if(Math.abs(robot.rightLiftMotor.getCurrentPosition()) < 3038 && -rightGP2X < 0)
+            leftGP2Y = 0;
+        if(Math.abs(robot.leftLiftMotor.getCurrentPosition()) > 8495 && -leftGP2Y > 0)
+            leftGP2Y = 0;
+        if(Math.abs(robot.rightLiftMotor.getCurrentPosition()) > 8498 && -rightGP2Y > 0)
+            leftGP2Y = 0;
+
+
+        robot.rightLiftMotor.setPower(-leftGP2Y);
+        robot.leftLiftMotor.setPower(-leftGP2Y)
         //setting powers to motors
+
         robot.frontRightMotor.setPower(frontrightPOWER);
         robot.frontLeftMotor.setPower(frontleftPOWER);
         robot.backRightMotor.setPower(backrightPOWER);
         robot.backLeftMotor.setPower(backleftPOWER);
-        telemetry.addData("Left game pad power", leftGP1Y);
-        telemetry.addData("Right game pad power", rightGP1Y);
+        telemetry.addData("Left game pad 1 power", leftGP1Y);
+        telemetry.addData("Right game pad 1 power", rightGP1Y);
+        telemetry.addData("Left game pad 2 power", leftGP2Y);
+        telemetry.addData("Right game pad 2 power", rightGP2Y);
         telemetry.addData("Slow drive", slowDrive);
         telemetry.addData("Endgame speed", endGameSpeed);
+        telemetry.addData("Left lift motor position", robot.leftLiftMotor.getCurrentPosition());
+        telemetry.addData("Right lift motor position", robot.rightLiftMotor.getCurrentPosition());
         telemetry.update();
 
     }

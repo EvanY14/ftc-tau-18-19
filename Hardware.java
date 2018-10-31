@@ -27,8 +27,8 @@ public class Hardware {
     //******************************
 
     //Lift Motors*******************
-   /* public DcMotor leftLiftMotor = null;
-    public DcMotor rightLiftMotor = null;*/
+    public DcMotor leftLiftMotor = null;
+    public DcMotor rightLiftMotor = null;
     //******************************
 
     //Servos************************
@@ -81,6 +81,27 @@ public class Hardware {
         backLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
 
+
+
+        //init lift motors
+        leftLiftMotor = hwMap.dcMotor.get("left_lift");
+        rightLiftMotor = hwMap.dcMotor.get("right_lift");
+
+        leftLiftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightLiftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        leftLiftMotor.setPower(0);
+        rightLiftMotor.setPower(0);
+
+    }
+
+    public void init_auto(HardwareMap hwMap){
+        init(hwMap);
+        frontLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
         //Vision stuff
         int cameraMonitorViewId = hwMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hwMap.appContext.getPackageName());
         VuforiaLocalizer.Parameters Vuparameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
@@ -91,24 +112,6 @@ public class Hardware {
         //imageTemplate = imageTrackables.get(0);
         //imageTemplate.setName("roverVuMarkTemplate");
         imageTrackables.activate();
-        //init lift motors
-        /*leftLiftMotor = hwMap.dcMotor.get("left_lift");
-        rightLiftMotor = hwMap.dcMotor.get("right_lift");
-
-        leftLiftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightLiftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-        leftLiftMotor.setPower(0);
-        rightLiftMotor.setPower(0);*/
-
-    }
-
-    public void init_auto(HardwareMap hwMap){
-        init(hwMap);
-        frontLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        frontRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        backRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        backLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
     public double getTime(){
         return period.time();

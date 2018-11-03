@@ -3,40 +3,26 @@ package org.firstinspires.ftc.teamcode;
 import android.util.Log;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 //import org.firstinspires.ftc.teamcode.Vision;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaRoverRuckus;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 //import org.firstinspires.ftc.teamcode.Vision1;
-import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
-import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
-import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
-import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
 import java.util.List;
-import java.util.Locale;
 
 import java.util.ArrayList;
 
-import static org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity.TAG;
 import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.XYZ;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.YZX;
@@ -134,9 +120,26 @@ public class AUTO_METHODS extends LinearOpMode {
       Right is forwards, left is backwards
       All distances have to be multiplied by ticksPerRotation and divided by 6 * Pi
      */
+    public void hang(){
+        ArrayList<Double> navigate = new ArrayList<>();
+        ArrayList<Double> location = getLocation();
+        navigate.add(location.get(0) > 0 ? 36.0:-36.0);
+        navigate.add(location.get(1) > 0 ? 36.0:-36.0);
+        navigateTo(location);
+        turnDegrees(0.5, getRobotHeading() + 45);
+        driveForward(0.5, -2 * Math.sqrt(2) * 12);
+    }
 
+    //use inches with coordinates
+    public void navigateTo(ArrayList<Double> location){
+        double heading = getRobotHeading();
+        turnDegrees(0.5, -getRobotHeading());
+        turnDegrees(0.5, -90 - Math.atan(Math.abs(getRobotY() - location.get(1))/Math.abs(getRobotX() - location.get(0))));
+        driveForward(0.5, Math.sqrt(Math.pow(getRobotY() - location.get(1), 2) + Math.pow(getRobotX() - location.get(0),2)));
 
-   public void getLocationOnField() {
+    }
+
+    public void getLocationOnField() {
        telemetry.addData("Status:", "About to run opmode");
        getLocation();
        telemetry.addData("Status:", "ran opmode");
@@ -146,21 +149,13 @@ public class AUTO_METHODS extends LinearOpMode {
         location.set(3, getRobotHeading());
         telemetry.addData("Location", "X:" + location.get(0) + "," + "Y:" + location.get(1) + "Z:" + location.get(2));
         telemetry.update();
-   }
+    }
 
-    /*public void unhang() {
-        //time it takes to drop robot
-        long dropTime = 0;
-        robot.leftLiftMotor.setPower(-1);
-        robot.leftLiftMotor.setPower(-1);
-        try {
-            robot.sleepTau(dropTime);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        robot.leftLiftMotor.setPower(0);
-        robot.rightLiftMotor.setPower(0);
-    }*/
+    public void unhang() {
+        robot.leftLiftMotor.setTargetPosition((int)robot.leftLiftMotor.getCurrentPosition() + 5450);
+        robot.rightLiftMotor.setTargetPosition((int)robot.rightLiftMotor.getCurrentPosition() + 5450);
+        sleepTau(2500);
+    }
 
     //drive forward certain distance at certain speed(speed should be no more than 1), distance is in inches
     public void driveForward(double speed, double distance){
@@ -177,8 +172,8 @@ public class AUTO_METHODS extends LinearOpMode {
         double distance = (degree * (2 * robotRotationRadius * Math.PI) / 360);
         motorPosition = (int)((distance / (6*Math.PI)) * ticksPerRotation);
         robot.frontLeftMotor.setTargetPosition(robot.frontLeftMotor.getCurrentPosition()+ motorPosition);
-        robot.backLeftMotor.setTargetPosition(robot.backLeftMotor.getCurrentPosition()+ motorPosition);
         robot.frontRightMotor.setTargetPosition(robot.frontRightMotor.getCurrentPosition() + motorPosition);
+        robot.backLeftMotor.setTargetPosition(robot.backLeftMotor.getCurrentPosition()+ motorPosition);
         robot.backRightMotor.setTargetPosition(robot.backRightMotor.getCurrentPosition() + motorPosition);
     }
     /*public void scanMinerals(){
@@ -316,8 +311,8 @@ public class AUTO_METHODS extends LinearOpMode {
          * In this example, it is centered (left to right), but 110 mm forward of the middle of the robot, and 200 mm above ground level.
          */
         Log.d(Tag, "Initialized vumarks");
-        final int CAMERA_FORWARD_DISPLACEMENT  = 110;   // eg: Camera is 110 mm in front of robot center
-        final int CAMERA_VERTICAL_DISPLACEMENT = 200;   // eg: Camera is 200 mm above ground
+        final int CAMERA_FORWARD_DISPLACEMENT  = -222;   // eg: Camera is 110 mm in front of robot center
+        final int CAMERA_VERTICAL_DISPLACEMENT = 76;   // eg: Camera is 200 mm above ground
         final int CAMERA_LEFT_DISPLACEMENT     = 0;     // eg: Camera is ON the robot's center line
 
         OpenGLMatrix phoneLocationOnRobot = OpenGLMatrix
@@ -388,14 +383,10 @@ public class AUTO_METHODS extends LinearOpMode {
         }
         return location;
     }
-    public double getRobotX(){
-        return translation.get(0) / mmPerInch;
-    }
-    public double getRobotY(){
-        return translation.get(1) / mmPerInch;
-    }
+    public double getRobotX(){return getLocation().get(0) / mmPerInch; }
+    public double getRobotY(){return getLocation().get(1) / mmPerInch; }
     public double getRobotZ(){
-        return translation.get(2) / mmPerInch;
+        return getLocation().get(2) / mmPerInch;
     }
     public double getRobotRoll(){
         return rotation.firstAngle;
@@ -406,6 +397,7 @@ public class AUTO_METHODS extends LinearOpMode {
     public double getRobotHeading(){
         return rotation.thirdAngle;
     }
+
     public void sleepTau(long milliSec){try{Thread.sleep(milliSec);}catch(InterruptedException e){throw new RuntimeException(e);}}
 
     @Override

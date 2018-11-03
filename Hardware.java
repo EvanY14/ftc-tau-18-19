@@ -48,6 +48,10 @@ public class Hardware {
     //Other*************************
     HardwareMap hwMap;
     private ElapsedTime period = new ElapsedTime();
+    public double leftLiftBottom = 0;
+    public double rightLiftBottom = 0;
+    public double leftLiftTop = 0;
+    public double rightLiftTop = 0;
     //******************************
 
     public Hardware(){
@@ -93,6 +97,11 @@ public class Hardware {
         leftLiftMotor.setPower(0);
         rightLiftMotor.setPower(0);
 
+        //initialize variables
+        leftLiftBottom = leftLiftMotor.getCurrentPosition();
+        rightLiftBottom = rightLiftMotor.getCurrentPosition();
+        leftLiftTop = leftLiftBottom + 5450;
+        rightLiftTop = rightLiftBottom + 5450;
     }
 
     public void init_auto(HardwareMap hwMap){
@@ -112,6 +121,8 @@ public class Hardware {
         //imageTemplate = imageTrackables.get(0);
         //imageTemplate.setName("roverVuMarkTemplate");
         imageTrackables.activate();
+
+
     }
     public double getTime(){
         return period.time();

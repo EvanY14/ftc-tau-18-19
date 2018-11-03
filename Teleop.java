@@ -3,15 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import android.util.Log;
 
-import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
 
 //import org.firstinspires.ftc.teamcode.Vision1;
 
@@ -44,10 +36,7 @@ public class Teleop extends OpMode{
     private double endTimeA = 0;
     private boolean endGameSpeed = false;
     private double endTimeB = 0;
-    private final double leftLiftBottom = -8495;
-    private final double rightLiftBottom = -8498;
-    private final double leftLiftTop = -3034;
-    private final double rightLiftTop = -3048;
+
 
     @Override
     public void init() {
@@ -150,17 +139,6 @@ public class Teleop extends OpMode{
         backleftPOWER = maxPOWER * backleftPOWER;
         backrightPOWER = maxPOWER * backrightPOWER;
 
-        /*maxPOWER = Math.abs(frontleftPOWER);
-        if (Math.abs(backleftPOWER) > maxPOWER) {
-            maxPOWER = Math.abs(backleftPOWER);
-        }
-        if (Math.abs(backrightPOWER) > maxPOWER) {
-            maxPOWER = Math.abs(backrightPOWER);
-        }
-        if (Math.abs(frontrightPOWER) > maxPOWER) {
-            maxPOWER = Math.abs(frontrightPOWER);
-        }*/
-
         /**************************
          *********Gamepad 2********
          **************************/
@@ -172,20 +150,22 @@ public class Teleop extends OpMode{
         if(Math.abs(rightGP2Y) < 0.05){
             rightGP1Y = 0;
         }
-        if(Math.abs(robot.leftLiftMotor.getCurrentPosition()) < 3034 && -leftGP2Y < 0 )
+
+        /*if(robot.rightLiftMotor.getCurrentPosition() < robot.rightLiftBottom && leftGP2Y > 0)
+            leftGP2Y = 0;*/
+        if(robot.rightLiftMotor.getCurrentPosition() > robot.rightLiftTop && leftGP2Y < 0)
             leftGP2Y = 0;
-        if(Math.abs(robot.rightLiftMotor.getCurrentPosition()) < 3038 && -rightGP2X < 0)
-            leftGP2Y = 0;
-        if(Math.abs(robot.leftLiftMotor.getCurrentPosition()) > 8495 && -leftGP2Y > 0)
-            leftGP2Y = 0;
-        if(Math.abs(robot.rightLiftMotor.getCurrentPosition()) > 8498 && -rightGP2Y > 0)
+        /*if(robot.leftLiftMotor.getCurrentPosition() < robot.leftLiftBottom && leftGP2Y > 0)
+            leftGP2Y = 0;*/
+        if(robot.leftLiftMotor.getCurrentPosition() > robot.leftLiftTop && leftGP2Y < 0)
             leftGP2Y = 0;
 
 
         robot.rightLiftMotor.setPower(-leftGP2Y);
         robot.leftLiftMotor.setPower(-leftGP2Y);
-        //setting powers to motors
 
+
+        //setting powers to motors
         robot.frontRightMotor.setPower(frontrightPOWER);
         robot.frontLeftMotor.setPower(frontleftPOWER);
         robot.backRightMotor.setPower(backrightPOWER);
@@ -196,10 +176,7 @@ public class Teleop extends OpMode{
         telemetry.addData("Right game pad 2 power", rightGP2Y);
         telemetry.addData("Slow drive", slowDrive);
         telemetry.addData("Endgame speed", endGameSpeed);
-        telemetry.addData("Left lift motor position", robot.leftLiftMotor.getCurrentPosition());
-        telemetry.addData("Right lift motor position", robot.rightLiftMotor.getCurrentPosition());
         telemetry.update();
-
     }
 
 

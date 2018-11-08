@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import android.util.Log;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 //import org.firstinspires.ftc.teamcode.Vision1;
 
@@ -15,7 +16,8 @@ public class Teleop extends OpMode{
     Hardware robot = new Hardware();
     //Log.d("Error message", "about to instantiate vision class");
     //Vision1 vision = new Vision1();
-   // AUTO_METHODS auto = new AUTO_METHODS();
+    AUTO_METHODS auto = new AUTO_METHODS();
+    ElapsedTime period = new ElapsedTime();
     //Drive variables
     private boolean slowDrive = false;
     private double leftGP1X = 0;
@@ -32,24 +34,31 @@ public class Teleop extends OpMode{
     private double frontrightPOWER = 0;
     private double backleftPOWER = 0;
     private double backrightPOWER = 0;
-    private double maxPOWER = 1;
+    private double maxPOWER = 0.5;
     private double endTimeA = 0;
     private boolean endGameSpeed = false;
     private double endTimeB = 0;
+    private double endTimeUp = 0;
+    private double endTimeDown = 0;
+    private double endTimeArm = 0;
+    private double stopperEndTime = 0;
 
+    private final double markerArmdown = 95;
+    private final double markerArmUp = 0;
 
     @Override
     public void init() {
        telemetry.addData("Readiness", "NOT READY TO START, PLEASE WAIT");
         updateTelemetry(telemetry);
 
-        robot.init(hardwareMap);
+        robot.init(hardwareMap, telemetry);
         Log.d("Error message", "initialized robot with vision");
         telemetry.addData("HardwareMap", hardwareMap);
         telemetry.addData("Readiness", "Press Play to start");
         telemetry.addData("If you notice this", "You are COOL!!! (Charles was here)");
         updateTelemetry(telemetry);
-
+        robot.stopper.setPosition(180);
+        auto.sleepTau(1000);
     }
 
     @Override
@@ -130,6 +139,20 @@ public class Teleop extends OpMode{
             rightGP1X = 0;
         }
 
+        if(gamepad1.dpad_up && endTimeUp < robot.getTime()){
+            robot.stopper.setPosition(robot.stopper.getPosition() + 0.005);
+            endTimeUp = robot.getTime() + 0.25;
+        }
+        if(gamepad1.dpad_down && endTimeDown < robot.getTime()){
+            robot.stopper.setPosition(robot.stopper.getPosition() - 0.005);
+            endTimeDown = robot.getTime() + 0.25;
+        }
+
+        if(gamepad1.y && endTimeArm < robot.getTime()){
+            double position = robot.markerArm.getPosition() == markerArmdown ? markerArmUp:markerArmdown;
+            robot.markerArm.setPosition(position);
+            endTimeArm = robot.getTime() + 0.25;
+        }
         //speeds of drive motors
         frontleftPOWER = backleftPOWER = leftGP1Y;
         frontrightPOWER = backrightPOWER = rightGP1Y;
@@ -160,9 +183,28 @@ public class Teleop extends OpMode{
         if(robot.leftLiftMotor.getCurrentPosition() > robot.leftLiftTop && leftGP2Y < 0)
             leftGP2Y = 0;
 
+        if(gamepad2.left_trigger > 0.05 && endTimeArm < robot.getTime()){
+            robot.markerArm.setPosition(robot.markerArm.getPosition() - 0.05);
+            endTimeArm = robot.getTime() + 0.25;
+        }
+        if(gamepad2.right_trigger > 0.05 && endTimeArm < robot.getTime()){
+            robot.markerArm.setPosition(robot.markerArm.getPosition() + 0.05);
+            endTimeArm = robot.getTime() + 0.25;
+        }
 
-        robot.rightLiftMotor.setPower(-leftGP2Y);
-        robot.leftLiftMotor.setPower(-leftGP2Y);
+        if(gamepad2.y && stopperEndTime < robot.getTime()){
+            robot.stopper.setPosition(robot.stopper.getPosition() >0.956 || robot.stopper.getPosition() < 0.954 ? 0.955 : 1);
+            stopperEndTime = robot.getTime() + 0.25;
+        }
+        if(robot.stopper.getPosition() <= 0.955) {
+            robot.rightLiftMotor.setPower(-leftGP2Y);
+            robot.leftLiftMotor.setPower(-leftGP2Y);
+        }else{
+            robot.rightLiftMotor.setPower(0);
+            robot.leftLiftMotor.setPower(0);
+            telemetry.addData("DRIVERS", "RAISE THE STOPPER!!!!!!!!");
+            telemetry.update();
+        }
 
 
         //setting powers to motors
@@ -176,6 +218,8 @@ public class Teleop extends OpMode{
         telemetry.addData("Right game pad 2 power", rightGP2Y);
         telemetry.addData("Slow drive", slowDrive);
         telemetry.addData("Endgame speed", endGameSpeed);
+        telemetry.addData("Stopper position", robot.stopper.getPosition());
+        telemetry.addData("marker arm position", robot.markerArm.getPosition());
         telemetry.update();
     }
 

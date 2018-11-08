@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
@@ -8,6 +9,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 //import org.firstinspires.ftc.teamcode.Vision;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 //import org.firstinspires.ftc.teamcode.Vision1;
@@ -30,6 +32,8 @@ import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.
 import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.BACK;
 import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.FRONT;
 
+//import org.opencv.android.*;
+
 /**
  * Created by Evan Yu on 9/16/2018.
  */
@@ -38,12 +42,17 @@ public class AUTO_METHODS extends LinearOpMode {
     Hardware robot = new Hardware();
 
     //Vision1 vision = new Vision1();
+    //ImageProcessor.State blockPosition;
 
     private double leftSpeed = 0;
     private double rightSpeed = 0;
     private VectorF translation;
     private Orientation rotation;
-
+    private Position initialPos = null;
+    private double initialAngle = 0;
+    private double finalAngle = 0;
+    private double finalX = 0;
+    private double finalY = 0;
     ElapsedTime period = new ElapsedTime();
 
     private static final float mmPerInch        = 25.4f;
@@ -71,7 +80,7 @@ public class AUTO_METHODS extends LinearOpMode {
     private final double robotRotationRadius = 6.5;
     //Use if all motor positions should be the same
     private int motorPosition = 0;
-
+    private int markerGrabber = 0;
     /*
     Vision variables
      */
@@ -92,13 +101,31 @@ public class AUTO_METHODS extends LinearOpMode {
         telemetry.update();
     }
 
-    public void setUp(HardwareMap hwMap){
+    public void setUp(HardwareMap hwMap, Telemetry telemetry){
         telemetry.addData("Readiness", "NOT READY TO START, PLEASE WAIT");
         telemetry.update();
 //clickity clackity
-        robot.init_auto(hwMap);
+        robot.init_auto(hwMap, telemetry);
+        boolean useFullRes = true;
+        Context context = hardwareMap.appContext;
+        //cameraManager.initialize(context, useFullRes, this);
+        //imageProcessor.initialize(useFullRes, this, true, cameraManager.height, cameraManager.width);
         //robot.imageTrackables.activate();
         // Set up our telemetry dashboard
+        telemetry.addData("Mode", "calibrating...");
+        telemetry.update();
+
+        // make sure the imu gyro is calibrated before continuing.
+       /* while (!isStopRequested() && !imu.isGyroCalibrated())
+        {
+            sleep(50);
+            idle();
+        }
+
+        telemetry.addData("Mode", "waiting for start");
+        telemetry.addData("imu calib status", imu.getCalibrationStatus().toString());
+        telemetry.update();*/
+
         telemetry.addData("Readiness", "Press Play to start");
         telemetry.update();
 
@@ -115,6 +142,10 @@ public class AUTO_METHODS extends LinearOpMode {
         robot.backRightMotor.setPower(speed);
     }
 
+    public void speedLift(double speed){
+        robot.rightLiftMotor.setPower(speed);
+        robot.leftLiftMotor.setPower(speed);
+    }
 
     /*Auto methods to call
       Right is forwards, left is backwards
@@ -130,11 +161,32 @@ public class AUTO_METHODS extends LinearOpMode {
         driveForward(0.5, -2 * Math.sqrt(2) * 12);
     }
 
+    /*public ImageProcessor.State getBlockLocation(){
+        imageProcessor.takePicture();
+        blockPosition = imageProcessor.blockState;
+        blockPosition = ImageProcessor.State.BLOCK_IS_LEFT;
+        telemetry.addData("Block position", blockPosition);
+
+        return blockPosition;
+    }*/
+
+   /* public void knockBlockOff(ImageProcessor.State blockPosition){
+        if(blockPosition == ImageProcessor.State.BLOCK_IS_CENTER){
+            driveForward(0.5, Math.sqrt(2) * 12 + 3);
+            sleepTau(1200);
+            turnDegrees(0.5, -135);
+            sleepTau(1000);
+            driveForward(0.5, 12);
+            sleepTau(750);
+            turnDegrees(0.5, 45);
+            sleepTau(1000);
+        }
+    }*/
     //use inches with coordinates
     public void navigateTo(ArrayList<Double> location){
         double heading = getRobotHeading();
         turnDegrees(0.5, -getRobotHeading());
-        turnDegrees(0.5, -90 - Math.atan(Math.abs(getRobotY() - location.get(1))/Math.abs(getRobotX() - location.get(0))));
+        turnDegrees(0.5, -90 - Math.toDegrees(Math.atan(Math.abs(getRobotY() - location.get(1))/Math.abs(getRobotX() - location.get(0)))));
         driveForward(0.5, Math.sqrt(Math.pow(getRobotY() - location.get(1), 2) + Math.pow(getRobotX() - location.get(0),2)));
 
     }
@@ -151,30 +203,73 @@ public class AUTO_METHODS extends LinearOpMode {
         telemetry.update();
     }
 
-    public void unhang() {
-        robot.leftLiftMotor.setTargetPosition((int)robot.leftLiftMotor.getCurrentPosition() + 5450);
-        robot.rightLiftMotor.setTargetPosition((int)robot.rightLiftMotor.getCurrentPosition() + 5450);
-        sleepTau(2500);
+    public void dropArm() {
+        robot.markerArm.setPosition(0.5);
+        sleepTau(1500);
+        robot.markerArm.setPosition(0);
+        sleepTau(1500);
     }
 
+    public void unhang() {
+        robot.stopper.setPosition(0.95);
+        telemetry.addData("Status", "About to wait 5 sec");
+        telemetry.update();
+        sleepTau(2000);
+        telemetry.addData("Status", "done");
+        telemetry.update();
+        speedLift(1);
+        robot.leftLiftMotor.setTargetPosition((int)robot.leftLiftMotor.getCurrentPosition() + 5600);
+        robot.rightLiftMotor.setTargetPosition((int)robot.rightLiftMotor.getCurrentPosition() + 5600);
+        sleepTau(3000);
+    }
+
+    public void dropLift(){
+        speedLift(1);
+        robot.leftLiftMotor.setTargetPosition(robot.rightLiftMotor.getCurrentPosition() - 5600);
+        robot.rightLiftMotor.setTargetPosition(robot.leftLiftMotor.getCurrentPosition() - 5600);
+        sleepTau(5000);
+    }
     //drive forward certain distance at certain speed(speed should be no more than 1), distance is in inches
     public void driveForward(double speed, double distance){
         speed(speed);
+        /*initialPos = robot.imu.getPosition();
+        double heading = robot.imu.getAngularOrientation().firstAngle;
+        double deltaX = Math.sin(heading) * distance;
+        double deltaY = Math.cos(heading) * distance;
+        finalX = initialPos.x + deltaX;
+        finalY = initialPos.y;*/
         motorPosition = (int)((distance / (6 * Math.PI)) * ticksPerRotation);
         robot.frontLeftMotor.setTargetPosition(robot.frontLeftMotor.getCurrentPosition()- motorPosition);
         robot.backLeftMotor.setTargetPosition(robot.backLeftMotor.getCurrentPosition()- motorPosition);
         robot.frontRightMotor.setTargetPosition(robot.frontRightMotor.getCurrentPosition() + motorPosition);
         robot.backRightMotor.setTargetPosition(robot.backRightMotor.getCurrentPosition() + motorPosition);
+        /*while(true){
+            if(Math.abs(robot.imu.getPosition().x) >= Math.abs(finalX) && Math.abs(robot.imu.getPosition().y) >= Math.abs(finalY)){
+                speed(0);
+                sleepTau(500);
+                break;
+            }
+        }*/
+
     }
 
     public void turnDegrees(double speed, double degree){
         speed(speed);
+        /*initialAngle = robot.imu.getAngularOrientation().firstAngle;
+        finalAngle = initialAngle + degree;*/
         double distance = (degree * (2 * robotRotationRadius * Math.PI) / 360);
         motorPosition = (int)((distance / (6*Math.PI)) * ticksPerRotation);
         robot.frontLeftMotor.setTargetPosition(robot.frontLeftMotor.getCurrentPosition()+ motorPosition);
         robot.frontRightMotor.setTargetPosition(robot.frontRightMotor.getCurrentPosition() + motorPosition);
         robot.backLeftMotor.setTargetPosition(robot.backLeftMotor.getCurrentPosition()+ motorPosition);
         robot.backRightMotor.setTargetPosition(robot.backRightMotor.getCurrentPosition() + motorPosition);
+        /*while(true){
+            if(Math.abs(robot.imu.getAngularOrientation().firstAngle) >= Math.abs(finalAngle)){
+                speed(0);
+                sleepTau(500);
+                break;
+            }
+        }*/
     }
     /*public void scanMinerals(){
         if(vision.seesSilver()){

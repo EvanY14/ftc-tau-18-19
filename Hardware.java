@@ -1,10 +1,13 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
@@ -32,9 +35,14 @@ public class Hardware {
     //******************************
 
     //Servos************************
+    public Servo stopper = null;
+    public Servo markerArm = null;
     //******************************
 
     //IMU***************************
+    BNO055IMU               imu;
+    Orientation             lastAngles = new Orientation();
+    double globalAngle, power = .30, correction;
     //******************************
 
     //Vision************************
@@ -57,7 +65,7 @@ public class Hardware {
     public Hardware(){
         hwMap = null;
     }
-    public void init(HardwareMap hwMap){
+    public void init(HardwareMap hwMap, Telemetry telemetry){
 
         this.hwMap = hwMap;
         period.reset();
@@ -69,10 +77,10 @@ public class Hardware {
         backLeftMotor = hwMap.dcMotor.get("back_left");
         backRightMotor = hwMap.dcMotor.get("back_right");
 
-        frontLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        frontRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        backLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        backRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        frontLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        frontRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        backLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        backRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
         frontLeftMotor.setPower(0);
         frontRightMotor.setPower(0);
@@ -85,7 +93,12 @@ public class Hardware {
         backLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
 
+        //init servos
+        stopper = hwMap.servo.get("lift_stopper");
+        markerArm = hwMap.servo.get("marker_arm");
 
+        markerArm.setPosition(0);
+        stopper.setPosition(1);
 
         //init lift motors
         leftLiftMotor = hwMap.dcMotor.get("left_lift");
@@ -104,12 +117,29 @@ public class Hardware {
         rightLiftTop = rightLiftBottom + 5450;
     }
 
-    public void init_auto(HardwareMap hwMap){
-        init(hwMap);
+    public void init_auto(HardwareMap hwMap, Telemetry telemetry){
+        init(hwMap, telemetry);
         frontLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         frontRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         backRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         backLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        leftLiftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightLiftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        /*BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+
+        parameters.mode                = BNO055IMU.SensorMode.IMU;
+        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
+        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.loggingEnabled      = false;
+
+        // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
+        // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
+        // and named "imu".
+        imu = hwMap.get(BNO055IMU.class, "imu");
+
+        imu.initialize(parameters);*/
+
+
 
         //Vision stuff
         int cameraMonitorViewId = hwMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hwMap.appContext.getPackageName());

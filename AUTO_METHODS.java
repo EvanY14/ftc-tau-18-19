@@ -227,7 +227,7 @@ public class AUTO_METHODS extends LinearOpMode {
         speedLift(1);
         robot.leftLiftMotor.setTargetPosition(robot.rightLiftMotor.getCurrentPosition() - 5600);
         robot.rightLiftMotor.setTargetPosition(robot.leftLiftMotor.getCurrentPosition() - 5600);
-        sleepTau(5000);
+        sleepTau(3000);
     }
     //drive forward certain distance at certain speed(speed should be no more than 1), distance is in inches
     public void driveForward(double speed, double distance){

@@ -113,8 +113,8 @@ public class Hardware {
         //initialize variables
         leftLiftBottom = leftLiftMotor.getCurrentPosition();
         rightLiftBottom = rightLiftMotor.getCurrentPosition();
-        leftLiftTop = leftLiftBottom + 5450;
-        rightLiftTop = rightLiftBottom + 5450;
+        leftLiftTop = leftLiftBottom + 5600;
+        rightLiftTop = rightLiftBottom + 5600;
     }
 
     public void init_auto(HardwareMap hwMap, Telemetry telemetry){

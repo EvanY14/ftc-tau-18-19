@@ -50,11 +50,15 @@ public class AUTO_DEPOT extends AUTO_METHODS {
         dropArm();
         driveForward(0.5, Math.sqrt(2) * 11 + 1);
         sleepTau(2000);
+        robot.frontLeftMotor.setPower(0);
+        robot.frontRightMotor.setPower(0);
+        robot.backLeftMotor.setPower(0);
+        robot.backRightMotor.setPower(0);
         //calls arm method
         turnDegrees(0.5, 45);
         sleepTau(2000);
         dropLift();
-        driveForward(1, 66);
+        driveForward(1, 60);
         sleepTau(5000);
 
     }

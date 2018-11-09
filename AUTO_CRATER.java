@@ -15,15 +15,15 @@ public class AUTO_CRATER extends AUTO_METHODS{
         unhang();
         driveForward(0.5, Math.sqrt(2) * 12 + 1);
         sleepTau(1500);
-        turnDegrees(0.5, 55);
+        turnDegrees(0.5, 45);
         sleepTau(1500);
         driveForward(0.5, 14);      //21
         sleepTau(2000);
         turnDegrees(0.5, Math.toDegrees(Math.atan(1.0)));
         sleepTau(1500);
-        driveForward(0.3, Math.sqrt(2)*12 + 2);
+        driveForward(0.3, Math.sqrt(2)*12 + 7);
         sleepTau(1000);
-        turnDegrees(0.5,45);
+        turnDegrees(0.5,55);
         sleepTau(750);
         driveForward(0.5, 54);
         sleepTau(2000);

@@ -42,6 +42,9 @@ public class Teleop extends OpMode{
     private double endTimeDown = 0;
     private double endTimeArm = 0;
     private double stopperEndTime = 0;
+    private double endTimeDrive = 0;
+
+    private boolean reverseDrive = false;
 
     private final double markerArmdown = 95;
     private final double markerArmUp = 0;
@@ -139,23 +142,30 @@ public class Teleop extends OpMode{
             rightGP1X = 0;
         }
 
-        if(gamepad1.dpad_up && endTimeUp < robot.getTime()){
+        /*if(gamepad1.dpad_up && endTimeUp < robot.getTime()){
             robot.stopper.setPosition(robot.stopper.getPosition() + 0.005);
             endTimeUp = robot.getTime() + 0.25;
         }
         if(gamepad1.dpad_down && endTimeDown < robot.getTime()){
             robot.stopper.setPosition(robot.stopper.getPosition() - 0.005);
             endTimeDown = robot.getTime() + 0.25;
-        }
+        }*/
 
+        //Pressing y on gamepad 1 moves the marker arm up or down
         if(gamepad1.y && endTimeArm < robot.getTime()){
-            double position = robot.markerArm.getPosition() == markerArmdown ? markerArmUp:markerArmdown;
+            double position = robot.markerArm.getPosition() == markerArmdown +- 0.01 ? markerArmUp:markerArmdown;
             robot.markerArm.setPosition(position);
             endTimeArm = robot.getTime() + 0.25;
         }
+
+        if(gamepad1.x && endTimeDrive < robot.getTime()){
+            reverseDrive = !reverseDrive;
+            endTimeDrive = robot.getTime() + 0.25;
+        }
+
         //speeds of drive motors
-        frontleftPOWER = backleftPOWER = leftGP1Y;
-        frontrightPOWER = backrightPOWER = rightGP1Y;
+        frontleftPOWER = backleftPOWER = reverseDrive ? rightGP1Y:leftGP1Y;
+        frontrightPOWER = backrightPOWER = reverseDrive ? leftGP1Y:rightGP1Y;
 
         frontleftPOWER = maxPOWER * frontleftPOWER;
         frontrightPOWER = maxPOWER * frontrightPOWER;
@@ -192,11 +202,12 @@ public class Teleop extends OpMode{
             endTimeArm = robot.getTime() + 0.25;
         }
 
+        //Pressing y on gamepad 2 moves stopper up and down
         if(gamepad2.y && stopperEndTime < robot.getTime()){
             robot.stopper.setPosition(robot.stopper.getPosition() >0.956 || robot.stopper.getPosition() < 0.954 ? 0.955 : 1);
             stopperEndTime = robot.getTime() + 0.25;
         }
-        if(robot.stopper.getPosition() <= 0.955) {
+        if(robot.stopper.getPosition() <= 0.956) {
             robot.rightLiftMotor.setPower(-leftGP2Y);
             robot.leftLiftMotor.setPower(-leftGP2Y);
         }else{
@@ -212,8 +223,10 @@ public class Teleop extends OpMode{
         robot.frontLeftMotor.setPower(frontleftPOWER);
         robot.backRightMotor.setPower(backrightPOWER);
         robot.backLeftMotor.setPower(backleftPOWER);
-        telemetry.addData("Left game pad 1 power", leftGP1Y);
-        telemetry.addData("Right game pad 1 power", rightGP1Y);
+        telemetry.addData("Left game pad 1 power", frontleftPOWER);
+        telemetry.addData("Right game pad 1 power", frontrightPOWER);
+        telemetry.addData("Actual left power", robot.frontLeftMotor.getPower());
+        telemetry.addData("Actual right power", robot.frontRightMotor.getPower());
         telemetry.addData("Left game pad 2 power", leftGP2Y);
         telemetry.addData("Right game pad 2 power", rightGP2Y);
         telemetry.addData("Slow drive", slowDrive);

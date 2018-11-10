@@ -218,8 +218,8 @@ public class AUTO_METHODS extends LinearOpMode {
         telemetry.addData("Status", "done");
         telemetry.update();
         speedLift(1);
-        robot.leftLiftMotor.setTargetPosition((int)robot.leftLiftMotor.getCurrentPosition() + 5600);
-        robot.rightLiftMotor.setTargetPosition((int)robot.rightLiftMotor.getCurrentPosition() + 5600);
+        robot.leftLiftMotor.setTargetPosition((int)robot.leftLiftMotor.getCurrentPosition() + 5700);
+        robot.rightLiftMotor.setTargetPosition((int)robot.rightLiftMotor.getCurrentPosition() + 5700);
         sleepTau(3000);
     }
 

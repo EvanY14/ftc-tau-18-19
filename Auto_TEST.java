@@ -1,9 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 
 @Autonomous(name = "Tau: Test", group = "AUTO_TEST")
 public class Auto_TEST extends AUTO_METHODS {
@@ -17,7 +14,15 @@ public class Auto_TEST extends AUTO_METHODS {
         //robot.setUp();
         //telemetry.addData("Status", "initialized");
         //telemetry.update();
-        setUp(hardwareMap);
+        setUp(hardwareMap, telemetry);
+        while(opModeIsActive()){
+            telemetry.addData("Location" , getBlockLocation());
+            telemetry.update();
+            break;
+        }
+
+        //telemetry.addData("block location", getBlockLocation());
+        /*sleepTau(10000);
         getLocationOnField();
         driveForward(0.5, 12);
         telemetry.addData("Status", "Drove forward");
@@ -31,7 +36,7 @@ public class Auto_TEST extends AUTO_METHODS {
         telemetry.addData("Status", "turned 90 degrees right");
         telemetry.update();
         sleepTau(1500);
-
+*/
     }
 }
         /*driveForward(0.5, 12.0);

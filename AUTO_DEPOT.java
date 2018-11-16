@@ -43,23 +43,7 @@ public class AUTO_DEPOT extends AUTO_METHODS {
         telemetry.addData("Status", "Unhanged");
         telemetry.update();
         //Call other methods
-        driveForward(0.5, Math.sqrt(2) * 36);
-        sleepTau(2000);
-        turnDegrees(0.5, 90);
-        sleepTau(2000);
-        dropArm();
-        driveForward(0.5, Math.sqrt(2) * 11 + 1);
-        sleepTau(2000);
-        robot.frontLeftMotor.setPower(0);
-        robot.frontRightMotor.setPower(0);
-        robot.backLeftMotor.setPower(0);
-        robot.backRightMotor.setPower(0);
-        //calls arm method
-        turnDegrees(0.5, 45);
-        sleepTau(2000);
-        dropLift();
-        driveForward(1, 60);
-        sleepTau(5000);
+        knockBlockOff("Right");
 
     }
 

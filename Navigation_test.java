@@ -6,7 +6,7 @@ import java.util.ArrayList;
 public class Navigation_test extends AUTO_METHODS{
 
     public void runOpMode() throws InterruptedException{
-        setUp(hardwareMap);
+        setUp(hardwareMap, telemetry);
 
         ArrayList<Double> location = new ArrayList<>();
         location.add(Math.sqrt(2) * 2 * 12);

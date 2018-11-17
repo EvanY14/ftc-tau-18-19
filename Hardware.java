@@ -45,6 +45,7 @@ public class Hardware {
 
     //IMU***************************
     BNO055IMU               imu;
+    BNO055IMU               imu1;
     Orientation             lastAngles = new Orientation();
     double globalAngle, power = .30, correction;
     //******************************
@@ -133,7 +134,7 @@ public class Hardware {
         backLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         leftLiftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightLiftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        
+
         //Vision stuff
         /*int cameraMonitorViewId = hwMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hwMap.appContext.getPackageName());
         VuforiaLocalizer.Parameters Vuparameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);

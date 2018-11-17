@@ -4,14 +4,20 @@ import android.content.Context;
 import android.util.Log;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 //import org.firstinspires.ftc.teamcode.Vision;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 //import org.firstinspires.ftc.teamcode.Vision1;
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
@@ -27,6 +33,7 @@ import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import java.util.List;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.XYZ;
@@ -88,6 +95,7 @@ public class AUTO_METHODS extends LinearOpMode {
     private ArrayList<Double> location = new ArrayList<Double>();
 
     private BNO055IMU imu;
+    private BNO055IMU imu1;
     private Orientation angles;
     private Acceleration gravity;
     private Position position;
@@ -133,23 +141,39 @@ public class AUTO_METHODS extends LinearOpMode {
         //cameraManager.initialize(context, useFullRes, this);
         //imageProcessor.initialize(useFullRes, this, true, cameraManager.height, cameraManager.width);
         //robot.imageTrackables.activate();
-        // Set up our telemetry dashboard
+
         telemetry.addData("Mode", "calibrating...");
         telemetry.update();
 
-        // make sure the imu gyro is calibrated before continuing.
-        while (!isStopRequested() && !imu.isGyroCalibrated())
-        {
-            sleep(50);
-            idle();
-        }
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
+        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
+        parameters.loggingEnabled      = true;
+        parameters.loggingTag          = "IMU";
+        parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
 
+        // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
+        // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
+        // and named "imu".
+        imu = hardwareMap.get(BNO055IMU.class, "imu");
+        imu.initialize(parameters);
+        imu1 = hardwareMap.get(BNO055IMU.class, "imu1");
+        imu.initialize(parameters);
+
+        // Set up our telemetry dashboard
+        composeTelemetry();
+
+        // Start the logging of measured acceleration
+        imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
         telemetry.addData("Mode", "waiting for start");
         telemetry.addData("imu calib status", imu.getCalibrationStatus().toString());
         telemetry.update();
 
         telemetry.addData("Readiness", "Press Play to start");
         telemetry.update();
+
+
 
         // Wait until we're told to go
         waitForStart();
@@ -255,44 +279,44 @@ public class AUTO_METHODS extends LinearOpMode {
     //drive forward certain distance at certain speed(speed should be no more than 1), distance is in inches
     public void driveForward(double speed, double distance){
         speed(speed);
-        /*initialPos = robot.imu.getPosition();
+        initialPos = robot.imu.getPosition();
         double heading = robot.imu.getAngularOrientation().firstAngle;
         double deltaX = Math.sin(heading) * distance;
         double deltaY = Math.cos(heading) * distance;
         finalX = initialPos.x + deltaX;
-        finalY = initialPos.y;*/
+        finalY = initialPos.y;
         motorPosition = (int)((distance / (6 * Math.PI)) * ticksPerRotation);
         robot.frontLeftMotor.setTargetPosition(robot.frontLeftMotor.getCurrentPosition()- motorPosition);
         robot.backLeftMotor.setTargetPosition(robot.backLeftMotor.getCurrentPosition()- motorPosition);
         robot.frontRightMotor.setTargetPosition(robot.frontRightMotor.getCurrentPosition() + motorPosition);
         robot.backRightMotor.setTargetPosition(robot.backRightMotor.getCurrentPosition() + motorPosition);
-        /*while(true){
-            if(Math.abs(robot.imu.getPosition().x) >= Math.abs(finalX) && Math.abs(robot.imu.getPosition().y) >= Math.abs(finalY)){
+        while(true){
+            if(Math.abs(getImuAverageXValue()) >= Math.abs(finalX) && Math.abs(getIMUAverageYValue()) >= Math.abs(finalY)){
                 speed(0);
                 sleepTau(500);
                 break;
             }
-        }*/
+        }
 
     }
 
     public void turnDegrees(double speed, double degree){
         speed(speed);
-        /*initialAngle = robot.imu.getAngularOrientation().firstAngle;
-        finalAngle = initialAngle + degree;*/
+        initialAngle = robot.imu.getAngularOrientation().firstAngle;
+        finalAngle = initialAngle + degree;
         double distance = (degree * (2 * robotRotationRadius * Math.PI) / 360);
         motorPosition = (int)((distance / (6*Math.PI)) * ticksPerRotation);
         robot.frontLeftMotor.setTargetPosition(robot.frontLeftMotor.getCurrentPosition()+ motorPosition);
         robot.frontRightMotor.setTargetPosition(robot.frontRightMotor.getCurrentPosition() + motorPosition);
         robot.backLeftMotor.setTargetPosition(robot.backLeftMotor.getCurrentPosition()+ motorPosition);
         robot.backRightMotor.setTargetPosition(robot.backRightMotor.getCurrentPosition() + motorPosition);
-        /*while(true){
-            if(Math.abs(robot.imu.getAngularOrientation().firstAngle) >= Math.abs(finalAngle)){
+        while(true){
+            if(Math.abs(getImuAverageRotation()) >= Math.abs(finalAngle)){
                 speed(0);
                 sleepTau(500);
                 break;
             }
-        }*/
+        }
     }
     /*public void scanMinerals(){
         if(vision.seesSilver()){
@@ -661,5 +685,88 @@ public class AUTO_METHODS extends LinearOpMode {
         TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
         tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
         tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_GOLD_MINERAL, LABEL_SILVER_MINERAL);
+    }
+    void composeTelemetry() {
+
+        // At the beginning of each telemetry update, grab a bunch of data
+        // from the IMU that we will then display in separate lines.
+        telemetry.addAction(new Runnable() { @Override public void run()
+        {
+            // Acquiring the angles is relatively expensive; we don't want
+            // to do that in each of the three items that need that info, as that's
+            // three times the necessary expense.
+            angles   = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            gravity  = imu.getGravity();
+        }
+        });
+
+        telemetry.addLine()
+                .addData("status", new Func<String>() {
+                    @Override public String value() {
+                        return imu.getSystemStatus().toShortString();
+                    }
+                })
+                .addData("calib", new Func<String>() {
+                    @Override public String value() {
+                        return imu.getCalibrationStatus().toString();
+                    }
+                });
+
+        telemetry.addLine()
+                .addData("heading", new Func<String>() {
+                    @Override public String value() {
+                        return formatAngle(angles.angleUnit, angles.firstAngle);
+                    }
+                })
+                .addData("roll", new Func<String>() {
+                    @Override public String value() {
+                        return formatAngle(angles.angleUnit, angles.secondAngle);
+                    }
+                })
+                .addData("pitch", new Func<String>() {
+                    @Override public String value() {
+                        return formatAngle(angles.angleUnit, angles.thirdAngle);
+                    }
+                });
+
+        telemetry.addLine()
+                .addData("grvty", new Func<String>() {
+                    @Override public String value() {
+                        return gravity.toString();
+                    }
+                })
+                .addData("mag", new Func<String>() {
+                    @Override public String value() {
+                        return String.format(Locale.getDefault(), "%.3f",
+                                Math.sqrt(gravity.xAccel*gravity.xAccel
+                                        + gravity.yAccel*gravity.yAccel
+                                        + gravity.zAccel*gravity.zAccel));
+                    }
+                });
+    }
+
+    //----------------------------------------------------------------------------------------------
+    // Formatting
+    //----------------------------------------------------------------------------------------------
+
+    String formatAngle(AngleUnit angleUnit, double angle) {
+        return formatDegrees(AngleUnit.DEGREES.fromUnit(angleUnit, angle));
+    }
+
+    String formatDegrees(double degrees){
+        return String.format(Locale.getDefault(), "%.1f", AngleUnit.DEGREES.normalize(degrees));
+    }
+
+    public double getImuAverageXValue(){
+        return (imu.getPosition().x + imu1.getPosition().x)/2.0;
+    }
+    public double getIMUAverageYValue(){
+        return(imu.getPosition().y + imu1.getPosition().y)/2.0;
+    }
+    public double getIMUAverageZValue(){
+        return (imu.getPosition().z + imu1.getPosition().z) / 2.0;
+    }
+    public double getImuAverageRotation(){
+        return (imu.getAngularOrientation().firstAngle + imu1.getAngularOrientation().firstAngle) / 2.0;
     }
 }

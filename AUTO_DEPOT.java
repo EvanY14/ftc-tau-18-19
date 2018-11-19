@@ -39,11 +39,11 @@ public class AUTO_DEPOT extends AUTO_METHODS {
         setUp(hardwareMap, telemetry);
         telemetry.addData("Status", "about to unhang");
         telemetry.update();
-        unhang();
+        //unhang();
         telemetry.addData("Status", "Unhanged");
         telemetry.update();
         //Call other methods
-        knockBlockOff("Right");
+        knockBlockOff(getBlockLocation());
 
     }
 

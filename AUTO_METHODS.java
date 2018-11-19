@@ -162,7 +162,7 @@ public class AUTO_METHODS extends LinearOpMode {
         imu.initialize(parameters);
 
         // Set up our telemetry dashboard
-        composeTelemetry();
+        //composeTelemetry();
 
         // Start the logging of measured acceleration
         imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
@@ -279,44 +279,44 @@ public class AUTO_METHODS extends LinearOpMode {
     //drive forward certain distance at certain speed(speed should be no more than 1), distance is in inches
     public void driveForward(double speed, double distance){
         speed(speed);
-        initialPos = robot.imu.getPosition();
+        /*initialPos = robot.imu.getPosition();
         double heading = robot.imu.getAngularOrientation().firstAngle;
         double deltaX = Math.sin(heading) * distance;
         double deltaY = Math.cos(heading) * distance;
         finalX = initialPos.x + deltaX;
-        finalY = initialPos.y;
+        finalY = initialPos.y;*/
         motorPosition = (int)((distance / (6 * Math.PI)) * ticksPerRotation);
         robot.frontLeftMotor.setTargetPosition(robot.frontLeftMotor.getCurrentPosition()- motorPosition);
         robot.backLeftMotor.setTargetPosition(robot.backLeftMotor.getCurrentPosition()- motorPosition);
         robot.frontRightMotor.setTargetPosition(robot.frontRightMotor.getCurrentPosition() + motorPosition);
         robot.backRightMotor.setTargetPosition(robot.backRightMotor.getCurrentPosition() + motorPosition);
-        while(true){
+        /*while(true){
             if(Math.abs(getImuAverageXValue()) >= Math.abs(finalX) && Math.abs(getIMUAverageYValue()) >= Math.abs(finalY)){
                 speed(0);
                 sleepTau(500);
                 break;
             }
-        }
+        }*/
 
     }
 
     public void turnDegrees(double speed, double degree){
         speed(speed);
-        initialAngle = robot.imu.getAngularOrientation().firstAngle;
-        finalAngle = initialAngle + degree;
+        /*initialAngle = robot.imu.getAngularOrientation().firstAngle;
+        finalAngle = initialAngle + degree;*/
         double distance = (degree * (2 * robotRotationRadius * Math.PI) / 360);
         motorPosition = (int)((distance / (6*Math.PI)) * ticksPerRotation);
         robot.frontLeftMotor.setTargetPosition(robot.frontLeftMotor.getCurrentPosition()+ motorPosition);
         robot.frontRightMotor.setTargetPosition(robot.frontRightMotor.getCurrentPosition() + motorPosition);
         robot.backLeftMotor.setTargetPosition(robot.backLeftMotor.getCurrentPosition()+ motorPosition);
         robot.backRightMotor.setTargetPosition(robot.backRightMotor.getCurrentPosition() + motorPosition);
-        while(true){
+        /*while(true){
             if(Math.abs(getImuAverageRotation()) >= Math.abs(finalAngle)){
                 speed(0);
                 sleepTau(500);
                 break;
             }
-        }
+        }*/
     }
     /*public void scanMinerals(){
         if(vision.seesSilver()){
@@ -332,8 +332,25 @@ public class AUTO_METHODS extends LinearOpMode {
             telemetry.addData("Sorry!", "This device is not compatible with TFOD");
         }
                 /** Activate Tensor Flow Object Detection. */
-
+        boolean turn = false;
+        boolean turn2 = false;
             while (opModeIsActive()) {
+                if (robot.getTime() > 15) {
+                    if(turn2){
+                        turnDegrees(0.25, 10);
+                        sleepTau(750);
+                    }
+                    return "Center";
+                }
+                if (robot.getTime() > 5 && turn == false) {
+                    turnDegrees(0.25, 10);
+                    sleepTau(500);
+                    turn = true;
+                } else if (robot.getTime() > 10 && turn2 == false) {
+                    turnDegrees(0.25, -20);
+                    sleepTau(1000);
+                    turn2 = true;
+                }
                 if (robot.tfod != null) {
                     // getUpdatedRecognitions() will return null if no new information is available since
                     // the last time that call was made.
@@ -381,54 +398,64 @@ public class AUTO_METHODS extends LinearOpMode {
             robot.tfod.shutdown();
             //return "tfod null";
         }
+        if(turn2){
+                turnDegrees(0.25, 10);
+                sleepTau(750);
+        } else if(turn){
+                turnDegrees(0.25, -10);
+                sleepTau(750);
+        }
         return location;
     }
 
     public void knockBlockOff(String block){
-        driveForward(0.5, Math.sqrt(2) * 12);
-        sleepTau(750);
+        driveForward(0.25, Math.sqrt(2) * 12);
+        sleepTau(1000);
         if(block.equals("Left") || block.equals("Right")){
-            turnDegrees(0.5, block.equals("Left") ? 45: -45);
+            turnDegrees(0.25, block.equals("Left") ? 45: -45);
+            sleepTau(1250);
+            driveForward(0.25, 25);
+            sleepTau(3500);
+            turnDegrees(0.25, block.equals("Left") ? -90: 90);
             sleepTau(1000);
-            driveForward(0.5, 23.5);
-            sleepTau(2000);
-            turnDegrees(0.5, block.equals("Left") ? -90: 90);
-            sleepTau(1000);
-            driveForward(0.5, 22);
-            sleepTau(2000);
             if(block.equals("Left")){
-                turnDegrees(0.5, 90);
+                driveForward(0.25, 24);
+                sleepTau(1250);
+                turnDegrees(0.25, 90);
                 sleepTau(1000);
                 dropArm();
-                turnDegrees(0.5, 75);
+                turnDegrees(0.25, 75);
                 sleepTau(750);
-                driveForward(0.5, Math.sqrt(2) * 9 + 1);
+                driveForward(0.25, Math.sqrt(2) * 9 + 1);
                 sleepTau(2000);
                 robot.frontLeftMotor.setPower(0);
                 robot.frontRightMotor.setPower(0);
                 robot.backLeftMotor.setPower(0);
                 robot.backRightMotor.setPower(0);
                 //calls arm method
-                dropLift();
-                driveForward(1, 55);
+                //dropLift();
+                driveForward(1, 60);
                 sleepTau(5000);
             }else{
-
+                driveForward(0.25, 31);
+                sleepTau(3500);
                 dropArm();
-                turnDegrees(0.5, 45);
+                turnDegrees(0.5, 80);
                 sleepTau(750);
-                driveForward(0.5, Math.sqrt(2) * 11);
-                sleepTau(2000);
-                turnDegrees(.5, 40);
-                sleepTau(1000);
+                //driveForward(0.5, Math.sqrt(2) * 12);
+                //sleepTau(2000);
+                //turnDegrees(.5, 40);
+                //sleepTau(1000);
                 robot.frontLeftMotor.setPower(0);
                 robot.frontRightMotor.setPower(0);
                 robot.backLeftMotor.setPower(0);
                 robot.backRightMotor.setPower(0);
                 //calls arm method
-                dropLift();
-                driveForward(1, 55);
+                //dropLift();
+                driveForward(0.5, 60);
                 sleepTau(5000);
+                //turnDegrees(0.5,  );
+               // sleepTau(2000);
             }
 
         } else if(block.equals("Center")){
@@ -436,6 +463,14 @@ public class AUTO_METHODS extends LinearOpMode {
             sleepTau(1500);
             turnDegrees(0.5, 90);
             sleepTau(750);
+            dropArm();
+            turnDegrees(0.5, 20);
+            sleepTau(750);
+            driveForward(0.25, 20);
+            sleepTau(1000);
+            turnDegrees(0.25, 20);
+            sleepTau(750);
+            driveForward(0.5, 55);
         }
     }
 
@@ -686,7 +721,7 @@ public class AUTO_METHODS extends LinearOpMode {
         tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
         tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_GOLD_MINERAL, LABEL_SILVER_MINERAL);
     }
-    void composeTelemetry() {
+    /*void composeTelemetry() {
 
         // At the beginning of each telemetry update, grab a bunch of data
         // from the IMU that we will then display in separate lines.
@@ -768,5 +803,5 @@ public class AUTO_METHODS extends LinearOpMode {
     }
     public double getImuAverageRotation(){
         return (imu.getAngularOrientation().firstAngle + imu1.getAngularOrientation().firstAngle) / 2.0;
-    }
+    }*/
 }

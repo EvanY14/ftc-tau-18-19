@@ -63,7 +63,12 @@ public class AUTO_METHODS extends LinearOpMode {
     private double finalAngle = 0;
     private double finalX = 0;
     private double finalY = 0;
+    public String blockLocation = "Center";
+    private double initialX;
+    private double initialY;
     ElapsedTime period = new ElapsedTime();
+    private final double stopper_up = 0.95;
+    private final double stopper_down = 1;
 
     private static final float mmPerInch        = 25.4f;
     private static final float mmFTCFieldWidth  = (12*6) * mmPerInch;       // the width of the FTC field (from the center point to the outer panels)
@@ -99,6 +104,14 @@ public class AUTO_METHODS extends LinearOpMode {
     private Orientation angles;
     private Acceleration gravity;
     private Position position;
+    private Orientation angles1;
+    private Acceleration gravity1;
+    private Position position1;
+    /*public BNO055IMU.AccelRange accelRange          = BNO055IMU.AccelRange.G4;
+    /** accelerometer bandwidth. See Section 3.5.2 (p27) and Table 3-4 (p21) of the BNO055 specification
+    public BNO055IMU.AccelBandwidth accelBandwidth      = BNO055IMU.AccelBandwidth.HZ62_5;
+    /** accelerometer power mode. See Section 3.5.2 (p27) and Section 4.2.2 (p77) of the BNO055 specification
+    public BNO055IMU.AccelPowerMode accelPowerMode      = BNO055IMU.AccelPowerMode.NORMAL;*/
 
     private int backLeftMotorPosition = 0;
     private int backRightMotorPosition = 0;
@@ -152,6 +165,11 @@ public class AUTO_METHODS extends LinearOpMode {
         parameters.loggingEnabled      = true;
         parameters.loggingTag          = "IMU";
         parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
+        //`rometer bandwidth. See Section 3.5.2 (p27) and Table 3-4 (p21) of the BNO055 specification */
+        parameters.accelRange = BNO055IMU.AccelRange.G4;
+        parameters.accelBandwidth      = BNO055IMU.AccelBandwidth.HZ62_5;
+        /** accelerometer power mode. See Section 3.5.2 (p27) and Section 4.2.2 (p77) of the BNO055 specification */
+        parameters.accelPowerMode      = BNO055IMU.AccelPowerMode.NORMAL;
 
         // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
         // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
@@ -159,15 +177,17 @@ public class AUTO_METHODS extends LinearOpMode {
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameters);
         imu1 = hardwareMap.get(BNO055IMU.class, "imu1");
-        imu.initialize(parameters);
+        imu1.initialize(parameters);
 
         // Set up our telemetry dashboard
-        //composeTelemetry();
+        composeTelemetry();
 
         // Start the logging of measured acceleration
         imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
+        imu1.startAccelerationIntegration(new Position(), new Velocity(), 1000);
         telemetry.addData("Mode", "waiting for start");
         telemetry.addData("imu calib status", imu.getCalibrationStatus().toString());
+        telemetry.addData("imu1 calib status", imu1.getCalibrationStatus().toString());
         telemetry.update();
 
         telemetry.addData("Readiness", "Press Play to start");
@@ -178,6 +198,7 @@ public class AUTO_METHODS extends LinearOpMode {
         // Wait until we're told to go
         waitForStart();
         robot.tfod.activate();
+        period.startTime();
     }
     //Behind the scenes methods
 
@@ -198,7 +219,7 @@ public class AUTO_METHODS extends LinearOpMode {
       Right is forwards, left is backwards
       All distances have to be multiplied by ticksPerRotation and divided by 6 * Pi
      */
-    public void hang(){
+    /*public void hang(){
         ArrayList<Double> navigate = new ArrayList<>();
         ArrayList<Double> location = getLocation();
         navigate.add(location.get(0) > 0 ? 36.0:-36.0);
@@ -206,7 +227,7 @@ public class AUTO_METHODS extends LinearOpMode {
         navigateTo(location);
         turnDegrees(0.5, getRobotHeading() + 45);
         driveForward(0.5, -2 * Math.sqrt(2) * 12);
-    }
+    }*/
 
     /*public ImageProcessor.State getBlockLocation(){
         imageProcessor.takePicture();
@@ -230,15 +251,15 @@ public class AUTO_METHODS extends LinearOpMode {
         }
     }*/
     //use inches with coordinates
-    public void navigateTo(ArrayList<Double> location){
+   /* public void navigateTo(ArrayList<Double> location){
         double heading = getRobotHeading();
         turnDegrees(0.5, -getRobotHeading());
-        turnDegrees(0.5, -90 - Math.toDegrees(Math.atan(Math.abs(getRobotY() - location.get(1))/Math.abs(getRobotX() - location.get(0)))));
-        driveForward(0.5, Math.sqrt(Math.pow(getRobotY() - location.get(1), 2) + Math.pow(getRobotX() - location.get(0),2)));
+        turnDegrees(0.5, -90 - Math.toDegrees(Math.atan(Math.abs(getIMUAverageYValue() - location.get(1))/Math.abs(getImuAverageXValue() - location.get(0)))));
+        driveForward(0.5, Math.sqrt(Math.pow(getIMUAverageYValue() - location.get(1), 2) + Math.pow(getImuAverageXValue() - location.get(0),2)));
 
-    }
+    }*/
 
-    public void getLocationOnField() {
+    /*public void getLocationOnField() {
        telemetry.addData("Status:", "About to run opmode");
        getLocation();
        telemetry.addData("Status:", "ran opmode");
@@ -248,7 +269,7 @@ public class AUTO_METHODS extends LinearOpMode {
         location.set(3, getRobotHeading());
         telemetry.addData("Location", "X:" + location.get(0) + "," + "Y:" + location.get(1) + "Z:" + location.get(2));
         telemetry.update();
-    }
+    }*/
 
     public void dropArm() {
         robot.markerArm.setPosition(0.5);
@@ -259,18 +280,19 @@ public class AUTO_METHODS extends LinearOpMode {
 
     public void unhang() {
         robot.stopper.setPosition(0.95);
-        telemetry.addData("Status", "About to wait 5 sec");
-        telemetry.update();
-        sleepTau(2000);
+        //telemetry.addData("Status", "About to wait 5 sec");
+        //telemetry.update();
+        sleepTau(500);
         telemetry.addData("Status", "done");
         telemetry.update();
         speedLift(1);
         robot.leftLiftMotor.setTargetPosition((int)robot.leftLiftMotor.getCurrentPosition() + 5700);
         robot.rightLiftMotor.setTargetPosition((int)robot.rightLiftMotor.getCurrentPosition() + 5700);
-        sleepTau(3000);
+        blockLocation = getBlockLocation();
     }
 
     public void dropLift(){
+        robot.stopper.setPosition(0.95);
         speedLift(1);
         robot.leftLiftMotor.setTargetPosition(robot.rightLiftMotor.getCurrentPosition() - 5600);
         robot.rightLiftMotor.setTargetPosition(robot.leftLiftMotor.getCurrentPosition() - 5600);
@@ -279,44 +301,45 @@ public class AUTO_METHODS extends LinearOpMode {
     //drive forward certain distance at certain speed(speed should be no more than 1), distance is in inches
     public void driveForward(double speed, double distance){
         speed(speed);
-        /*initialPos = robot.imu.getPosition();
-        double heading = robot.imu.getAngularOrientation().firstAngle;
-        double deltaX = Math.sin(heading) * distance;
-        double deltaY = Math.cos(heading) * distance;
-        finalX = initialPos.x + deltaX;
-        finalY = initialPos.y;*/
+        initialX = getImuAverageXValue() * 39.3701;
+        initialY = getIMUAverageYValue() * 39.3701;
+        double heading = getImuAverageRotation();
+        double deltaX = Math.toDegrees(Math.sin(heading)) * distance;
+        double deltaY = Math.toDegrees(Math.cos(heading)) * distance;
+        finalX = initialX + deltaX;
+        finalY = initialY + deltaY;
         motorPosition = (int)((distance / (6 * Math.PI)) * ticksPerRotation);
         robot.frontLeftMotor.setTargetPosition(robot.frontLeftMotor.getCurrentPosition()- motorPosition);
         robot.backLeftMotor.setTargetPosition(robot.backLeftMotor.getCurrentPosition()- motorPosition);
         robot.frontRightMotor.setTargetPosition(robot.frontRightMotor.getCurrentPosition() + motorPosition);
         robot.backRightMotor.setTargetPosition(robot.backRightMotor.getCurrentPosition() + motorPosition);
-        /*while(true){
+        while(opModeIsActive()){
             if(Math.abs(getImuAverageXValue()) >= Math.abs(finalX) && Math.abs(getIMUAverageYValue()) >= Math.abs(finalY)){
                 speed(0);
                 sleepTau(500);
                 break;
             }
-        }*/
+        }
 
     }
 
     public void turnDegrees(double speed, double degree){
         speed(speed);
-        /*initialAngle = robot.imu.getAngularOrientation().firstAngle;
-        finalAngle = initialAngle + degree;*/
+        initialAngle = getImuAverageRotation();
+        finalAngle = initialAngle + degree;
         double distance = (degree * (2 * robotRotationRadius * Math.PI) / 360);
         motorPosition = (int)((distance / (6*Math.PI)) * ticksPerRotation);
         robot.frontLeftMotor.setTargetPosition(robot.frontLeftMotor.getCurrentPosition()+ motorPosition);
         robot.frontRightMotor.setTargetPosition(robot.frontRightMotor.getCurrentPosition() + motorPosition);
         robot.backLeftMotor.setTargetPosition(robot.backLeftMotor.getCurrentPosition()+ motorPosition);
         robot.backRightMotor.setTargetPosition(robot.backRightMotor.getCurrentPosition() + motorPosition);
-        /*while(true){
+        while(opModeIsActive()){
             if(Math.abs(getImuAverageRotation()) >= Math.abs(finalAngle)){
                 speed(0);
                 sleepTau(500);
                 break;
             }
-        }*/
+        }
     }
     /*public void scanMinerals(){
         if(vision.seesSilver()){
@@ -459,236 +482,22 @@ public class AUTO_METHODS extends LinearOpMode {
             }
 
         } else if(block.equals("Center")){
-            driveForward(0.5, 2 * Math.sqrt(2) * 12);
+            telemetry.addData("Block position", "Center");
+            telemetry.update();
+            driveForward(0.25, 2 * Math.sqrt(2) * 12);
             sleepTau(1500);
             turnDegrees(0.5, 90);
             sleepTau(750);
             dropArm();
-            turnDegrees(0.5, 20);
+            turnDegrees(0.5, 26.5);
             sleepTau(750);
             driveForward(0.25, 20);
             sleepTau(1000);
             turnDegrees(0.25, 20);
             sleepTau(750);
             driveForward(0.5, 55);
+            sleepTau(3000);
         }
-    }
-
-    public ArrayList<Double> getLocation(){
-        String Tag = "Error message";
-        Log.d(Tag, "test");
-        /*
-         * Configure Vuforia by creating a Parameter object, and passing it to the Vuforia engine.
-         * We can pass Vuforia the handle to a camera preview resource (on the RC phone);
-         * If no camera monitor is desired, use the parameterless constructor instead (commented out below).
-         */
-        telemetry.addData("Status:", "Starting location method");
-        Log.d(Tag, "Started");
-        //int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        Log.d(Tag, "created cameraMonitorViewId variable");
-        // VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
-        Log.d(Tag, "finished start");
-        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
-
-        parameters.vuforiaLicenseKey = "AUTPgLj/////AAABmftxO0IFGU3urmaLhFDDt+04jQVVUEnMoybqfXkW+2kDybcXkSk00wQ1RARTA6i+W3x8pWjVDY/xcKrLUwZZKYSdeSlSWW+nMK4s5AEaTS8K0Re8OrF3JF3zmHz4julP101iBl7+dpVOEFw10laj2E0q0bvw9vqvXMMjg8J3zdXiDS4zzHPRl0Iwx6iaH4ZmmE4VqXiJ8kXrZ9bc897oR4FcC01mF+cX3x6oi5e8ZpQanSDPp2/IBbvUxi/oe2ImrNpZTczvZLMwYMTQqgfeN9Ewz5KtCbAwfCLARiW5QZ/EOOdlLfGIPXGYesLuVPswhWP5HCCCrberCUZ+y+2OGj7+SlesgFSD8qwWNMQh+Erx" ;
-        parameters.cameraDirection   = CAMERA_CHOICE;
-
-        //  Instantiate the Vuforia engine
-        //vuforia = ClassFactory.getInstance().createVuforia(parameters);
-
-        // Load the data sets that for the trackable objects. These particular data
-        // sets are stored in the 'assets' part of our application.
-        VuforiaTrackables targetsRoverRuckus = robot.vuforia.loadTrackablesFromAsset("RoverRuckus");
-       // VuforiaTrackables targetsRoverRuckus = robot.imageTrackables;
-        Log.d(Tag,"about to add vumarks");
-        VuforiaTrackable blueRover = robot.imageTrackables.get(0);
-        blueRover.setName("Blue-Rover");
-        VuforiaTrackable redFootprint = robot.imageTrackables.get(1);
-        redFootprint.setName("Red-Footprint");
-        VuforiaTrackable frontCraters = robot.imageTrackables.get(2);
-        frontCraters.setName("Front-Craters");
-        VuforiaTrackable backSpace = robot.imageTrackables.get(3);
-        backSpace.setName("Back-Space");
-
-        // For convenience, gather together all the trackable objects in one easily-iterable collection */
-        List<VuforiaTrackable> allTrackables = new ArrayList<VuforiaTrackable>();
-        allTrackables.addAll(robot.imageTrackables);
-        telemetry.addData("Status:", "Added all of the vumarks");
-        Log.d(Tag, "added vumarks");
-        /**
-         * In order for localization to work, we need to tell the system where each target is on the field, and
-         * where the phone resides on the robot.  These specifications are in the form of <em>transformation matrices.</em>
-         * Transformation matrices are a central, important concept in the math here involved in localization.
-         * See <a href="https://en.wikipedia.org/wiki/Transformation_matrix">Transformation Matrix</a>
-         * for detailed information. Commonly, you'll encounter transformation matrices as instances
-         * of the {@link OpenGLMatrix} class.
-         *
-         * If you are standing in the Red Alliance Station looking towards the center of the field,
-         *     - The X axis runs from your left to the right. (positive from the center to the right)
-         *     - The Y axis runs from the Red Alliance Station towards the other side of the field
-         *       where the Blue Alliance Station is. (Positive is from the center, towards the BlueAlliance station)
-         *     - The Z axis runs from the floor, upwards towards the ceiling.  (Positive is above the floor)
-         *
-         * This Rover Ruckus sample places a specific target in the middle of each perimeter wall.
-         *
-         * Before being transformed, each target image is conceptually located at the origin of the field's
-         *  coordinate system (the center of the field), facing up.
-         */
-
-        /**
-         * To place the BlueRover target in the middle of the blue perimeter wall:
-         * - First we rotate it 90 around the field's X axis to flip it upright.
-         * - Then, we translate it along the Y axis to the blue perimeter wall.
-         */
-        OpenGLMatrix blueRoverLocationOnField = OpenGLMatrix
-                .translation(0, mmFTCFieldWidth, mmTargetHeight)
-                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, 0));
-        blueRover.setLocation(blueRoverLocationOnField);
-
-        /**
-         * To place the RedFootprint target in the middle of the red perimeter wall:
-         * - First we rotate it 90 around the field's X axis to flip it upright.
-         * - Second, we rotate it 180 around the field's Z axis so the image is flat against the red perimeter wall
-         *   and facing inwards to the center of the field.
-         * - Then, we translate it along the negative Y axis to the red perimeter wall.
-         */
-        OpenGLMatrix redFootprintLocationOnField = OpenGLMatrix
-                .translation(0, -mmFTCFieldWidth, mmTargetHeight)
-                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, 180));
-        redFootprint.setLocation(redFootprintLocationOnField);
-
-        /**
-         * To place the FrontCraters target in the middle of the front perimeter wall:
-         * - First we rotate it 90 around the field's X axis to flip it upright.
-         * - Second, we rotate it 90 around the field's Z axis so the image is flat against the front wall
-         *   and facing inwards to the center of the field.
-         * - Then, we translate it along the negative X axis to the front perimeter wall.
-         */
-        OpenGLMatrix frontCratersLocationOnField = OpenGLMatrix
-                .translation(-mmFTCFieldWidth, 0, mmTargetHeight)
-                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0 , 90));
-        frontCraters.setLocation(frontCratersLocationOnField);
-
-        /**
-         * To place the BackSpace target in the middle of the back perimeter wall:
-         * - First we rotate it 90 around the field's X axis to flip it upright.
-         * - Second, we rotate it -90 around the field's Z axis so the image is flat against the back wall
-         *   and facing inwards to the center of the field.
-         * - Then, we translate it along the X axis to the back perimeter wall.
-         */
-        OpenGLMatrix backSpaceLocationOnField = OpenGLMatrix
-                .translation(mmFTCFieldWidth, 0, mmTargetHeight)
-                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, -90));
-        backSpace.setLocation(backSpaceLocationOnField);
-
-        /**
-         * Create a transformation matrix describing where the phone is on the robot.
-         *
-         * The coordinate frame for the robot looks the same as the field.
-         * The robot's "forward" direction is facing out along X axis, with the LEFT side facing out along the Y axis.
-         * Z is UP on the robot.  This equates to a bearing angle of Zero degrees.
-         *
-         * The phone starts out lying flat, with the screen facing Up and with the physical top of the phone
-         * pointing to the LEFT side of the Robot.  It's very important when you test this code that the top of the
-         * camera is pointing to the left side of the  robot.  The rotation angles don't work if you flip the phone.
-         *
-         * If using the rear (High Res) camera:
-         * We need to rotate the camera around it's long axis to bring the rear camera forward.
-         * This requires a negative 90 degree rotation on the Y axis
-         *
-         * If using the Front (Low Res) camera
-         * We need to rotate the camera around it's long axis to bring the FRONT camera forward.
-         * This requires a Positive 90 degree rotation on the Y axis
-         *
-         * Next, translate the camera lens to where it is on the robot.
-         * In this example, it is centered (left to right), but 110 mm forward of the middle of the robot, and 200 mm above ground level.
-         */
-        Log.d(Tag, "Initialized vumarks");
-        final int CAMERA_FORWARD_DISPLACEMENT  = -222;   // eg: Camera is 110 mm in front of robot center
-        final int CAMERA_VERTICAL_DISPLACEMENT = 76;   // eg: Camera is 200 mm above ground
-        final int CAMERA_LEFT_DISPLACEMENT     = 0;     // eg: Camera is ON the robot's center line
-
-        OpenGLMatrix phoneLocationOnRobot = OpenGLMatrix
-                .translation(CAMERA_FORWARD_DISPLACEMENT, CAMERA_LEFT_DISPLACEMENT, CAMERA_VERTICAL_DISPLACEMENT)
-                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, YZX, DEGREES,
-                        CAMERA_CHOICE == FRONT ? 90 : -90, 0, 0));
-
-        /**  Let all the trackable listeners know where the phone is.  */
-        for (VuforiaTrackable trackable : allTrackables)
-        {
-            ((VuforiaTrackableDefaultListener)trackable.getListener()).setPhoneInformation(phoneLocationOnRobot, parameters.cameraDirection);
-        }
-
-        /** Wait for the game to begin */
-        /*telemetry.addData(">", "Press Play to start tracking");
-        telemetry.update();
-        waitForStart();*/
-
-        /** Start tracking the data sets we care about. */
-        //targetsRoverRuckus.activate();
-        Log.d(Tag, "About to start loop");
-        telemetry.addData("Status", "begin");
-        int runCounter = 0;
-        while (true) {
-        Log.d("Status", "in loop");
-        runCounter += 1;
-        Log.d("Num times run", "" + runCounter);
-            // check all the trackable target to see which one (if any) is visible.
-            targetVisible = false;
-            for (VuforiaTrackable trackable : allTrackables) {
-                if (((VuforiaTrackableDefaultListener)trackable.getListener()).isVisible()) {
-                    telemetry.addData("Visible Target", trackable.getName());
-                    targetVisible = true;
-
-                    // getUpdatedRobotLocation() will return null if no new information is available since
-                    // the last time that call was made, or if the trackable is not currently visible.
-                    OpenGLMatrix robotLocationTransform = ((VuforiaTrackableDefaultListener)trackable.getListener()).getUpdatedRobotLocation();
-                    if (robotLocationTransform != null) {
-                        lastLocation = robotLocationTransform;
-                    }
-                    break;
-                }
-            }
-
-            // Provide feedback as to where the robot is located (if we know).
-            if (targetVisible) {
-                // express position (translation) of robot in inches.
-                translation = lastLocation.getTranslation();
-                telemetry.addData("Pos (in)", "{X, Y, Z} = %.1f, %.1f, %.1f",
-                        translation.get(0) / mmPerInch, translation.get(1) / mmPerInch, translation.get(2) / mmPerInch);
-
-                location.add((double)(translation.get(0)/mmPerInch));
-                location.add((double)(translation.get(1)/mmPerInch));
-                location.add((double)(translation.get(2))/mmPerInch);
-                // express the rotation of the robot in degrees.
-                rotation = Orientation.getOrientation(lastLocation, EXTRINSIC, XYZ, DEGREES);
-                telemetry.addData("Rot (deg)", "{Roll, Pitch, Heading} = %.0f, %.0f, %.0f", rotation.firstAngle, rotation.secondAngle, rotation.thirdAngle);
-                return location;
-            }
-            else {
-                telemetry.addData("Visible Target", "none");
-                if(runCounter > 500){
-                    break;
-                }
-            }
-            //telemetry.update();
-
-        }
-        return location;
-    }
-    public double getRobotX(){return getLocation().get(0) / mmPerInch; }
-    public double getRobotY(){return getLocation().get(1) / mmPerInch; }
-    public double getRobotZ(){
-        return getLocation().get(2) / mmPerInch;
-    }
-    public double getRobotRoll(){
-        return rotation.firstAngle;
-    }
-    public double getRobotPitch(){
-        return rotation.secondAngle;
-    }
-    public double getRobotHeading(){
-        return rotation.thirdAngle;
     }
 
     public void sleepTau(long milliSec){try{Thread.sleep(milliSec);}catch(InterruptedException e){throw new RuntimeException(e);}}
@@ -721,7 +530,7 @@ public class AUTO_METHODS extends LinearOpMode {
         tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
         tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_GOLD_MINERAL, LABEL_SILVER_MINERAL);
     }
-    /*void composeTelemetry() {
+    void composeTelemetry() {
 
         // At the beginning of each telemetry update, grab a bunch of data
         // from the IMU that we will then display in separate lines.
@@ -732,42 +541,46 @@ public class AUTO_METHODS extends LinearOpMode {
             // three times the necessary expense.
             angles   = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             gravity  = imu.getGravity();
+            angles1 = imu1.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            gravity1 = imu1.getGravity();
+            position = imu.getPosition();
+            position1 = imu1.getPosition();
         }
         });
 
         telemetry.addLine()
                 .addData("status", new Func<String>() {
                     @Override public String value() {
-                        return imu.getSystemStatus().toShortString();
+                        return imu.getSystemStatus().toShortString() + " " + imu1.getSystemStatus().toShortString();
                     }
                 })
                 .addData("calib", new Func<String>() {
                     @Override public String value() {
-                        return imu.getCalibrationStatus().toString();
+                        return imu.getCalibrationStatus().toString() + " " + imu1.getCalibrationStatus().toString();
                     }
                 });
 
         telemetry.addLine()
                 .addData("heading", new Func<String>() {
                     @Override public String value() {
-                        return formatAngle(angles.angleUnit, angles.firstAngle);
+                        return formatAngle(angles.angleUnit, angles.firstAngle) + " " + formatAngle(angles1.angleUnit, angles.firstAngle);
                     }
                 })
                 .addData("roll", new Func<String>() {
                     @Override public String value() {
-                        return formatAngle(angles.angleUnit, angles.secondAngle);
+                        return formatAngle(angles.angleUnit, angles.secondAngle) + " " + formatAngle(angles1.angleUnit, angles1.secondAngle);
                     }
                 })
                 .addData("pitch", new Func<String>() {
                     @Override public String value() {
-                        return formatAngle(angles.angleUnit, angles.thirdAngle);
+                        return formatAngle(angles.angleUnit, angles.thirdAngle) + " " + formatAngle(angles1.angleUnit, angles1.thirdAngle);
                     }
                 });
 
         telemetry.addLine()
                 .addData("grvty", new Func<String>() {
                     @Override public String value() {
-                        return gravity.toString();
+                        return gravity.toString() + " " + gravity1.toString();
                     }
                 })
                 .addData("mag", new Func<String>() {
@@ -775,10 +588,21 @@ public class AUTO_METHODS extends LinearOpMode {
                         return String.format(Locale.getDefault(), "%.3f",
                                 Math.sqrt(gravity.xAccel*gravity.xAccel
                                         + gravity.yAccel*gravity.yAccel
-                                        + gravity.zAccel*gravity.zAccel));
+                                        + gravity.zAccel*gravity.zAccel)) + " " + String.format(Locale.getDefault(), "%.3f",
+                                Math.sqrt(gravity1.xAccel*gravity1.xAccel
+                                        + gravity1.yAccel*gravity1.yAccel
+                                        + gravity1.zAccel*gravity1.zAccel));
                     }
                 });
-    }
+        telemetry.addLine()
+                .addData("position", new Func<String>(){
+                    @Override public String value(){
+                        return String.format(Locale.getDefault(), "%.3f", position.x ) + String.format(Locale.getDefault(), "%.3f", position.y);
+                    }
+                });
+
+        telemetry.update();
+        }
 
     //----------------------------------------------------------------------------------------------
     // Formatting
@@ -793,15 +617,19 @@ public class AUTO_METHODS extends LinearOpMode {
     }
 
     public double getImuAverageXValue(){
+        updateTelemetry(telemetry);
         return (imu.getPosition().x + imu1.getPosition().x)/2.0;
     }
     public double getIMUAverageYValue(){
+        updateTelemetry(telemetry);
         return(imu.getPosition().y + imu1.getPosition().y)/2.0;
     }
     public double getIMUAverageZValue(){
+        updateTelemetry(telemetry);
         return (imu.getPosition().z + imu1.getPosition().z) / 2.0;
     }
     public double getImuAverageRotation(){
+        updateTelemetry(telemetry);
         return (imu.getAngularOrientation().firstAngle + imu1.getAngularOrientation().firstAngle) / 2.0;
-    }*/
+    }
 }

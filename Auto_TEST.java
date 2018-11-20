@@ -16,9 +16,9 @@ public class Auto_TEST extends AUTO_METHODS {
         //telemetry.update();
         setUp(hardwareMap, telemetry);
         while(opModeIsActive()){
-            telemetry.addData("Location" , getBlockLocation());
+            telemetry.addData("X", getImuAverageXValue());
+            telemetry.addData("y", getIMUAverageYValue());
             telemetry.update();
-            break;
         }
 
         //telemetry.addData("block location", getBlockLocation());

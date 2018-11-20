@@ -78,7 +78,7 @@ public class Hardware {
 
         this.hwMap = hwMap;
         period.reset();
-        period.startTime();
+
 
         //init drive motors
         frontLeftMotor = hwMap.dcMotor.get("front_left");

@@ -11,10 +11,10 @@ public class Navigation_test extends AUTO_METHODS{
         ArrayList<Double> location = new ArrayList<>();
         location.add(Math.sqrt(2) * 2 * 12);
         location.add(Math.sqrt(2) * 2 * 12);
-        telemetry.addData("Robot x", getRobotX());
+        /*telemetry.addData("Robot x", getRobotX());
         telemetry.addData("Robot y", getRobotY());
         navigateTo(location);
         telemetry.addData("Robot x", getRobotX());
-        telemetry.addData("Robot y", getRobotY());
+        telemetry.addData("Robot y", getRobotY());*/
     }
 }

@@ -46,7 +46,7 @@ public class Teleop extends OpMode{
 
     private boolean reverseDrive = false;
 
-    private final double markerArmdown = 95;
+    private final double markerArmdown = 0.95;
     private final double markerArmUp = 0;
 
     @Override
@@ -204,10 +204,10 @@ public class Teleop extends OpMode{
 
         //Pressing y on gamepad 2 moves stopper up and down
         if(gamepad2.y && stopperEndTime < robot.getTime()){
-            robot.stopper.setPosition(robot.stopper.getPosition() >0.956 || robot.stopper.getPosition() < 0.954 ? 0.955 : 1);
+            robot.stopper.setPosition(!(robot.stopper.getPosition()==0.955 +- 0.01) ? 0.955 : 1);
             stopperEndTime = robot.getTime() + 0.25;
         }
-        if(robot.stopper.getPosition() <= 0.956) {
+        if(robot.stopper.getPosition() == 0.955 +- 0.01) {
             robot.rightLiftMotor.setPower(-leftGP2Y);
             robot.leftLiftMotor.setPower(-leftGP2Y);
         }else{

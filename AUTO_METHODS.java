@@ -99,7 +99,7 @@ public class AUTO_METHODS extends LinearOpMode {
 
     private ArrayList<Double> location = new ArrayList<Double>();
 
-    private BNO055IMU imu;
+    public BNO055IMU imu;
     private BNO055IMU imu1;
     private Orientation angles;
     private Acceleration gravity;
@@ -124,6 +124,10 @@ public class AUTO_METHODS extends LinearOpMode {
     //Use if all motor positions should be the same
     private int motorPosition = 0;
     private int markerGrabber = 0;
+    private double zeroX;
+    private double zeroY;
+    private double zeroZ;
+    private double zeroHeading;
     /*
     Vision variables
      */
@@ -148,7 +152,7 @@ public class AUTO_METHODS extends LinearOpMode {
         telemetry.addData("Readiness", "NOT READY TO START, PLEASE WAIT");
         telemetry.update();
 //clickity clackity
-        robot.init_auto(hwMap, telemetry);
+        robot.init_auto_IMU(hwMap, telemetry);
         boolean useFullRes = true;
         Context context = hardwareMap.appContext;
         //cameraManager.initialize(context, useFullRes, this);
@@ -161,35 +165,33 @@ public class AUTO_METHODS extends LinearOpMode {
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
         parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        parameters.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
+        parameters.calibrationDataFile = "AdafruitIMUCalibration.json"; // see the calibration sample opmode
         parameters.loggingEnabled      = true;
         parameters.loggingTag          = "IMU";
-        parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
-        //`rometer bandwidth. See Section 3.5.2 (p27) and Table 3-4 (p21) of the BNO055 specification */
-        parameters.accelRange = BNO055IMU.AccelRange.G4;
-        parameters.accelBandwidth      = BNO055IMU.AccelBandwidth.HZ62_5;
-        /** accelerometer power mode. See Section 3.5.2 (p27) and Section 4.2.2 (p77) of the BNO055 specification */
-        parameters.accelPowerMode      = BNO055IMU.AccelPowerMode.NORMAL;
+        //parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
 
         // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
         // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
         // and named "imu".
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameters);
+        parameters.loggingTag = "IMU1";
         imu1 = hardwareMap.get(BNO055IMU.class, "imu1");
         imu1.initialize(parameters);
 
         // Set up our telemetry dashboard
-        composeTelemetry();
+        //composeTelemetry(imu, imu1, telemetry);
 
         // Start the logging of measured acceleration
-        imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
-        imu1.startAccelerationIntegration(new Position(), new Velocity(), 1000);
+
         telemetry.addData("Mode", "waiting for start");
         telemetry.addData("imu calib status", imu.getCalibrationStatus().toString());
         telemetry.addData("imu1 calib status", imu1.getCalibrationStatus().toString());
         telemetry.update();
-
+        zeroHeading = imu.getAngularOrientation().firstAngle;
+        zeroX = imu.getPosition().x;
+        zeroY = imu.getPosition().y;
+        zeroZ = imu.getPosition().z;
         telemetry.addData("Readiness", "Press Play to start");
         telemetry.update();
 
@@ -197,6 +199,8 @@ public class AUTO_METHODS extends LinearOpMode {
 
         // Wait until we're told to go
         waitForStart();
+        imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
+        imu1.startAccelerationIntegration(new Position(), new Velocity(), 1000);
         robot.tfod.activate();
         period.startTime();
     }
@@ -204,9 +208,9 @@ public class AUTO_METHODS extends LinearOpMode {
 
     //Sets speeds of motors
     private void speed(double speed){
-        robot.frontLeftMotor.setPower(speed);
+        robot.frontLeftMotor.setPower(-speed);
         robot.frontRightMotor.setPower(speed);
-        robot.backLeftMotor.setPower(speed);
+        robot.backLeftMotor.setPower(-speed);
         robot.backRightMotor.setPower(speed);
     }
 
@@ -300,21 +304,18 @@ public class AUTO_METHODS extends LinearOpMode {
     }
     //drive forward certain distance at certain speed(speed should be no more than 1), distance is in inches
     public void driveForward(double speed, double distance){
-        speed(speed);
-        initialX = getImuAverageXValue() * 39.3701;
-        initialY = getIMUAverageYValue() * 39.3701;
-        double heading = getImuAverageRotation();
-        double deltaX = Math.toDegrees(Math.sin(heading)) * distance;
-        double deltaY = Math.toDegrees(Math.cos(heading)) * distance;
+
+        initialX = imu.getPosition().x / mmPerInch;
+        initialY = imu.getPosition().y / mmPerInch;
+        double heading = imu.getAngularOrientation().firstAngle;
+        double deltaX = Math.toDegrees(Math.cos(heading)) * distance;
+        double deltaY = Math.toDegrees(Math.sin(heading)) * distance;
         finalX = initialX + deltaX;
         finalY = initialY + deltaY;
-        motorPosition = (int)((distance / (6 * Math.PI)) * ticksPerRotation);
-        robot.frontLeftMotor.setTargetPosition(robot.frontLeftMotor.getCurrentPosition()- motorPosition);
-        robot.backLeftMotor.setTargetPosition(robot.backLeftMotor.getCurrentPosition()- motorPosition);
-        robot.frontRightMotor.setTargetPosition(robot.frontRightMotor.getCurrentPosition() + motorPosition);
-        robot.backRightMotor.setTargetPosition(robot.backRightMotor.getCurrentPosition() + motorPosition);
+        speed(speed);
         while(opModeIsActive()){
-            if(Math.abs(getImuAverageXValue()) >= Math.abs(finalX) && Math.abs(getIMUAverageYValue()) >= Math.abs(finalY)){
+            updateTelemetry(telemetry);
+            if(Math.abs(imu.getPosition().x) >= Math.abs(finalX) && Math.abs(imu.getPosition().y) >= Math.abs(finalY)){
                 speed(0);
                 sleepTau(500);
                 break;
@@ -325,7 +326,7 @@ public class AUTO_METHODS extends LinearOpMode {
 
     public void turnDegrees(double speed, double degree){
         speed(speed);
-        initialAngle = getImuAverageRotation();
+        initialAngle = imu.getAngularOrientation().firstAngle;
         finalAngle = initialAngle + degree;
         double distance = (degree * (2 * robotRotationRadius * Math.PI) / 360);
         motorPosition = (int)((distance / (6*Math.PI)) * ticksPerRotation);
@@ -334,7 +335,7 @@ public class AUTO_METHODS extends LinearOpMode {
         robot.backLeftMotor.setTargetPosition(robot.backLeftMotor.getCurrentPosition()+ motorPosition);
         robot.backRightMotor.setTargetPosition(robot.backRightMotor.getCurrentPosition() + motorPosition);
         while(opModeIsActive()){
-            if(Math.abs(getImuAverageRotation()) >= Math.abs(finalAngle)){
+            if(Math.abs(imu.getAngularOrientation().firstAngle) >= Math.abs(finalAngle)){
                 speed(0);
                 sleepTau(500);
                 break;
@@ -530,7 +531,7 @@ public class AUTO_METHODS extends LinearOpMode {
         tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
         tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_GOLD_MINERAL, LABEL_SILVER_MINERAL);
     }
-    void composeTelemetry() {
+    public void composeTelemetry(final BNO055IMU imu, final BNO055IMU imu1, Telemetry telemetry) {
 
         // At the beginning of each telemetry update, grab a bunch of data
         // from the IMU that we will then display in separate lines.
@@ -563,7 +564,7 @@ public class AUTO_METHODS extends LinearOpMode {
         telemetry.addLine()
                 .addData("heading", new Func<String>() {
                     @Override public String value() {
-                        return formatAngle(angles.angleUnit, angles.firstAngle) + " " + formatAngle(angles1.angleUnit, angles.firstAngle);
+                        return formatAngle(angles.angleUnit, angles.firstAngle-zeroHeading) + " " + formatAngle(angles1.angleUnit, angles.firstAngle-zeroHeading);
                     }
                 })
                 .addData("roll", new Func<String>() {
@@ -597,7 +598,7 @@ public class AUTO_METHODS extends LinearOpMode {
         telemetry.addLine()
                 .addData("position", new Func<String>(){
                     @Override public String value(){
-                        return String.format(Locale.getDefault(), "%.3f", position.x ) + String.format(Locale.getDefault(), "%.3f", position.y);
+                        return "" + String.format(Locale.getDefault(), "%.3f", position.x - zeroX) +" "+ String.format(Locale.getDefault(), "%.3f", position.y - zeroY);
                     }
                 });
 
@@ -618,11 +619,11 @@ public class AUTO_METHODS extends LinearOpMode {
 
     public double getImuAverageXValue(){
         updateTelemetry(telemetry);
-        return (imu.getPosition().x + imu1.getPosition().x)/2.0;
+        return ((imu.getPosition().x + imu1.getPosition().x)/2.0);
     }
     public double getIMUAverageYValue(){
         updateTelemetry(telemetry);
-        return(imu.getPosition().y + imu1.getPosition().y)/2.0;
+        return((imu.getPosition().y + imu1.getPosition().y)/2.0);
     }
     public double getIMUAverageZValue(){
         updateTelemetry(telemetry);
@@ -630,6 +631,6 @@ public class AUTO_METHODS extends LinearOpMode {
     }
     public double getImuAverageRotation(){
         updateTelemetry(telemetry);
-        return (imu.getAngularOrientation().firstAngle + imu1.getAngularOrientation().firstAngle) / 2.0;
+        return ((imu.getAngularOrientation().firstAngle + imu1.getAngularOrientation().firstAngle) / 2.0);
     }
 }

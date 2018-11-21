@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 @Autonomous(name = "Tau: Test", group = "AUTO_TEST")
-public class Auto_TEST extends AUTO_METHODS {
+public class Auto_TEST extends AUTO_METHODS_HARDCODE {
 //    Hardware robot = new Hardware();
     @Override
     public void runOpMode() throws InterruptedException{
@@ -16,9 +16,7 @@ public class Auto_TEST extends AUTO_METHODS {
         //telemetry.update();
         setUp(hardwareMap, telemetry);
         while(opModeIsActive()){
-            telemetry.addData("X", getImuAverageXValue());
-            telemetry.addData("y", getIMUAverageYValue());
-            telemetry.update();
+            getBlockLocation();
         }
 
         //telemetry.addData("block location", getBlockLocation());

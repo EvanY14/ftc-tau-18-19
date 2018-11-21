@@ -44,8 +44,6 @@ public class Hardware {
     //******************************
 
     //IMU***************************
-    BNO055IMU               imu;
-    BNO055IMU               imu1;
     Orientation             lastAngles = new Orientation();
     double globalAngle, power = .30, correction;
     //******************************
@@ -77,8 +75,6 @@ public class Hardware {
     public void init(HardwareMap hwMap, Telemetry telemetry){
 
         this.hwMap = hwMap;
-        period.reset();
-
 
         //init drive motors
         frontLeftMotor = hwMap.dcMotor.get("front_left");
@@ -96,10 +92,10 @@ public class Hardware {
         backLeftMotor.setPower(0);
         backRightMotor.setPower(0);
 
-        frontLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        frontRightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        backRightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        backLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        frontLeftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backLeftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
 
         //init servos
@@ -113,6 +109,8 @@ public class Hardware {
         leftLiftMotor = hwMap.dcMotor.get("left_lift");
         rightLiftMotor = hwMap.dcMotor.get("right_lift");
 
+        leftLiftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightLiftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         leftLiftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightLiftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
@@ -164,13 +162,19 @@ public class Hardware {
         int tfodMonitorViewId = hwMap.appContext.getResources().getIdentifier(
                 "tfodMonitorViewId", "id", hwMap.appContext.getPackageName());
         TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
-        tfodParameters.minimumConfidence = 0.5;
+        tfodParameters.minimumConfidence = 0.4;
         tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, this.vuforia);
         tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_GOLD_MINERAL, LABEL_SILVER_MINERAL);
 
 
     }
-
+    public void init_auto_IMU(HardwareMap hwMap, Telemetry telemetry){
+        init_auto(hwMap, telemetry);
+        frontLeftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backLeftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
     public double getTime(){
         return period.time();
     }
@@ -200,5 +204,11 @@ public class Hardware {
         TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
         tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, this.vuforia);
         tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_GOLD_MINERAL, LABEL_SILVER_MINERAL);
+    }
+    public void resetTime(){
+        period.reset();
+    }
+    public void startTime(){
+        period.startTime();
     }
 }

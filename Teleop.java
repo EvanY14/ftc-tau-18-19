@@ -6,6 +6,9 @@ import android.util.Log;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
+import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
+
 //import org.firstinspires.ftc.teamcode.Vision1;
 
 /**
@@ -16,7 +19,7 @@ public class Teleop extends OpMode{
     Hardware robot = new Hardware();
     //Log.d("Error message", "about to instantiate vision class");
     //Vision1 vision = new Vision1();
-    AUTO_METHODS auto = new AUTO_METHODS();
+    AUTO_METHODS_HARDCODE auto = new AUTO_METHODS_HARDCODE();
     ElapsedTime period = new ElapsedTime();
     //Drive variables
     private boolean slowDrive = false;
@@ -48,6 +51,7 @@ public class Teleop extends OpMode{
 
     private final double markerArmdown = 0.95;
     private final double markerArmUp = 0;
+    private boolean firstRun = true;
 
     @Override
     public void init() {
@@ -55,13 +59,16 @@ public class Teleop extends OpMode{
         updateTelemetry(telemetry);
 
         robot.init(hardwareMap, telemetry);
+        robot.stopper.setPosition(180);
+        auto.sleepTau(1000);
         Log.d("Error message", "initialized robot with vision");
         telemetry.addData("HardwareMap", hardwareMap);
         telemetry.addData("Readiness", "Press Play to start");
         telemetry.addData("If you notice this", "You are COOL!!! (Charles was here)");
-        updateTelemetry(telemetry);
-        robot.stopper.setPosition(180);
-        auto.sleepTau(1000);
+        telemetry.update();
+
+
+
     }
 
     @Override
@@ -111,7 +118,12 @@ public class Teleop extends OpMode{
         telemetry.addData("Robot y:", auto.getRobotY());
         telemetry.addData("Robot z:", auto.getRobotZ());
         telemetry.update();*/
-
+        /*if(firstRun){
+            imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
+            imu1.startAccelerationIntegration(new Position(), new Velocity(), 1000);
+            firstRun = false;
+        }*/
+        telemetry.update();
         if(gamepad1.a && robot.getTime() > endTimeA){
             endTimeA = robot.getTime() + 1;
             slowDrive = !slowDrive;
@@ -204,10 +216,10 @@ public class Teleop extends OpMode{
 
         //Pressing y on gamepad 2 moves stopper up and down
         if(gamepad2.y && stopperEndTime < robot.getTime()){
-            robot.stopper.setPosition(!(robot.stopper.getPosition()==0.955 +- 0.01) ? 0.955 : 1);
+            robot.stopper.setPosition(!(robot.stopper.getPosition() < 0.956) ? 0.955 : 1);
             stopperEndTime = robot.getTime() + 0.25;
         }
-        if(robot.stopper.getPosition() == 0.955 +- 0.01) {
+        if(robot.stopper.getPosition() > 0.955 && robot.stopper.getPosition() < 0.956) {
             robot.rightLiftMotor.setPower(-leftGP2Y);
             robot.leftLiftMotor.setPower(-leftGP2Y);
         }else{
@@ -231,6 +243,7 @@ public class Teleop extends OpMode{
         telemetry.addData("Right game pad 2 power", rightGP2Y);
         telemetry.addData("Slow drive", slowDrive);
         telemetry.addData("Endgame speed", endGameSpeed);
+        telemetry.addData("Left lift location", robot.leftLiftMotor.getCurrentPosition());
         telemetry.addData("Stopper position", robot.stopper.getPosition());
         telemetry.addData("marker arm position", robot.markerArm.getPosition());
         telemetry.update();

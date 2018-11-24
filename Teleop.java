@@ -55,12 +55,15 @@ public class Teleop extends OpMode{
 
     @Override
     public void init() {
-       telemetry.addData("Readiness", "NOT READY TO START, PLEASE WAIT");
-        updateTelemetry(telemetry);
-
         robot.init(hardwareMap, telemetry);
+        telemetry.addData("Readiness", "NOT READY TO START, PLEASE WAIT");
+        telemetry.update();
         robot.stopper.setPosition(180);
-        auto.sleepTau(1000);
+        /*try {
+            period.wait(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }*/
         Log.d("Error message", "initialized robot with vision");
         telemetry.addData("HardwareMap", hardwareMap);
         telemetry.addData("Readiness", "Press Play to start");

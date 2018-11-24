@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 @Autonomous(name = "Tau: Test", group = "AUTO_TEST")
@@ -14,9 +15,20 @@ public class Auto_TEST extends AUTO_METHODS_HARDCODE {
         //robot.setUp();
         //telemetry.addData("Status", "initialized");
         //telemetry.update();
-        setUp(hardwareMap, telemetry);
+        waitForStart();
         while(opModeIsActive()){
-            getBlockLocation();
+            speedLift(0.25);
+            telemetry.addData("right lift motor position", robot.rightLiftMotor.getCurrentPosition());
+            telemetry.update();
+            sleepTau(1000);
+            telemetry.addData("right lift motor position", robot.rightLiftMotor.getCurrentPosition());
+            telemetry.update();
+            robot.leftLiftMotor.setTargetPosition(robot.leftLiftMotor.getCurrentPosition() + 500);
+            robot.rightLiftMotor.setTargetPosition(robot.rightLiftMotor.getCurrentPosition() + 500);
+            telemetry.addData("Right lift motor target position", robot.rightLiftMotor.getTargetPosition());
+
+            sleepTau(5000);
+
         }
 
         //telemetry.addData("block location", getBlockLocation());

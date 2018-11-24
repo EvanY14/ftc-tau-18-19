@@ -6,6 +6,7 @@ import android.util.Log;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -82,7 +83,7 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
     private static final String LABEL_GOLD_MINERAL = "Gold Mineral";
     private static final String LABEL_SILVER_MINERAL = "Silver Mineral";
     private String VUFORIA_KEY = "AUTPgLj/////AAABmftxO0IFGU3urmaLhFDDt+04jQVVUEnMoybqfXkW+2kDybcXkSk00wQ1RARTA6i+W3x8pWjVDY/xcKrLUwZZKYSdeSlSWW+nMK4s5AEaTS8K0Re8OrF3JF3zmHz4julP101iBl7+dpVOEFw10laj2E0q0bvw9vqvXMMjg8J3zdXiDS4zzHPRl0Iwx6iaH4ZmmE4VqXiJ8kXrZ9bc897oR4FcC01mF+cX3x6oi5e8ZpQanSDPp2/IBbvUxi/oe2ImrNpZTczvZLMwYMTQqgfeN9Ewz5KtCbAwfCLARiW5QZ/EOOdlLfGIPXGYesLuVPswhWP5HCCCrberCUZ+y+2OGj7+SlesgFSD8qwWNMQh+Erx";
-
+    private BNO055IMU imu;
     /**
      * {@link #vuforia} is the variable we will use to store our instance of the Vuforia
      * localization engine.
@@ -98,6 +99,7 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
 
 
     private ArrayList<Double> location = new ArrayList<Double>();
+    private ArrayList<DcMotor> driveMotors = new ArrayList<>();
     private Orientation angles;
     private Acceleration gravity;
     private Position position;
@@ -125,7 +127,9 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
     Vision variables
      */
 
-    public AUTO_METHODS_HARDCODE(){}
+    public AUTO_METHODS_HARDCODE(){
+
+    }
 
 
     //static{System.loadLibrary(Core.NATIVE_LIBRARY_NAME);}
@@ -145,14 +149,18 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
         telemetry.addData("Readiness", "NOT READY TO START, PLEASE WAIT");
         telemetry.update();
 //clickity clackity
-        robot.init_auto(hwMap, telemetry);
+        robot.init_auto_IMU(hwMap, telemetry);
+        driveMotors.add(robot.backLeftMotor);
+        driveMotors.add(robot.backRightMotor);
+        driveMotors.add(robot.frontLeftMotor);
+        driveMotors.add(robot.frontRightMotor);
         boolean useFullRes = true;
         Context context = hardwareMap.appContext;
         //cameraManager.initialize(context, useFullRes, this);
         //imageProcessor.initialize(useFullRes, this, true, cameraManager.height, cameraManager.width);
         //robot.imageTrackables.activate();
 
-        /*telemetry.addData("Mode", "calibrating...");
+        telemetry.addData("Mode", "calibrating...");
         telemetry.update();
 
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
@@ -170,20 +178,17 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
 
         // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
         // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
-        // and named "imu".
+        // and named "imu".*/
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameters);
-        parameters.loggingTag = "IMU1";
-        imu1 = hardwareMap.get(BNO055IMU.class, "imu1");
-        imu1.initialize(parameters);*/
+
 
         // Set up our telemetry dashboard
         //composeTelemetry();
 
         // Start the logging of measured acceleration
-        /*telemetry.addData("imu calib status", imu.getCalibrationStatus().toString());
-        telemetry.addData("imu1 calib status", imu1.getCalibrationStatus().toString());
-        telemetry.update();*/
+        telemetry.addData("imu calib status", imu.getCalibrationStatus().toString());
+        telemetry.update();
 
         telemetry.addData("Readiness", "Press Play to start");
         telemetry.update();
@@ -286,25 +291,30 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
         sleepTau(500);
         telemetry.addData("Status", "done");
         telemetry.update();
+        speedLift(0);
+        robot.leftLiftMotor.setTargetPosition((int)robot.leftLiftMotor.getCurrentPosition() - 6000);
+        robot.rightLiftMotor.setTargetPosition((int)robot.rightLiftMotor.getCurrentPosition() - 6000);
         speedLift(1);
-        robot.leftLiftMotor.setTargetPosition((int)robot.leftLiftMotor.getCurrentPosition() + 6000);
-        robot.rightLiftMotor.setTargetPosition((int)robot.rightLiftMotor.getCurrentPosition() + 6000);
         getBlockLocation();
         sleepTau(2000);
-        if(blockLocation.equals("") && robot.leftLiftMotor.getCurrentPosition() < robot.leftLiftMotor.getTargetPosition() - 50){
+        if(blockLocation.equals("") && robot.leftLiftMotor.getCurrentPosition() < robot.leftLiftMotor.getTargetPosition() + 50){
             sleepTau(500);
         }
     }
 
     public void dropLift(){
         robot.stopper.setPosition(0.95);
+        speedLift(0);
+        robot.leftLiftMotor.setTargetPosition(robot.rightLiftMotor.getCurrentPosition() + 6000);
+        robot.rightLiftMotor.setTargetPosition(robot.leftLiftMotor.getCurrentPosition() + 6000);
         speedLift(1);
-        robot.leftLiftMotor.setTargetPosition(robot.rightLiftMotor.getCurrentPosition() - 6000);
-        robot.rightLiftMotor.setTargetPosition(robot.leftLiftMotor.getCurrentPosition() - 6000);
         sleepTau(3000);
     }
     //drive forward certain distance at certain speed(speed should be no more than 1), distance is in inches
     public void driveForward(double speed, double distance){
+        for(DcMotor motor:driveMotors){
+            motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        }
         speed(speed);
         motorPosition = (int)((distance / (6 * Math.PI)) * ticksPerRotation);
         robot.frontLeftMotor.setTargetPosition(robot.frontLeftMotor.getCurrentPosition()- motorPosition);
@@ -322,22 +332,31 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
     }
 
     public void turnDegrees(double speed, double degree){
-        speed(speed);
-        /*initialAngle = getImuAverageRotation();
-        finalAngle = initialAngle + degree;*/
+        for(DcMotor motor:driveMotors){
+            motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        }
+        speed((degree / Math.abs(degree)) * speed);
+        initialAngle = imu.getAngularOrientation().firstAngle;
+        finalAngle = initialAngle + degree;
         double distance = (degree * (2 * robotRotationRadius * Math.PI) / 360);
         motorPosition = (int)((distance / (6*Math.PI)) * ticksPerRotation);
         robot.frontLeftMotor.setTargetPosition(robot.frontLeftMotor.getCurrentPosition()+ motorPosition);
         robot.frontRightMotor.setTargetPosition(robot.frontRightMotor.getCurrentPosition() + motorPosition);
         robot.backLeftMotor.setTargetPosition(robot.backLeftMotor.getCurrentPosition()+ motorPosition);
         robot.backRightMotor.setTargetPosition(robot.backRightMotor.getCurrentPosition() + motorPosition);
-        /*while(opModeIsActive()){
-            if(Math.abs(getImuAverageRotation()) >= Math.abs(finalAngle)){
-                speed(0);
-                sleepTau(500);
-                break;
+        while(opModeIsActive() && Math.abs(robot.frontLeftMotor.getCurrentPosition()) <= Math.abs(robot.frontLeftMotor.getTargetPosition())){
+            sleepTau(100);
+        }
+        while(opModeIsActive()){
+            speed((degree / Math.abs(degree)) * 0.125);
+            while(imu.getAngularOrientation().firstAngle <= finalAngle){
+                sleepTau(100);
             }
-        }*/
+            speed(-(degree / Math.abs(degree)) * 0.125);
+            while(imu.getAngularOrientation().firstAngle >= finalAngle){
+                sleepTau(100);
+            }
+        }
     }
     /*public void scanMinerals(){
         if(vision.seesSilver()){
@@ -498,10 +517,7 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
                 robot.backLeftMotor.setPower(0);
                 robot.backRightMotor.setPower(0);
                 dropLift();
-                //calls arm method
-                //dropLift();
-                Log.d("Status", ""+robot.getTime());
-                driveForward(0.5, 75);
+                driveForward(0.5, 81);
                 sleepTau(5000);
                 //turnDegrees(0.5,  );
                 // sleepTau(2000);
@@ -529,7 +545,43 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
         }
     }
 
-    public void sleepTau(long milliSec){try{Thread.sleep(milliSec);}catch(InterruptedException e){throw new RuntimeException(e);}}
+    public void driveForwardToCrater(){
+        robot.frontLeftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.backLeftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.frontRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.backRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        speed(0.25);
+        while(true){
+            if(Math.abs(imu.getAngularOrientation().thirdAngle) > Math.abs(Math.toDegrees(Math.asin(1/6.0)))){
+                speed(0);
+                sleepTau(500);
+                break;
+            }
+        }
+
+    }
+
+    public void driveForwardAndDropLift(double distance){
+        speed(0.5);
+        motorPosition = (int)((distance / (6 * Math.PI)) * ticksPerRotation);
+        robot.frontLeftMotor.setTargetPosition(robot.frontLeftMotor.getCurrentPosition()- motorPosition);
+        robot.frontRightMotor.setTargetPosition(robot.frontRightMotor.getCurrentPosition() + motorPosition);
+        robot.backLeftMotor.setTargetPosition(robot.backLeftMotor.getCurrentPosition()- motorPosition);
+        robot.backRightMotor.setTargetPosition(robot.backRightMotor.getCurrentPosition() + motorPosition);
+        dropLift();
+        sleepTau(3000);
+    }
+    public void sleepTau(long milliSec){
+       double start = robot.getTime();
+       double end = start + milliSec/1000.0;
+        while(opModeIsActive()){
+            if(robot.getTime() >= end){
+                break;
+            }
+            telemetry.addData("Waiting",  "");
+            telemetry.update();
+        }
+    }
 
     @Override
     public void runOpMode() throws InterruptedException {}

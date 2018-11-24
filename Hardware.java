@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -25,7 +26,7 @@ import static org.firstinspires.ftc.robotcore.external.tfod.TfodRoverRuckus.TFOD
  * Created by Evan Yu on 9/16/2018.
  */
 
-public class Hardware {
+public class Hardware extends OpMode {
     //Drive Motors******************
     public DcMotor frontLeftMotor = null;
     public DcMotor frontRightMotor = null;
@@ -72,10 +73,16 @@ public class Hardware {
     public Hardware(){
         hwMap = null;
     }
+
+    @Override
+    public void init() { }
+
+    @Override
+    public void loop() { }
+
     public void init(HardwareMap hwMap, Telemetry telemetry){
 
         this.hwMap = hwMap;
-
         //init drive motors
         frontLeftMotor = hwMap.dcMotor.get("front_left");
         frontRightMotor = hwMap.dcMotor.get("front_right");
@@ -181,6 +188,8 @@ public class Hardware {
 
     public void sleepTau(long millis) throws InterruptedException {
         period.wait(millis);
+        telemetry.addData("Status", "Waited" + millis/1000.0 + "seconds");
+        telemetry.update();
     }
 
     public void initVuforia(HardwareMap hwMap) {

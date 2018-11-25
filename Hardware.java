@@ -1,10 +1,12 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.UltrasonicSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
@@ -44,9 +46,10 @@ public class Hardware extends OpMode {
     public Servo markerArm = null;
     //******************************
 
-    //IMU***************************
+    //Sensors***************************
     Orientation             lastAngles = new Orientation();
     double globalAngle, power = .30, correction;
+    public ModernRoboticsI2cRangeSensor ultrasonicSensor = null;
     //******************************
 
     //Vision************************
@@ -127,8 +130,8 @@ public class Hardware extends OpMode {
         //initialize variables
         leftLiftBottom = leftLiftMotor.getCurrentPosition();
         rightLiftBottom = rightLiftMotor.getCurrentPosition();
-        leftLiftTop = leftLiftBottom + 5600;
-        rightLiftTop = rightLiftBottom + 5600;
+        leftLiftTop = leftLiftBottom + 6000;
+        rightLiftTop = rightLiftBottom + 6000;
     }
 
     public void init_auto(HardwareMap hwMap, Telemetry telemetry){
@@ -140,6 +143,9 @@ public class Hardware extends OpMode {
         leftLiftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightLiftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
+        //Sensors
+        ultrasonicSensor = hwMap.get(ModernRoboticsI2cRangeSensor.class, "ultrasonic");
+        /*******/
         //Vision stuff
         /*int cameraMonitorViewId = hwMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hwMap.appContext.getPackageName());
         VuforiaLocalizer.Parameters Vuparameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);

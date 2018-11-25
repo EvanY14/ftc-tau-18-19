@@ -18,6 +18,7 @@ import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 //import org.firstinspires.ftc.teamcode.Vision1;
@@ -70,6 +71,9 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
     ElapsedTime period = new ElapsedTime();
     private final double stopper_up = 0.95;
     private final double stopper_down = 1;
+    private double firstAngleZero = 0;
+    private double secondAngleZero = 0;
+    private double thirdAngleZero = 0;
 
     private static final float mmPerInch        = 25.4f;
     private static final float mmFTCFieldWidth  = (12*6) * mmPerInch;       // the width of the FTC field (from the center point to the outer panels)
@@ -192,7 +196,9 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
 
         telemetry.addData("Readiness", "Press Play to start");
         telemetry.update();
-
+        firstAngleZero = imu.getAngularOrientation().firstAngle;
+        secondAngleZero = imu.getAngularOrientation().secondAngle;
+        thirdAngleZero = imu.getAngularOrientation().thirdAngle;
 
         Log.d("status", "wait for start");
         // Wait until we're told to go
@@ -321,6 +327,9 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
         robot.frontRightMotor.setTargetPosition(robot.frontRightMotor.getCurrentPosition() + motorPosition);
         robot.backLeftMotor.setTargetPosition(robot.backLeftMotor.getCurrentPosition()- motorPosition);
         robot.backRightMotor.setTargetPosition(robot.backRightMotor.getCurrentPosition() + motorPosition);
+        while(opModeIsActive() && robot.frontLeftMotor.isBusy()){
+            testDistances();
+        }
         /*while(opModeIsActive()){
             if(Math.abs(getImuAverageXValue()) >= Math.abs(finalX) && Math.abs(getIMUAverageYValue()) >= Math.abs(finalY)){
                 speed(0);
@@ -333,30 +342,46 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
 
     public void turnDegrees(double speed, double degree){
         for(DcMotor motor:driveMotors){
-            motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         }
-        speed((degree / Math.abs(degree)) * speed);
         initialAngle = imu.getAngularOrientation().firstAngle;
         finalAngle = initialAngle + degree;
+        speed((degree / Math.abs(degree)) * speed);
         double distance = (degree * (2 * robotRotationRadius * Math.PI) / 360);
         motorPosition = (int)((distance / (6*Math.PI)) * ticksPerRotation);
         robot.frontLeftMotor.setTargetPosition(robot.frontLeftMotor.getCurrentPosition()+ motorPosition);
         robot.frontRightMotor.setTargetPosition(robot.frontRightMotor.getCurrentPosition() + motorPosition);
         robot.backLeftMotor.setTargetPosition(robot.backLeftMotor.getCurrentPosition()+ motorPosition);
         robot.backRightMotor.setTargetPosition(robot.backRightMotor.getCurrentPosition() + motorPosition);
-        while(opModeIsActive() && Math.abs(robot.frontLeftMotor.getCurrentPosition()) <= Math.abs(robot.frontLeftMotor.getTargetPosition())){
-            sleepTau(100);
-        }
-        while(opModeIsActive()){
-            speed((degree / Math.abs(degree)) * 0.125);
-            while(imu.getAngularOrientation().firstAngle <= finalAngle){
+        if(degree > 0) {
+            while (opModeIsActive() && imu.getAngularOrientation().firstAngle < finalAngle && robot.frontLeftMotor.isBusy()) {
                 sleepTau(100);
+                telemetry.addData("Heading", imu.getAngularOrientation().firstAngle);
+                telemetry.update();
             }
-            speed(-(degree / Math.abs(degree)) * 0.125);
-            while(imu.getAngularOrientation().firstAngle >= finalAngle){
+        }else if (degree < 0){
+            while(opModeIsActive() && imu.getAngularOrientation().firstAngle > finalAngle && robot.frontLeftMotor.isBusy()){
                 sleepTau(100);
+                telemetry.addData("Heading", imu.getAngularOrientation().firstAngle);
+                telemetry.update();
             }
         }
+        /*for(DcMotor motor:driveMotors){
+            motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        }
+            speed((degree / Math.abs(degree)) * 0.25);
+            while(imu.getAngularOrientation().firstAngle <= finalAngle && opModeIsActive()){
+                sleepTau(50);
+                telemetry.addData("Heading", imu.getAngularOrientation().firstAngle);
+                telemetry.update();
+            }
+            speed(-(degree / Math.abs(degree)) * 0.25);
+            while(imu.getAngularOrientation().firstAngle >= finalAngle && opModeIsActive()){
+                sleepTau(50);
+                telemetry.addData("Heading", imu.getAngularOrientation().firstAngle);
+                telemetry.update();
+            }*/
+            speed(0);
     }
     /*public void scanMinerals(){
         if(vision.seesSilver()){
@@ -500,8 +525,7 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
                 dropLift();
                 //calls arm method
                 //dropLift();
-                driveForward(0.5, 60);
-                sleepTau(5000);
+                driveForwardToCrater();
             }else{
                 driveForward(0.25, 31);
                 sleepTau(3500);
@@ -517,8 +541,7 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
                 robot.backLeftMotor.setPower(0);
                 robot.backRightMotor.setPower(0);
                 dropLift();
-                driveForward(0.5, 81);
-                sleepTau(5000);
+                driveForwardToCrater();
                 //turnDegrees(0.5,  );
                 // sleepTau(2000);
             }
@@ -529,19 +552,17 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
             driveForward(0.25, 2 * Math.sqrt(2) * 12);
             sleepTau(1500);
             turnDegrees(0.25, 90);
-            sleepTau(750);
             dropArm();
             driveForward(0.25, 5);
             sleepTau(1000);
-            turnDegrees(0.25, 22.5);
+            turnDegrees(0.25, 10);
             sleepTau(1000);
             driveForward(0.25, 16);
             sleepTau(1000);
             turnDegrees(0.25, 30);
             sleepTau(1000);
             dropLift();
-            driveForward(0.5, 55);
-            sleepTau(3000);
+            driveForwardToCrater();
         }
     }
 
@@ -550,9 +571,12 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
         robot.backLeftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         robot.frontRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         robot.backRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        speed(0.25);
-        while(true){
-            if(Math.abs(imu.getAngularOrientation().thirdAngle) > Math.abs(Math.toDegrees(Math.asin(1/6.0)))){
+        speed(0.5);
+        robot.frontLeftMotor.setPower(-0.5);
+        robot.backLeftMotor.setPower(-0.5);
+        while(opModeIsActive()){
+            if(imu.getAngularOrientation().thirdAngle - thirdAngleZero >= 352){
+                sleepTau(500);
                 speed(0);
                 sleepTau(500);
                 break;
@@ -571,6 +595,7 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
         dropLift();
         sleepTau(3000);
     }
+
     public void sleepTau(long milliSec){
        double start = robot.getTime();
        double end = start + milliSec/1000.0;
@@ -586,6 +611,14 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {}
 
+    public void testDistances(){
+        while(opModeIsActive()) {
+            if (getDistance() < 6) {
+                speed(0);
+                break;
+            }
+        }
+    }
     private void initVuforia() {
         /*
          * Configure Vuforia by creating a Parameter object, and passing it to the Vuforia engine.
@@ -610,6 +643,18 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
         TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
         tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
         tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_GOLD_MINERAL, LABEL_SILVER_MINERAL);
+    }
+    public double getIMUThirdAngle(){
+        return imu.getAngularOrientation().thirdAngle - thirdAngleZero;
+    }
+    public double getIMUSecondAngle(){
+        return imu.getAngularOrientation().secondAngle-secondAngleZero;
+    }
+    public double getIMUFirstAngle(){
+        return imu.getAngularOrientation().firstAngle-firstAngleZero;
+    }
+    public double getDistance(){
+        return robot.ultrasonicSensor.getDistance(DistanceUnit.INCH);
     }
     /*void composeTelemetry() {
 

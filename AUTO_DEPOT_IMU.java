@@ -30,8 +30,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
 import java.util.Locale;
 
-@Autonomous(name = "Auto Depot Hardcode", group = "Tau")
-public class AUTO_DEPOT_HARDCODE extends AUTO_METHODS_HARDCODE {
+@Autonomous(name = "Auto Depot IMU", group = "Tau")
+public class AUTO_DEPOT_IMU extends AUTO_METHODS_IMU {
 
     @Override
     public void runOpMode() throws InterruptedException{
@@ -46,42 +46,39 @@ public class AUTO_DEPOT_HARDCODE extends AUTO_METHODS_HARDCODE {
 
                 //Drive forward two blocks diagonals to knock off the center block and move to the depot
                 driveForward(0.25, 4*Math.sqrt(2) * 12);
-                sleepTau(3000);
+                sleepTau(2000);
 
                 //back up half a block diagonal to leave the mineral in the depot
                 driveForward(0.25, -Math.sqrt(2) * 12);
                 sleepTau(1000);
 
                 //Turn 90 degrees to set up the marker claw
-                turnDegrees(0.25, 75);
-                sleepTau(750);
+                turnDegrees(0.25, 90);
 
                 //Drop the marker in the depot
                 dropArm();
 
                 //Move five inches forward to give more room to turn so we don't knock off the silver mineral
-                /*driveForward(0.25, 9);
+                driveForward(0.25, 5);
                 sleepTau(1000);
 
                 //Slight turn to get to the middle of the block
-                turnDegrees(0.25, 7);
-                sleepTau(1000);*/
+                turnDegrees(0.25, 10);
+                sleepTau(1000);
 
                 //Drive forward to the middle of the block
-                driveForward(0.25, Math.sqrt(2) * 13);
+                driveForward(0.25, 16);
                 sleepTau(1000);
 
                 //Turn towards the crater
-                turnDegrees(0.25, 60);
+                turnDegrees(0.25, 30);
                 sleepTau(1000);
 
                 //Lower the lift so we don't tip over on the way to the crater
                 dropLift();
 
                 //Drive forward until we detect that we are on the crater
-                //driveForwardToCrater();
-                driveForward(0.5, 50);
-                sleepTau(5000);
+                driveForwardToCrater();
                 break;
             case ("Left"):
                 telemetry.addData("Block position", "Left");
@@ -125,13 +122,17 @@ public class AUTO_DEPOT_HARDCODE extends AUTO_METHODS_HARDCODE {
                 /*driveForward(0.25, Math.sqrt(2) * 9 + 1);
                 sleepTau(2000);*/
 
+                //Stop
+                robot.frontLeftMotor.setPower(0);
+                robot.frontRightMotor.setPower(0);
+                robot.backLeftMotor.setPower(0);
+                robot.backRightMotor.setPower(0);
+
                 //Lower the lift
                 dropLift();
 
                 //Drive forward into the crater
-                //driveForwardToCrater();
-                driveForward(0.5, 81);
-                sleepTau(3000);
+                driveForwardToCrater();
                 break;
             case("Right"):
                 telemetry.addData("Block location", "Right");
@@ -149,9 +150,12 @@ public class AUTO_DEPOT_HARDCODE extends AUTO_METHODS_HARDCODE {
                 dropArm();
                 turnDegrees(0.25, 90);
                 sleepTau(1500);
+                robot.frontLeftMotor.setPower(0);
+                robot.frontRightMotor.setPower(0);
+                robot.backLeftMotor.setPower(0);
+                robot.backRightMotor.setPower(0);
                 dropLift();
-                driveForward(0.5 , 70 );
-                sleepTau(5000);
+                driveForwardToCrater();
                 break;
         }
 

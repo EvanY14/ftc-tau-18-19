@@ -17,11 +17,11 @@ public class Auto_TEST extends AUTO_METHODS_HARDCODE {
         //telemetry.update();
         setUp(hardwareMap, telemetry);
         waitForStart();
-        while(opModeIsActive()){
+        /*while(opModeIsActive()){
             telemetry.addData("Distance", getDistance());
             telemetry.update();
 
-        }
+        }*/
 
         //telemetry.addData("block location", getBlockLocation());
         /*sleepTau(10000);

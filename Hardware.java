@@ -49,7 +49,7 @@ public class Hardware extends OpMode {
     //Sensors***************************
     Orientation             lastAngles = new Orientation();
     double globalAngle, power = .30, correction;
-    public ModernRoboticsI2cRangeSensor ultrasonicSensor = null;
+   // public ModernRoboticsI2cRangeSensor ultrasonicSensor = null;
     //******************************
 
     //Vision************************
@@ -144,7 +144,7 @@ public class Hardware extends OpMode {
         rightLiftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         //Sensors
-        ultrasonicSensor = hwMap.get(ModernRoboticsI2cRangeSensor.class, "ultrasonic");
+       // ultrasonicSensor = hwMap.get(ModernRoboticsI2cRangeSensor.class, "ultrasonic");
         /*******/
         //Vision stuff
         /*int cameraMonitorViewId = hwMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hwMap.appContext.getPackageName());

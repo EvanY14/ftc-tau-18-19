@@ -2,8 +2,8 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-@Autonomous(group = "Tau", name = "Auto Crater Hardcode")
-public class AUTO_CRATER_HARDCODE extends AUTO_METHODS_HARDCODE{
+@Autonomous(group = "Tau", name = "Auto Crater IMU")
+public class AUTO_CRATER_IMU extends AUTO_METHODS_IMU{
 
     @Override
     public void runOpMode() throws InterruptedException{
@@ -17,15 +17,16 @@ public class AUTO_CRATER_HARDCODE extends AUTO_METHODS_HARDCODE{
             case "Left":
                 //Drive forward 1/2 block diagonal plus an inch to get the middle of the robot to the first corner
                 driveForward(0.25, Math.sqrt(2) * 12 + 1);
-                sleepTau(1500);
+                //sleepTau(1500);
 
                 //turn 45 degrees to the left mineral
                 turnDegrees(0.25, 45);
                 sleepTau(1500);
 
-                //drive into the mineral, knocking it off
+                //drive into the mineral, knowcking it off
                 driveForward(0.25, 16);      //21
-                sleepTau(2000);
+
+                //sleepTau(2000);
 
                 //turn arctan(1.0) degrees because we want to go to the middle of the adjacent block
                 turnDegrees(0.25, Math.toDegrees(Math.atan(1.0)));
@@ -33,19 +34,19 @@ public class AUTO_CRATER_HARDCODE extends AUTO_METHODS_HARDCODE{
 
                 //drive forward 1/2 a diagonal of a block
                 driveForward(0.3, Math.sqrt(2) * 12 + 4);
-                sleepTau(1000);
+                //sleepTau(1000);
 
                 //turn towards the depot
                 turnDegrees(0.25, 47.5);
-                sleepTau(1000);
+                sleepTau(750);
 
                 //drive to the depot plus a foot-ish in order to leave the block in the depot
                 driveForward(0.25, 63);
-                sleepTau(3500);
+                //sleepTau(3000);
 
                 //drive BACKWARDS a foot so we don't move the block when we turn
                 driveForward(0.25, -12);
-                sleepTau(1000);
+                //sleepTau(1000);
 
                 //turn 90 degrees to set up the mineral arm
                 turnDegrees(0.25, 90);
@@ -64,8 +65,7 @@ public class AUTO_CRATER_HARDCODE extends AUTO_METHODS_HARDCODE{
 
                 //drive forward into the crater by driving forward until a certain angle is met with the IMU
                 //then waiting 1/2 a second to get fully into the crater
-                driveForward(0.5, 81);
-                sleepTau(5000);
+                driveForwardToCrater();
                 break;
             case "Right":
                 driveForward(0.25, Math.sqrt(2) * 12 + 1);
@@ -96,25 +96,25 @@ public class AUTO_CRATER_HARDCODE extends AUTO_METHODS_HARDCODE{
                 driveForwardAndDropLift(81);
                 break;
             case "Center":
-                driveForward(0.25, Math.sqrt(2) * 24 + 1);
+                driveForward(0.25, Math.sqrt(2) * 24 + 2);
                 sleepTau(1750);
-                driveForward(0.25, -Math.sqrt(2) * 12 - 1);
+                driveForward(0.25, -Math.sqrt(2) * 12 - 2);
                 sleepTau(1000);
-                turnDegrees(0.25, 65);
+                turnDegrees(0.25, 75);
                 sleepTau(1000);
-                driveForward(0.25, Math.sqrt(2) * 36 - 15);
+                driveForward(0.25, Math.sqrt(2) * 36 - 10);
                 sleepTau(2000);
                 turnDegrees(0.25, 65);
                 sleepTau(1500);
-                driveForward(0.25, 50);
-                sleepTau(3000);
+                driveForward(0.25, 40);
+                sleepTau(2000);
                 turnDegrees(0.25, 90);
                 sleepTau(1000);
                 dropArm();
-                turnDegrees(0.25, 100);
+                turnDegrees(0.25, 110);
                 sleepTau(1000);
                 dropLift();
-                driveForward(0.5, 78);
+                driveForward(0.25, 78);
                 sleepTau(5000);
                 break;
         }

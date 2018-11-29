@@ -17,10 +17,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 @TeleOp(name = "Tau Teleop", group = "Tau")
 public class Teleop extends OpMode{
     Hardware robot = new Hardware();
-    //Log.d("Error message", "about to instantiate vision class");
-    //Vision1 vision = new Vision1();
     AUTO_METHODS_HARDCODE auto = new AUTO_METHODS_HARDCODE();
     ElapsedTime period = new ElapsedTime();
+
     //Drive variables
     private boolean slowDrive = false;
     private double leftGP1X = 0;
@@ -190,7 +189,7 @@ public class Teleop extends OpMode{
         /**************************
          *********Gamepad 2********
          **************************/
-        leftGP2Y = gamepad2.left_stick_y;
+        leftGP2Y = -gamepad2.left_stick_y;
         rightGP2Y = gamepad2.right_stick_y;
         if(Math.abs(leftGP2Y) < 0.05){
             leftGP2Y = 0;
@@ -199,12 +198,9 @@ public class Teleop extends OpMode{
             rightGP1Y = 0;
         }
 
-        /*if(robot.rightLiftMotor.getCurrentPosition() < robot.rightLiftBottom && leftGP2Y > 0)
-            leftGP2Y = 0;*/
         if(robot.rightLiftMotor.getCurrentPosition() > robot.rightLiftTop && leftGP2Y < 0)
             leftGP2Y = 0;
-        /*if(robot.leftLiftMotor.getCurrentPosition() < robot.leftLiftBottom && leftGP2Y > 0)
-            leftGP2Y = 0;*/
+
         if(robot.leftLiftMotor.getCurrentPosition() > robot.leftLiftTop && leftGP2Y < 0)
             leftGP2Y = 0;
 

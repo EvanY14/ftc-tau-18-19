@@ -50,7 +50,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
  * Created by Evan Yu on 9/16/2018.
  */
 
-public class AUTO_METHODS_HARDCODE extends LinearOpMode {
+public class AUTO_METHODS_IMU extends LinearOpMode {
     Hardware robot = new Hardware();
 
     //Vision1 vision = new Vision1();
@@ -131,7 +131,7 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
     Vision variables
      */
 
-    public AUTO_METHODS_HARDCODE(){
+    public AUTO_METHODS_IMU(){
 
     }
 
@@ -153,11 +153,11 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
         telemetry.addData("Readiness", "NOT READY TO START, PLEASE WAIT");
         telemetry.update();
 //clickity clackity
-        robot.init_auto(hwMap, telemetry);
-        /*driveMotors.add(robot.backLeftMotor);
+        robot.init_auto_IMU(hwMap, telemetry);
+        driveMotors.add(robot.backLeftMotor);
         driveMotors.add(robot.backRightMotor);
         driveMotors.add(robot.frontLeftMotor);
-        driveMotors.add(robot.frontRightMotor);*/
+        driveMotors.add(robot.frontRightMotor);
         boolean useFullRes = true;
         Context context = hardwareMap.appContext;
         //cameraManager.initialize(context, useFullRes, this);
@@ -167,7 +167,7 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
         telemetry.addData("Mode", "calibrating...");
         telemetry.update();
 
-        /*BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
         parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
         parameters.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
@@ -183,22 +183,22 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
         // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
         // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
         // and named "imu".*/
-        /*imu = hardwareMap.get(BNO055IMU.class, "imu");
-        imu.initialize(parameters);*/
+        imu = hardwareMap.get(BNO055IMU.class, "imu");
+        imu.initialize(parameters);
 
 
         // Set up our telemetry dashboard
         //composeTelemetry();
 
         // Start the logging of measured acceleration
-        //telemetry.addData("imu calib status", imu.getCalibrationStatus().toString());
-        //telemetry.update();
+        telemetry.addData("imu calib status", imu.getCalibrationStatus().toString());
+        telemetry.update();
 
         telemetry.addData("Readiness", "Press Play to start");
         telemetry.update();
-        /*firstAngleZero = imu.getAngularOrientation().firstAngle;
+        firstAngleZero = imu.getAngularOrientation().firstAngle;
         secondAngleZero = imu.getAngularOrientation().secondAngle;
-        thirdAngleZero = imu.getAngularOrientation().thirdAngle;*/
+        thirdAngleZero = imu.getAngularOrientation().thirdAngle;
 
         Log.d("status", "wait for start");
         // Wait until we're told to go
@@ -297,38 +297,36 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
         sleepTau(500);
         telemetry.addData("Status", "done");
         telemetry.update();
-
-        robot.leftLiftMotor.setTargetPosition((int)robot.leftLiftMotor.getCurrentPosition() - 5800);
-        robot.rightLiftMotor.setTargetPosition((int)robot.rightLiftMotor.getCurrentPosition() - 5800);
-
+        speedLift(0);
+        robot.leftLiftMotor.setTargetPosition((int)robot.leftLiftMotor.getCurrentPosition() - 6000);
+        robot.rightLiftMotor.setTargetPosition((int)robot.rightLiftMotor.getCurrentPosition() - 6000);
         speedLift(1);
         getBlockLocation();
         sleepTau(2000);
-        if(robot.leftLiftMotor.getCurrentPosition() < robot.leftLiftMotor.getTargetPosition()){
+        if(blockLocation.equals("") && robot.leftLiftMotor.getCurrentPosition() < robot.leftLiftMotor.getTargetPosition() + 50){
             sleepTau(500);
         }
-        Log.d("lift position", robot.rightLiftMotor.getCurrentPosition() + "");
     }
 
     public void dropLift(){
         robot.stopper.setPosition(0.95);
-        //speedLift(0);
-        robot.leftLiftMotor.setTargetPosition(robot.rightLiftMotor.getCurrentPosition() + 5800);
-        robot.rightLiftMotor.setTargetPosition(robot.leftLiftMotor.getCurrentPosition() + 5800);
-
+        speedLift(0);
+        robot.leftLiftMotor.setTargetPosition(robot.rightLiftMotor.getCurrentPosition() + 6000);
+        robot.rightLiftMotor.setTargetPosition(robot.leftLiftMotor.getCurrentPosition() + 6000);
         speedLift(1);
         sleepTau(3000);
-        Log.d("lift position", robot.rightLiftMotor.getCurrentPosition() + "");
     }
     //drive forward certain distance at certain speed(speed should be no more than 1), distance is in inches
     public void driveForward(double speed, double distance){
-        //speed(speed);
+        for(DcMotor motor:driveMotors){
+            motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        }
+        speed(speed);
         motorPosition = (int)((distance / (6 * Math.PI)) * ticksPerRotation);
         robot.frontLeftMotor.setTargetPosition(robot.frontLeftMotor.getCurrentPosition()- motorPosition);
         robot.frontRightMotor.setTargetPosition(robot.frontRightMotor.getCurrentPosition() + motorPosition);
         robot.backLeftMotor.setTargetPosition(robot.backLeftMotor.getCurrentPosition()- motorPosition);
         robot.backRightMotor.setTargetPosition(robot.backRightMotor.getCurrentPosition() + motorPosition);
-        speed(speed);
         /*while(opModeIsActive() && robot.frontLeftMotor.isBusy()){
             testDistances();
         }*/
@@ -343,25 +341,27 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
     }
 
     public void turnDegrees(double speed, double degree){
-        //initialAngle = imu.getAngularOrientation().firstAngle;
-        //double heading = initialAngle;
-        //finalAngle = initialAngle + degree < 0 ? initialAngle + degree + 360:initialAngle+degree;
-        //speed(speed);
+        for(DcMotor motor:driveMotors){
+            motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        }
+        initialAngle = imu.getAngularOrientation().firstAngle;
+        double heading = initialAngle;
+        finalAngle = initialAngle + degree < 0 ? initialAngle + degree + 360:initialAngle+degree;
+        speed(speed);
         double distance = (degree * (2 * robotRotationRadius * Math.PI) / 360);
         motorPosition = (int)((distance / (6*Math.PI)) * ticksPerRotation);
         robot.frontLeftMotor.setTargetPosition(robot.frontLeftMotor.getCurrentPosition()+ motorPosition);
         robot.frontRightMotor.setTargetPosition(robot.frontRightMotor.getCurrentPosition() + motorPosition);
         robot.backLeftMotor.setTargetPosition(robot.backLeftMotor.getCurrentPosition()+ motorPosition);
         robot.backRightMotor.setTargetPosition(robot.backRightMotor.getCurrentPosition() + motorPosition);
-        speed(speed);
-        /*if(degree > 0) {
+        if(degree > 0) {
             while (opModeIsActive() && heading <= finalAngle && robot.frontLeftMotor.isBusy()) {
                 sleepTau(100);
                 heading = imu.getAngularOrientation().firstAngle;
                 /*if(heading < 0){
                     heading += 360;
                 }*/
-               /* telemetry.addData("Heading", heading);
+                telemetry.addData("Heading", heading);
                 Log.d("Heading", heading + "");
                 //Log.d("Adjusted heading", imu.getAngularOrientation().firstAngle - firstAngleZero + "");
                 telemetry.update();
@@ -373,11 +373,11 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
                /* if(heading < 0){
                     heading += 360;
                 }*/
-                /*telemetry.addData("Heading", heading);
+                telemetry.addData("Heading", heading);
                 telemetry.update();
             }
         }
-        speed(0);*/
+        speed(0);
         /*for(DcMotor motor:driveMotors){
             motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         }
@@ -539,7 +539,7 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
                 dropLift();
                 //calls arm method
                 //dropLift();
-                //driveForwardToCrater();
+                driveForwardToCrater();
             }else{
                 driveForward(0.25, 31);
                 sleepTau(3500);
@@ -555,7 +555,7 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
                 robot.backLeftMotor.setPower(0);
                 robot.backRightMotor.setPower(0);
                 dropLift();
-              //  driveForwardToCrater();
+                driveForwardToCrater();
                 //turnDegrees(0.5,  );
                 // sleepTau(2000);
             }
@@ -576,11 +576,11 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
             turnDegrees(0.25, 30);
             sleepTau(1000);
             dropLift();
-            //driveForwardToCrater();
+            driveForwardToCrater();
         }
     }
 
-    /*public void driveForwardToCrater(){
+    public void driveForwardToCrater(){
         robot.frontLeftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         robot.backLeftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         robot.frontRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -589,16 +589,16 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
         robot.backRightMotor.setPower(0.75);
         robot.frontLeftMotor.setPower(-0.75);
         robot.backLeftMotor.setPower(-0.75);
-        /*while(opModeIsActive()){
+        while(opModeIsActive()){
             if(imu.getAngularOrientation().thirdAngle - thirdAngleZero >= 352){
                 sleepTau(500);
                 speed(0);
                 sleepTau(500);
                 break;
             }
-        }*/
+        }
 
-    //}
+    }
 
     /*public void testAndBackUpIntoCrater(){
         double initialDist = robot.ultrasonicSensor.getDistance(DistanceUnit.INCH);
@@ -637,7 +637,7 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
             if(robot.getTime() >= end){
                 break;
             }
-            telemetry.addData("Status:",  "Alive");
+            telemetry.addData("Waiting",  "");
             telemetry.update();
         }
     }
@@ -678,7 +678,7 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
         tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
         tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_GOLD_MINERAL, LABEL_SILVER_MINERAL);
     }
-    /*public double getIMUThirdAngle(){
+    public double getIMUThirdAngle(){
         return imu.getAngularOrientation().thirdAngle - thirdAngleZero;
     }
     public double getIMUSecondAngle(){
@@ -686,7 +686,7 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
     }
     public double getIMUFirstAngle(){
         return imu.getAngularOrientation().firstAngle-firstAngleZero;
-    }*/
+    }
     /*public double getDistance(){
         return robot.ultrasonicSensor.getDistance(DistanceUnit.INCH);
     }*/
@@ -790,6 +790,6 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
     }
     public double getImuAverageRotation(){
         updateTelemetry(telemetry);
-            return ((imu.getAngularOrientation().firstAngle + imu1.getAngularOrientation().firstAngle) / 2.0);
+        return ((imu.getAngularOrientation().firstAngle + imu1.getAngularOrientation().firstAngle) / 2.0);
     }*/
 }

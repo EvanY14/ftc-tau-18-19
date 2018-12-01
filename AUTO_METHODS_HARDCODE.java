@@ -294,7 +294,7 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
         robot.stopper.setPosition(0.95);
         //telemetry.addData("Status", "About to wait 5 sec");
         //telemetry.update();
-        sleepTau(500);
+        sleepTau(1000);
         telemetry.addData("Status", "done");
         telemetry.update();
 
@@ -302,11 +302,13 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
         robot.rightLiftMotor.setTargetPosition((int)robot.rightLiftMotor.getCurrentPosition() - 5800);
 
         speedLift(1);
+        robot.resetTime();
         getBlockLocation();
-        sleepTau(2000);
-        if(robot.leftLiftMotor.getCurrentPosition() < robot.leftLiftMotor.getTargetPosition()){
-            sleepTau(500);
+        while(opModeIsActive() && robot.getTime() < 15 && robot.leftLiftMotor.isBusy() && robot.rightLiftMotor.isBusy()){
+            telemetry.addData("Status", "Dropping robot...");
+            telemetry.update();
         }
+        speedLift(0);
         Log.d("lift position", robot.rightLiftMotor.getCurrentPosition() + "");
     }
 
@@ -316,19 +318,32 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
         robot.leftLiftMotor.setTargetPosition(robot.rightLiftMotor.getCurrentPosition() + 5800);
         robot.rightLiftMotor.setTargetPosition(robot.leftLiftMotor.getCurrentPosition() + 5800);
 
+        robot.resetTime();
         speedLift(1);
-        sleepTau(3000);
+
+        while(opModeIsActive() && robot.getTime() < 5 && robot.rightLiftMotor.isBusy() && robot.leftLiftMotor.isBusy()){
+            telemetry.addData("Status", "Lowering lift...");
+            telemetry.update();
+        }
+        speedLift(0);
         Log.d("lift position", robot.rightLiftMotor.getCurrentPosition() + "");
     }
     //drive forward certain distance at certain speed(speed should be no more than 1), distance is in inches
     public void driveForward(double speed, double distance){
         //speed(speed);
+        double startTime = robot.getTime();
         motorPosition = (int)((distance / (6 * Math.PI)) * ticksPerRotation);
         robot.frontLeftMotor.setTargetPosition(robot.frontLeftMotor.getCurrentPosition()- motorPosition);
         robot.frontRightMotor.setTargetPosition(robot.frontRightMotor.getCurrentPosition() + motorPosition);
         robot.backLeftMotor.setTargetPosition(robot.backLeftMotor.getCurrentPosition()- motorPosition);
         robot.backRightMotor.setTargetPosition(robot.backRightMotor.getCurrentPosition() + motorPosition);
+        robot.resetTime();
         speed(speed);
+        while(opModeIsActive() && robot.getTime() < 5 && robot.frontRightMotor.isBusy() && robot.frontLeftMotor.isBusy() && robot.backRightMotor.isBusy() && robot.backLeftMotor.isBusy()){
+            telemetry.addData("Position", robot.frontRightMotor.getCurrentPosition());
+            telemetry.update();
+        }
+        speed(0);
         /*while(opModeIsActive() && robot.frontLeftMotor.isBusy()){
             testDistances();
         }*/
@@ -347,53 +362,20 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
         //double heading = initialAngle;
         //finalAngle = initialAngle + degree < 0 ? initialAngle + degree + 360:initialAngle+degree;
         //speed(speed);
+        double startTime = robot.getTime();
         double distance = (degree * (2 * robotRotationRadius * Math.PI) / 360);
         motorPosition = (int)((distance / (6*Math.PI)) * ticksPerRotation);
         robot.frontLeftMotor.setTargetPosition(robot.frontLeftMotor.getCurrentPosition()+ motorPosition);
         robot.frontRightMotor.setTargetPosition(robot.frontRightMotor.getCurrentPosition() + motorPosition);
         robot.backLeftMotor.setTargetPosition(robot.backLeftMotor.getCurrentPosition()+ motorPosition);
         robot.backRightMotor.setTargetPosition(robot.backRightMotor.getCurrentPosition() + motorPosition);
+        robot.resetTime();
         speed(speed);
-        /*if(degree > 0) {
-            while (opModeIsActive() && heading <= finalAngle && robot.frontLeftMotor.isBusy()) {
-                sleepTau(100);
-                heading = imu.getAngularOrientation().firstAngle;
-                /*if(heading < 0){
-                    heading += 360;
-                }*/
-               /* telemetry.addData("Heading", heading);
-                Log.d("Heading", heading + "");
-                //Log.d("Adjusted heading", imu.getAngularOrientation().firstAngle - firstAngleZero + "");
-                telemetry.update();
-            }
-        }else if (degree < 0){
-            while(opModeIsActive() && heading >= finalAngle && robot.frontLeftMotor.isBusy()){
-                sleepTau(100);
-                heading = imu.getAngularOrientation().firstAngle;
-               /* if(heading < 0){
-                    heading += 360;
-                }*/
-                /*telemetry.addData("Heading", heading);
-                telemetry.update();
-            }
+        while(opModeIsActive() && robot.getTime() < 3 && robot.frontRightMotor.isBusy() && robot.frontLeftMotor.isBusy() && robot.backRightMotor.isBusy() && robot.backLeftMotor.isBusy()){
+            telemetry.addData("Position", robot.frontRightMotor.getCurrentPosition());
+            telemetry.update();
         }
-        speed(0);*/
-        /*for(DcMotor motor:driveMotors){
-            motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        }
-            speed((degree / Math.abs(degree)) * 0.25);
-            while(imu.getAngularOrientation().firstAngle <= finalAngle && opModeIsActive()){
-                sleepTau(50);
-                telemetry.addData("Heading", imu.getAngularOrientation().firstAngle);
-                telemetry.update();
-            }
-            speed(-(degree / Math.abs(degree)) * 0.25);
-            while(imu.getAngularOrientation().firstAngle >= finalAngle && opModeIsActive()){
-                sleepTau(50);
-                telemetry.addData("Heading", imu.getAngularOrientation().firstAngle);
-                telemetry.update();
-            }*/
-
+        speed(0);
     }
     /*public void scanMinerals(){
         if(vision.seesSilver()){
@@ -427,6 +409,7 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
             if (robot.tfod != null) {
                 // getUpdatedRecognitions() will return null if no new information is available since
                 // the last time that call was made.
+                sleepTau(500);
                 List<Recognition> updatedRecognitions = robot.tfod.getUpdatedRecognitions();
                 Log.d("Status", "First call");
                 if (updatedRecognitions != null) {
@@ -458,7 +441,12 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
                                 if(recognition.getTop() > silverMineral1Y && updatedRecognitions.size() > 3) {
                                     silverMineral2X = silverMineral1X;
                                     silverMineral1X = (int) recognition.getLeft();
+                                    silverMineral2Y = silverMineral1Y;
+                                    silverMineral1Y = (int)recognition.getTop();
                                     Log.d("y of Top Silver 1", recognition.getTop() + "");
+                                }else if(recognition.getTop() > silverMineral2Y && updatedRecognitions.size() > 3){
+                                    silverMineral2X = (int) recognition.getLeft();
+                                    silverMineral2Y = (int) recognition.getTop();
                                 }else {
                                     //if it only detects three minerals, just look for the two silvers
                                     if(silverMineral1X == -1){
@@ -477,18 +465,21 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
                                 telemetry.addData("Gold Mineral Position", "Left");
                                 telemetry.update();
                                 Log.d("Status", "Left");
+                                Log.d("Status", goldMineralX + " " + goldMineralY);
                                 blockLocation = "Left";
                                 break;
                             } else if (goldMineralX > silverMineral1X && goldMineralX > silverMineral2X) {
                                 telemetry.addData("Gold Mineral Position", "Right");
                                 telemetry.update();
                                 Log.d("Status", "Right");
+                                Log.d("Status", goldMineralX + " " + goldMineralY);
                                 blockLocation = "Right";
                                 break;
                             } else {
                                 telemetry.addData("Gold Mineral Position", "Center");
                                 telemetry.update();
                                 Log.d("Status", "Center");
+                                Log.d("Status", goldMineralX + " " + goldMineralY);
                                 blockLocation = "Center";
                                 break;
                             }

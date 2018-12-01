@@ -136,6 +136,13 @@ public class Hardware extends OpMode {
 
     public void init_auto(HardwareMap hwMap, Telemetry telemetry){
         init(hwMap, telemetry);
+        frontLeftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftLiftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightLiftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
         frontLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         frontRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         backRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);

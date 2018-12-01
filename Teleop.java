@@ -92,7 +92,7 @@ public class Teleop extends OpMode{
         //Game Controller 1
         //*****************
         //Log.d("Status", "Starting loop");
-        //auto.sleepTau(2000);
+        //auto.//sleepTau(2000);
         //telemetry.addData("Status", "about to get an error");
 
             /*

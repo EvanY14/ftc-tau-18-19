@@ -16,27 +16,27 @@ public class AUTO_CRATER_HARDCODE extends AUTO_METHODS_HARDCODE{
         switch (blockLocation) {
             case "Left":
                 //Drive forward 1/2 block diagonal plus an inch to get the middle of the robot to the first corner
-                driveForward(0.25, Math.sqrt(2) * 12 + 1);
-                sleepTau(1500);
+                driveForward(0.25, Math.sqrt(2) * 12 -2);
+                sleepTau(1000);
 
                 //turn 45 degrees to the left mineral
                 turnDegrees(0.25, 45);
-                sleepTau(1500);
+                sleepTau(1000);
 
                 //drive into the mineral, knocking it off
                 driveForward(0.25, 16);      //21
-                sleepTau(2000);
+                sleepTau(1500);
 
                 //turn arctan(1.0) degrees because we want to go to the middle of the adjacent block
                 turnDegrees(0.25, Math.toDegrees(Math.atan(1.0)));
-                sleepTau(1500);
+                sleepTau(1000);
 
                 //drive forward 1/2 a diagonal of a block
-                driveForward(0.3, Math.sqrt(2) * 12 + 4);
+                driveForward(0.3, Math.sqrt(2) * 12 + 6);
                 sleepTau(1000);
 
                 //turn towards the depot
-                turnDegrees(0.25, 47.5);
+                turnDegrees(0.25, 45);
                 sleepTau(1000);
 
                 //drive to the depot plus a foot-ish in order to leave the block in the depot
@@ -44,7 +44,7 @@ public class AUTO_CRATER_HARDCODE extends AUTO_METHODS_HARDCODE{
                 sleepTau(3500);
 
                 //drive BACKWARDS a foot so we don't move the block when we turn
-                driveForward(0.25, -12);
+                driveForward(0.25, -9);
                 sleepTau(1000);
 
                 //turn 90 degrees to set up the mineral arm
@@ -68,32 +68,34 @@ public class AUTO_CRATER_HARDCODE extends AUTO_METHODS_HARDCODE{
                 sleepTau(5000);
                 break;
             case "Right":
-                driveForward(0.25, Math.sqrt(2) * 12 + 1);
+                driveForward(0.25, Math.sqrt(2) * 12 - 2);
                 sleepTau(1000);
                 turnDegrees(0.25, -45);
-                sleepTau(750);
-                driveForward(0.25, 16);
                 sleepTau(1000);
+                driveForward(0.25, 16);
+                sleepTau(1250);
                 turnDegrees(0.25, -30);
-                sleepTau(750);
+                sleepTau(1000);
                 turnDegrees(0.25, 30);
-                sleepTau(750);
+                sleepTau(1000);
                 driveForward(0.25, -24);
                 sleepTau(1000);
-                turnDegrees(0.25, 120);
+                turnDegrees(0.25, 100);
                 sleepTau(1000);
                 driveForward(0.25, Math.sqrt(2) * 24);
                 sleepTau(2000);
-                turnDegrees(0.25, 67.5);
+                turnDegrees(0.25, 80);
                 sleepTau(1250);
-                driveForward(0.25, 42);
+                driveForward(0.25, 45);
                 sleepTau(3000);
                 turnDegrees(0.25, 90);
                 sleepTau(1000);
                 dropArm();
                 turnDegrees(0.25, 105);
                 sleepTau(1500);
-                driveForwardAndDropLift(81);
+                dropLift();
+                driveForward(0.25, 60);
+                sleepTau(5000);
                 break;
             case "Center":
                 driveForward(0.25, Math.sqrt(2) * 24 + 1);

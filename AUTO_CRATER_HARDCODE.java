@@ -121,5 +121,9 @@ public class AUTO_CRATER_HARDCODE extends AUTO_METHODS_HARDCODE{
                 break;
         }
 
+        //deactivate the TensorFlow library to free up system resources
+        if (robot.tfod != null) {
+            robot.tfod.shutdown();
+        }
     }
 }

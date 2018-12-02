@@ -137,7 +137,10 @@ public class AUTO_DEPOT_HARDCODE extends AUTO_METHODS_HARDCODE {
                 driveForward(0.5 , 70 );
                 break;
         }
-
+        //deactivate the TensorFlow library to free up system resources
+        if (robot.tfod != null) {
+            robot.tfod.shutdown();
+        }
     }
 
 }

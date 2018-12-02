@@ -438,16 +438,26 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
                                     }
                                     //Same for silver, but getting the two lowest instead of just the lowest
                             } else if (recognition.getLabel().equals(LABEL_SILVER_MINERAL)) {
-                                if(recognition.getTop() > silverMineral1Y && updatedRecognitions.size() > 3) {
-                                    silverMineral2X = silverMineral1X;
-                                    silverMineral1X = (int) recognition.getLeft();
-                                    silverMineral2Y = silverMineral1Y;
-                                    silverMineral1Y = (int)recognition.getTop();
-                                    Log.d("y of Top Silver 1", recognition.getTop() + "");
-                                }else if(recognition.getTop() > silverMineral2Y && updatedRecognitions.size() > 3){
-                                    silverMineral2X = (int) recognition.getLeft();
-                                    silverMineral2Y = (int) recognition.getTop();
-                                }else {
+                                if(updatedRecognitions.size() > 3) {
+                                    if (recognition.getTop() > silverMineral1Y) {
+                                        silverMineral2X = silverMineral1X;
+                                        silverMineral1X = (int) recognition.getLeft();
+                                        silverMineral2Y = silverMineral1Y;
+                                        silverMineral1Y = (int) recognition.getTop();
+                                        Log.d("y of Top Silver 1", silverMineral1Y + "");
+                                        Log.d("y of Top Silver 2", silverMineral2Y + "");
+                                    } else if (recognition.getTop() > silverMineral2Y) {
+                                        silverMineral2X = (int) recognition.getLeft();
+                                        silverMineral2Y = (int) recognition.getTop();
+                                        Log.d("y of Top Silver 1", silverMineral1Y + "");
+                                        Log.d("y of Top Silver 2", silverMineral2Y + "");
+                                    } else {
+                                        //no change if detected silver mineral Y is less than both previously detected
+                                        Log.d("y of Top Silver 1", silverMineral1Y + "");
+                                        Log.d("y of Top Silver 2", silverMineral2Y + "");
+                                    }
+                                }
+                                else {
                                     //if it only detects three minerals, just look for the two silvers
                                     if(silverMineral1X == -1){
                                         silverMineral1X = (int) recognition.getLeft();

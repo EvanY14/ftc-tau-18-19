@@ -3,8 +3,10 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+
 @Autonomous(name = "Tau: Test", group = "AUTO_TEST")
-public class Auto_TEST extends AUTO_METHODS_HARDCODE {
+public class Auto_TEST extends AUTO_METHODS_HARDCODE_ULTRASONIC {
 //    Hardware robot = new Hardware();
     @Override
     public void runOpMode() throws InterruptedException{
@@ -17,28 +19,11 @@ public class Auto_TEST extends AUTO_METHODS_HARDCODE {
         //telemetry.update();
         setUp(hardwareMap, telemetry);
         waitForStart();
-        /*while(opModeIsActive()){
-            telemetry.addData("Distance", getDistance());
+
+        while(opModeIsActive()){
+            telemetry.addData("distance", robot.ultrasonicSensor.getDistance(DistanceUnit.INCH));
             telemetry.update();
-
-        }*/
-
-        //telemetry.addData("block location", getBlockLocation());
-        /*//sleepTau(10000);
-        getLocationOnField();
-        driveForward(0.5, 12);
-        telemetry.addData("Status", "Drove forward");
-        telemetry.update();
-        //sleepTau(2000);
-        turnDegrees(0.5, 90);
-        telemetry.addData("Status", "Turned 90 degrees left");
-        telemetry.update();
-        //sleepTau(1500);
-        turnDegrees(0.5,-90);
-        telemetry.addData("Status", "turned 90 degrees right");
-        telemetry.update();
-        //sleepTau(1500);
-*/
+        }
     }
 }
         /*driveForward(0.5, 12.0);

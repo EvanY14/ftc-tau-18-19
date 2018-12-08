@@ -30,8 +30,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
 import java.util.Locale;
 
-@Autonomous(name = "Auto Depot Hardcode", group = "Tau")
-public class AUTO_DEPOT_HARDCODE extends AUTO_METHODS_HARDCODE {
+@Autonomous(name = "Auto Depot Hardcode Ultrasonic", group = "Tau")
+public class AUTO_DEPOT_HARDCODE_ULTRASONIC extends AUTO_METHODS_HARDCODE_ULTRASONIC {
 
     @Override
     public void runOpMode() throws InterruptedException{

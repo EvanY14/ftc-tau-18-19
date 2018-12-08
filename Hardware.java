@@ -2,7 +2,9 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
+import com.qualcomm.hardware.motors.RevRoboticsCoreHexMotor;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -39,17 +41,20 @@ public class Hardware extends OpMode {
     //Lift Motors*******************
     public DcMotor leftLiftMotor = null;
     public DcMotor rightLiftMotor = null;
+    public DcMotor liftRotationMotor = null;
+    public DcMotor liftExtensionMotor = null;
     //******************************
 
     //Servos************************
     public Servo stopper = null;
     public Servo markerArm = null;
+    public CRServo intakeServo = null;
     //******************************
 
     //Sensors***************************
     Orientation             lastAngles = new Orientation();
     double globalAngle, power = .30, correction;
-   // public ModernRoboticsI2cRangeSensor ultrasonicSensor = null;
+    public ModernRoboticsI2cRangeSensor ultrasonicSensor = null;
     //******************************
 
     //Vision************************
@@ -71,6 +76,8 @@ public class Hardware extends OpMode {
     public double rightLiftBottom = 0;
     public double leftLiftTop = 0;
     public double rightLiftTop = 0;
+    public double liftMaxExtension = 0;
+    public double liftMinExtension = 0;
     //******************************
 
     public Hardware(){
@@ -111,6 +118,7 @@ public class Hardware extends OpMode {
         //init servos
         stopper = hwMap.servo.get("lift_stopper");
         markerArm = hwMap.servo.get("marker_arm");
+        //intakeServo = hwMap.crservo.get("intake_servo");
 
         markerArm.setPosition(0);
         stopper.setPosition(1);
@@ -118,20 +126,32 @@ public class Hardware extends OpMode {
         //init lift motors
         leftLiftMotor = hwMap.dcMotor.get("left_lift");
         rightLiftMotor = hwMap.dcMotor.get("right_lift");
+        liftExtensionMotor = hwMap.dcMotor.get("extension_motor");
+        liftRotationMotor = hwMap.dcMotor.get("rotation_motor");
 
         leftLiftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightLiftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         leftLiftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightLiftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        //liftExtensionMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        //liftRotationMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        liftRotationMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        liftExtensionMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        liftRotationMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        liftExtensionMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
 
         leftLiftMotor.setPower(0);
         rightLiftMotor.setPower(0);
+        liftRotationMotor.setPower(0);
+        liftExtensionMotor.setPower(0);
 
         //initialize variables
         leftLiftBottom = leftLiftMotor.getCurrentPosition();
         rightLiftBottom = rightLiftMotor.getCurrentPosition();
         leftLiftTop = leftLiftBottom + 6000;
         rightLiftTop = rightLiftBottom + 6000;
+        liftMaxExtension = -6000;
     }
 
     public void init_auto(HardwareMap hwMap, Telemetry telemetry){
@@ -150,8 +170,12 @@ public class Hardware extends OpMode {
         leftLiftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightLiftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
+        frontLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        frontRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         //Sensors
-       // ultrasonicSensor = hwMap.get(ModernRoboticsI2cRangeSensor.class, "ultrasonic");
+        ultrasonicSensor = hwMap.get(ModernRoboticsI2cRangeSensor.class, "ultrasonic");
         /*******/
         //Vision stuff
         /*int cameraMonitorViewId = hwMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hwMap.appContext.getPackageName());

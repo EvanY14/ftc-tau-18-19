@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import android.util.Log;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
@@ -17,7 +18,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 @TeleOp(name = "Tau Teleop", group = "Tau")
 public class Teleop extends OpMode{
     Hardware robot = new Hardware();
-    AUTO_METHODS_HARDCODE auto = new AUTO_METHODS_HARDCODE();
+    AUTO_METHODS_HARDCODE_ULTRASONIC auto = new AUTO_METHODS_HARDCODE_ULTRASONIC();
     ElapsedTime period = new ElapsedTime();
 
     //Drive variables
@@ -45,6 +46,8 @@ public class Teleop extends OpMode{
     private double endTimeArm = 0;
     private double stopperEndTime = 0;
     private double endTimeDrive = 0;
+    private double liftExtensionPower = 0;
+    private double liftRotationPower = 0;
 
     private boolean reverseDrive = false;
 
@@ -204,15 +207,6 @@ public class Teleop extends OpMode{
         if(robot.leftLiftMotor.getCurrentPosition() > robot.leftLiftTop && leftGP2Y < 0)
             leftGP2Y = 0;
 
-        if(gamepad2.left_trigger > 0.05 && endTimeArm < robot.getTime()){
-            robot.markerArm.setPosition(robot.markerArm.getPosition() - 0.05);
-            endTimeArm = robot.getTime() + 0.25;
-        }
-        if(gamepad2.right_trigger > 0.05 && endTimeArm < robot.getTime()){
-            robot.markerArm.setPosition(robot.markerArm.getPosition() + 0.05);
-            endTimeArm = robot.getTime() + 0.25;
-        }
-
         //Pressing y on gamepad 2 moves stopper up and down
         if(gamepad2.y && stopperEndTime < robot.getTime()){
             robot.stopper.setPosition(!(robot.stopper.getPosition() < 0.956) ? 0.955 : 1);
@@ -228,12 +222,47 @@ public class Teleop extends OpMode{
             telemetry.update();
         }
 
+        //Using the right joystick, extend/retract the arm
+        //telemetry.addData("Extender pos", robot.liftExtensionMotor.getCurrentPosition());
+        if(Math.abs(rightGP2Y) > 0.05){
+            if(/*robot.liftExtensionMotor.getCurrentPosition() >= robot.liftMaxExtension &&*/ rightGP2Y < 0)
+                liftExtensionPower = rightGP2Y;
+            else if(/*robot.liftExtensionMotor.getCurrentPosition() <= 0 &&*/ rightGP2Y > 0)
+                liftExtensionPower = rightGP2Y;
+            else
+                liftExtensionPower = 0;
+        }else{
+            liftExtensionPower = 0;
+        }
+
+        //Using the dpad, rotate the arm
+        if((Math.abs(gamepad2.left_trigger) > 0.05)){
+            liftRotationPower = -gamepad2.left_trigger;
+        }else if(Math.abs(gamepad2.right_trigger) > 0.05){
+           liftRotationPower = gamepad2.right_trigger;
+        } else{
+            liftRotationPower = 0;
+        }
+
+        //intake with left trigger
+        if(gamepad2.left_bumper){
+            robot.intakeServo.setPower(1);
+            robot.intakeServo.setDirection(DcMotorSimple.Direction.FORWARD);
+        }else if(gamepad2.right_bumper){//Outtake with right trigger
+            robot.intakeServo.setPower(1);
+            robot.intakeServo.setDirection(DcMotorSimple.Direction.REVERSE);
+        }else{
+            robot.intakeServo.setPower(0);
+        }
+
 
         //setting powers to motors
         robot.frontRightMotor.setPower(frontrightPOWER);
         robot.frontLeftMotor.setPower(frontleftPOWER);
         robot.backRightMotor.setPower(backrightPOWER);
         robot.backLeftMotor.setPower(backleftPOWER);
+        robot.liftRotationMotor.setPower(liftRotationPower);
+        robot.liftExtensionMotor.setPower(liftExtensionPower);
         telemetry.addData("Left game pad 1 power", frontleftPOWER);
         telemetry.addData("Right game pad 1 power", frontrightPOWER);
         telemetry.addData("Actual left power", robot.frontLeftMotor.getPower());

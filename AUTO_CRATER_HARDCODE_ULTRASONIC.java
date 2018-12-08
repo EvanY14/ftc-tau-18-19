@@ -2,8 +2,8 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-@Autonomous(group = "Tau", name = "Auto Crater Hardcode")
-public class AUTO_CRATER_HARDCODE extends AUTO_METHODS_HARDCODE{
+@Autonomous(group = "Tau", name = "Auto Crater Hardcode Ultrasonic")
+public class AUTO_CRATER_HARDCODE_ULTRASONIC extends AUTO_METHODS_HARDCODE_ULTRASONIC{
 
     @Override
     public void runOpMode() throws InterruptedException{
@@ -32,15 +32,15 @@ public class AUTO_CRATER_HARDCODE extends AUTO_METHODS_HARDCODE{
 
 
                 //drive forward 1/2 a diagonal of a block
-                driveForward(0.3, Math.sqrt(2) * 12 + 7);
+                driveForward(0.3, Math.sqrt(2) * 12 + 6);
 
 
                 //turn towards the depot
-                turnDegrees(0.25, 43);
+                turnDegrees(0.25, 45);
 
 
                 //drive to the depot plus a foot-ish in order to leave the block in the depot
-                driveForward(0.25, 63);
+                driveForwardToDepot(0.25, 63);
 
 
                 //drive BACKWARDS a foot so we don't move the block when we turn
@@ -50,13 +50,11 @@ public class AUTO_CRATER_HARDCODE extends AUTO_METHODS_HARDCODE{
                 //turn 90 degrees to set up the mineral arm
                 turnDegrees(0.25, 90);
 
-                //arm method called here
-
                 //drop the mineral arm
                 dropArm();
 
                 //turn back towards the crater, turning a little more than 90 degrees to account for weird starting motion
-                turnDegrees(0.25, 93);
+                turnDegrees(0.25, 88);
 
 
                 //lower the lift so we don't tip over when we go into the crater
@@ -91,7 +89,7 @@ public class AUTO_CRATER_HARDCODE extends AUTO_METHODS_HARDCODE{
                 turnDegrees(0.25, 90);
                 //sleepTau(1000);
                 dropArm();
-                turnDegrees(0.25, 95);
+                turnDegrees(0.25, 90);
                 //sleepTau(1500);
                 dropLift();
                 driveForward(0.5, 65);
@@ -121,9 +119,5 @@ public class AUTO_CRATER_HARDCODE extends AUTO_METHODS_HARDCODE{
                 break;
         }
 
-        //deactivate the TensorFlow library to free up system resources
-        if (robot.tfod != null) {
-            robot.tfod.shutdown();
-        }
     }
 }

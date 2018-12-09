@@ -49,6 +49,9 @@ public class Teleop extends OpMode{
     private double liftExtensionPower = 0;
     private double liftRotationPower = 0;
 
+    //true is up, false is down
+    private boolean markerPos = true;
+
     private boolean reverseDrive = false;
 
     private final double markerArmdown = 0.95;
@@ -169,8 +172,10 @@ public class Teleop extends OpMode{
         }*/
 
         //Pressing y on gamepad 1 moves the marker arm up or down
+        //True is up, false is down
         if(gamepad1.y && endTimeArm < robot.getTime()){
-            double position = robot.markerArm.getPosition() == markerArmdown +- 0.01 ? markerArmUp:markerArmdown;
+            double position = !markerPos ? markerArmUp:markerArmdown;
+            markerPos = !markerPos;
             robot.markerArm.setPosition(position);
             endTimeArm = robot.getTime() + 0.25;
         }

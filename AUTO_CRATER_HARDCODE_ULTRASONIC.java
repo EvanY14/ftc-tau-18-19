@@ -1,8 +1,10 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 @Autonomous(group = "Tau", name = "Auto Crater Hardcode Ultrasonic")
+@Disabled
 public class AUTO_CRATER_HARDCODE_ULTRASONIC extends AUTO_METHODS_HARDCODE_ULTRASONIC{
 
     @Override

@@ -1,8 +1,10 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 @Autonomous(group = "Tau", name = "Auto Crater IMU")
+@Disabled
 public class AUTO_CRATER_IMU extends AUTO_METHODS_IMU{
 
     @Override

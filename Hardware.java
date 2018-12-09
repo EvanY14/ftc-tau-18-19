@@ -118,7 +118,7 @@ public class Hardware extends OpMode {
         //init servos
         stopper = hwMap.servo.get("lift_stopper");
         markerArm = hwMap.servo.get("marker_arm");
-        //intakeServo = hwMap.crservo.get("intake_servo");
+        intakeServo = hwMap.crservo.get("intake_servo");
 
         markerArm.setPosition(0);
         stopper.setPosition(1);

@@ -31,6 +31,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 import java.util.Locale;
 
 @Autonomous(name = "Auto Depot Hardcode Ultrasonic", group = "Tau")
+@Disabled
 public class AUTO_DEPOT_HARDCODE_ULTRASONIC extends AUTO_METHODS_HARDCODE_ULTRASONIC {
 
     @Override

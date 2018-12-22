@@ -141,7 +141,7 @@ public class Teleop extends OpMode{
         if(gamepad1.b && robot.getTime() > endTimeB){
             endTimeB = robot.getTime() + 1;
             endGameSpeed = !endGameSpeed;
-            maxPOWER = endGameSpeed?0.25:1;
+            maxPOWER = endGameSpeed?(3.0/7):1;
         }
 
         leftGP1Y = gamepad1.left_stick_y;

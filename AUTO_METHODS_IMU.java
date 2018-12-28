@@ -590,11 +590,16 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
         robot.frontLeftMotor.setPower(-0.75);
         robot.backLeftMotor.setPower(-0.75);
         while(opModeIsActive()){
-            if(imu.getAngularOrientation().thirdAngle - thirdAngleZero >= 352){
-                sleepTau(500);
-                speed(0);
-                sleepTau(500);
-                break;
+            while(Math.pow(imu.getAcceleration().xAccel,2) + Math.pow(imu.getAcceleration().yAccel,2) > 0.1){
+                sleepTau(50);
+            }
+            double accel = 0;
+            while(opModeIsActive()){
+                if(Math.pow(imu.getAcceleration().xAccel,2) + Math.pow(imu.getAcceleration().yAccel,2) < accel - 100) {
+                    stopRobot();
+                    break;
+                }
+                accel = Math.pow(imu.getAcceleration().xAccel,2) + Math.pow(imu.getAcceleration().yAccel,2);
             }
         }
 

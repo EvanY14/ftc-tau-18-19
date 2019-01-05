@@ -203,7 +203,7 @@ public class Teleop extends OpMode{
             leftGP2Y = 0;
         }
         if(Math.abs(rightGP2Y) < 0.05){
-            rightGP1Y = 0;
+            rightGP2Y = 0;
         }
 
         if(robot.rightLiftMotor.getCurrentPosition() > robot.rightLiftTop && leftGP2Y < 0)

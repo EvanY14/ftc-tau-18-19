@@ -1,26 +1,23 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import android.util.Log;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
-import org.firstinspires.ftc.robotcore.external.navigation.Position;
-import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 
 //import org.firstinspires.ftc.teamcode.Vision1;
 
 /**
  * Created by Evan Yu on 9/16/2018.
  */
-@TeleOp(name = "Tau Teleop", group = "Tau")
-public class Teleop extends OpMode{
+@TeleOp(name = "Tau Teleop IMU", group = "Tau")
+public class TeleopIMU extends OpMode{
     Hardware robot = new Hardware();
     AUTO_METHODS_HARDCODE_ULTRASONIC auto = new AUTO_METHODS_HARDCODE_ULTRASONIC();
     ElapsedTime period = new ElapsedTime();
-
+    private BNO055IMU imu;
     //Drive variables
     private boolean slowDrive = false;
     private double leftGP1X = 0;
@@ -49,7 +46,6 @@ public class Teleop extends OpMode{
     private double liftExtensionPower = 0;
     private double liftRotationPower = 0;
     private boolean intakeIn = false;
-    private boolean intakeOut = false;
     private double endTimeIntake = 0;
     //true is up, false is down
     private boolean markerPos = true;
@@ -71,6 +67,24 @@ public class Teleop extends OpMode{
         } catch (InterruptedException e) {
             e.printStackTrace();
         }*/
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
+        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
+        parameters.loggingEnabled      = true;
+        parameters.loggingTag          = "IMU";
+        //parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
+        //`rometer bandwidth. See Section 3.5.2 (p27) and Table 3-4 (p21) of the BNO055 specification
+        parameters.accelRange = BNO055IMU.AccelRange.G4;
+        parameters.accelBandwidth      = BNO055IMU.AccelBandwidth.HZ62_5;
+        /** accelerometer power mode. See Section 3.5.2 (p27) and Section 4.2.2 (p77) of the BNO055 specification
+         parameters.accelPowerMode      = BNO055IMU.AccelPowerMode.NORMAL;
+
+         // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
+         // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
+         // and named "imu".*/
+        imu = hardwareMap.get(BNO055IMU.class, "imu");
+        imu.initialize(parameters);
         Log.d("Error message", "initialized robot with vision");
         telemetry.addData("HardwareMap", hardwareMap);
         telemetry.addData("Readiness", "Press Play to start");
@@ -137,13 +151,13 @@ public class Teleop extends OpMode{
         if(gamepad1.a && robot.getTime() > endTimeA){
             endTimeA = robot.getTime() + 1;
             slowDrive = !slowDrive;
-            maxPOWER = slowDrive?(3.0/4):1;
+            maxPOWER = slowDrive?(2.0/3):1;
 
         }
         if(gamepad1.b && robot.getTime() > endTimeB){
             endTimeB = robot.getTime() + 1;
             endGameSpeed = !endGameSpeed;
-            maxPOWER = endGameSpeed?(0.5):1;
+            maxPOWER = endGameSpeed?(3.0/7):1;
         }
 
         leftGP1Y = gamepad1.left_stick_y;
@@ -242,7 +256,7 @@ public class Teleop extends OpMode{
             liftExtensionPower = 0;
         }
 
-        //Using the triggers, rotate the arm
+        //Using the dpad, rotate the arm
         if((Math.abs(gamepad2.left_trigger) > 0.05)){
             liftRotationPower = -gamepad2.left_trigger;
         }else if(Math.abs(gamepad2.right_trigger) > 0.05){
@@ -251,16 +265,11 @@ public class Teleop extends OpMode{
             liftRotationPower = 0;
         }
 
-        //intake with 'a' button, reverse with 'x' button
+        //intake with a button
         if(gamepad2.a && endTimeIntake < robot.getTime()){
             endTimeIntake = robot.getTime() + 0.25;
-            robot.intakeServo.setPower(-1);
-        }else if(gamepad2.x && endTimeIntake < robot.getTime()){
-            endTimeIntake = robot.getTime() + 0.25;
-            robot.intakeServo.setPower(1);
-        }else if(gamepad2.b && endTimeIntake < robot.getTime()){
-            endTimeIntake = robot.getTime() + 0.25;
-            robot.intakeServo.setPower(0);
+            intakeIn = !intakeIn;
+            robot.intakeServo.setPower(intakeIn?-1:0);
         }
 
 
@@ -282,6 +291,12 @@ public class Teleop extends OpMode{
         telemetry.addData("Left lift location", robot.leftLiftMotor.getCurrentPosition());
         telemetry.addData("Stopper position", robot.stopper.getPosition());
         telemetry.addData("marker arm position", robot.markerArm.getPosition());
+        telemetry.addData("Acceleration x", imu.getAcceleration().xAccel);
+        telemetry.addData("Acceleration y", imu.getAcceleration().yAccel);
+        telemetry.addData("Acceleration z", imu.getAcceleration().zAccel);
+        Log.d("X Accel:", imu.getAcceleration().xAccel + "");
+        Log.d("y Accel:", imu.getAcceleration().yAccel + "");
+        Log.d("z Accel:", imu.getAcceleration().zAccel + "");
         telemetry.update();
     }
 

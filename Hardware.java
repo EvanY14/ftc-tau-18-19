@@ -6,6 +6,7 @@ import com.qualcomm.hardware.motors.RevRoboticsCoreHexMotor;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.UltrasonicSensor;
@@ -25,6 +26,8 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
 import static org.firstinspires.ftc.robotcore.external.tfod.TfodRoverRuckus.LABEL_GOLD_MINERAL;
 import static org.firstinspires.ftc.robotcore.external.tfod.TfodRoverRuckus.LABEL_SILVER_MINERAL;
 import static org.firstinspires.ftc.robotcore.external.tfod.TfodRoverRuckus.TFOD_MODEL_ASSET;
+import android.hardware.Camera;
+import android.util.Log;
 
 /**
  * Created by Evan Yu on 9/16/2018.
@@ -67,6 +70,9 @@ public class Hardware extends OpMode {
     private static final String TFOD_MODEL_ASSET = "RoverRuckus.tflite";
     private static final String LABEL_GOLD_MINERAL = "Gold Mineral";
     private static final String LABEL_SILVER_MINERAL = "Silver Mineral";
+    public Camera camera;
+    public boolean isFlashOn;
+    private Camera.Parameters params;
     //******************************
 
     //Other*************************
@@ -122,6 +128,7 @@ public class Hardware extends OpMode {
 
         markerArm.setPosition(0);
         stopper.setPosition(1);
+        intakeServo.setDirection(DcMotorSimple.Direction.FORWARD);
 
         //init lift motors
         leftLiftMotor = hwMap.dcMotor.get("left_lift");
@@ -206,11 +213,12 @@ public class Hardware extends OpMode {
         int tfodMonitorViewId = hwMap.appContext.getResources().getIdentifier(
                 "tfodMonitorViewId", "id", hwMap.appContext.getPackageName());
         TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
-        tfodParameters.minimumConfidence = 0.4;
+        tfodParameters.minimumConfidence = 0.3;
         tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, this.vuforia);
         tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_GOLD_MINERAL, LABEL_SILVER_MINERAL);
 
-
+        //Turn on flash for camera
+        turnOnFlash();
     }
     public void init_auto_IMU(HardwareMap hwMap, Telemetry telemetry){
         init_auto(hwMap, telemetry);
@@ -256,5 +264,43 @@ public class Hardware extends OpMode {
     }
     public void startTime(){
         period.startTime();
+    }
+    private void getCamera() {
+        if (camera == null) {
+            try {
+                camera = Camera.open();
+                params = camera.getParameters();
+            } catch (RuntimeException e) {
+                Log.e("Camera Error. Error: ", e.getMessage());
+            }
+        }
+    }
+
+    public void turnOnFlash() {
+        if (!isFlashOn) {
+            if (camera == null || params == null) {
+                return;
+            }
+
+            params = camera.getParameters();
+            params.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+            camera.setParameters(params);
+            camera.startPreview();
+            isFlashOn = true;
+        }
+    }
+
+    public void turnOffFlash() {
+        if (isFlashOn) {
+            if (camera == null || params == null) {
+                return;
+            }
+
+            params = camera.getParameters();
+            params.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+            camera.setParameters(params);
+            camera.stopPreview();
+            isFlashOn = false;
+        }
     }
 }

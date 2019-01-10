@@ -297,18 +297,34 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
         sleepTau(1000);
         telemetry.addData("Status", "done");
         telemetry.update();
+        int startPos = robot.leftLiftMotor.getCurrentPosition();
+        double difference = 5800;
+        int targetPosLeft = (int)(robot.leftLiftMotor.getCurrentPosition() - (difference));
+        int targetPosRight = (int)(robot.rightLiftMotor.getCurrentPosition() - (difference));
 
-        robot.leftLiftMotor.setTargetPosition((int)robot.leftLiftMotor.getCurrentPosition() - 5800);
-        robot.rightLiftMotor.setTargetPosition((int)robot.rightLiftMotor.getCurrentPosition() - 5800);
+        robot.leftLiftMotor.setTargetPosition(targetPosLeft);
+        robot.rightLiftMotor.setTargetPosition(targetPosRight);
 
         speedLift(1);
         robot.resetTime();
-        getBlockLocation();
-        while(opModeIsActive() && robot.getTime() < 15 && robot.leftLiftMotor.isBusy() && robot.rightLiftMotor.isBusy()){
+        getBlockLocation2();
+        /*while(targetPosLeft > startPos - 5800){
+            while(robot.leftLiftMotor.isBusy()){
+                sleepTau(50);
+            }
+            sleepTau(750);
+            targetPosLeft -= difference;
+            targetPosRight -= difference;
+            robot.leftLiftMotor.setTargetPosition(targetPosLeft);
+            robot.rightLiftMotor.setTargetPosition(targetPosRight);
+            speedLift(1);
+        }*/
+        while(opModeIsActive() && robot.getTime() < 10 && robot.leftLiftMotor.isBusy() && robot.rightLiftMotor.isBusy()){
             telemetry.addData("Status", "Dropping robot...");
             telemetry.update();
         }
         speedLift(0);
+        //getBlockLocation2();
         Log.d("lift position", robot.rightLiftMotor.getCurrentPosition() + "");
     }
 
@@ -400,7 +416,7 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
                 turnDegrees(0.25, 10);
                 sleepTau(500);
                 turn = true;
-            //try checking 10 degrees to the right
+                //try checking 10 degrees to the right
             } else if (robot.getTime() > 10 && turn2 == false) {
                 turnDegrees(0.25, -20);
                 sleepTau(1000);
@@ -429,14 +445,14 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
                                 //If the y value of the top of the gold mineral is greater than the y value of the next lowest
                                 //make it the new mineral that we are scanning
                                 if(recognition.getTop() > goldMineralY){
-                                        goldMineralX = (int) recognition.getLeft();
-                                        goldMineralY = (int)recognition.getTop();
-                                        Log.d("Width", "" + (Math.abs(recognition.getLeft() - recognition.getRight())));
-                                        Log.d("Status", "In more than 3 detected loop" + updatedRecognitions.size());
-                                        Log.d("Y of top", recognition.getTop() +"");
-                                        Log.d("Gold mineral y", "" + goldMineralY);
-                                    }
-                                    //Same for silver, but getting the two lowest instead of just the lowest
+                                    goldMineralX = (int) recognition.getLeft();
+                                    goldMineralY = (int)recognition.getTop();
+                                    Log.d("Width", "" + (Math.abs(recognition.getLeft() - recognition.getRight())));
+                                    Log.d("Status", "In more than 3 detected loop" + updatedRecognitions.size());
+                                    Log.d("Y of top", recognition.getTop() +"");
+                                    Log.d("Gold mineral y", "" + goldMineralY);
+                                }
+                                //Same for silver, but getting the two lowest instead of just the lowest
                             } else if (recognition.getLabel().equals(LABEL_SILVER_MINERAL)) {
                                 if(recognition.getTop() > silverMineral1Y && updatedRecognitions.size() > 3) {
                                     silverMineral2X = silverMineral1X;
@@ -503,6 +519,157 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
         }
     }
 
+    public void getBlockLocation2() {
+        boolean turn = false;
+        boolean turn2 = false;
+        while (opModeIsActive() && robot.getTime() < 10) {
+            //Try checking 10 degrees to the left
+            if (robot.getTime() > 5 && turn == false) {
+                turnDegrees(0.33, 12.5);
+                //sleepTau(500);
+                turn = true;
+            }
+
+            if (robot.tfod != null) {
+                // getUpdatedRecognitions() will return null if no new information is available since
+                // the last time that call was made.
+                //sleepTau(1500);
+                List<Recognition> updatedRecognitions = robot.tfod.getUpdatedRecognitions();
+                Log.d("Status", "First call");
+                if (updatedRecognitions != null) {
+                    telemetry.addData("# Object Detected", updatedRecognitions.size());
+                    Log.d("Status", "Objects detected");
+                    Log.d("# Objects detected", updatedRecognitions.size() + "");
+                    if (updatedRecognitions.size() >= 2 && updatedRecognitions != null) {
+                        int goldMineralX = -1;
+                        int silverMineral1X = -1;
+                        int silverMineral2X = -1;
+                        int goldMineralY = -1;
+                        int silverMineral1Y = -1;
+                        int silverMineral2Y = -1;
+                        int mineral1X = -1;
+                        int mineral2X = -1;
+                        int mineral1Y = -1;
+                        int mineral2Y = -1;
+                        int mineral1Type = -1; //0 - silver; 1 - gold
+                        int mineral2Type = -1;
+                        for (Recognition recognition : updatedRecognitions) {
+                            //Get the detected 2 minerals with the lowest Y values
+
+                            if (recognition.getLabel().equals(LABEL_SILVER_MINERAL) || recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
+                                telemetry.addData("status", "detected gold or silver");
+                                telemetry.update();
+                                if (recognition.getTop() > mineral1Y && updatedRecognitions.size() >= 3) {
+                                    mineral2X = mineral1X;
+                                    mineral1X = (int) recognition.getLeft();
+                                    mineral2Y = mineral1Y;
+                                    mineral1Y = (int) recognition.getTop();
+                                    if (recognition.getLabel().equals(LABEL_SILVER_MINERAL)) {
+                                        silverMineral1X = mineral1X;
+                                        silverMineral1Y = mineral1Y;
+                                        mineral1Type = 0;
+                                    } else {
+                                        goldMineralX = mineral1X;
+                                        goldMineralY = mineral1Y;
+                                        mineral1Type = 1;
+                                    }
+                                } else if (recognition.getTop() > mineral2Y && updatedRecognitions.size() >= 3) {
+                                    mineral2X = (int) recognition.getLeft();
+                                    mineral2Y = (int) recognition.getTop();
+                                    if (recognition.getLabel().equals(LABEL_SILVER_MINERAL)) {
+                                        silverMineral2X = mineral2X;
+                                        silverMineral2Y = mineral2Y;
+                                        mineral2Type = 0;
+                                    } else {
+                                        goldMineralX = mineral2X;
+                                        goldMineralY = mineral2Y;
+                                        mineral2Type = 1;
+                                    }
+                                } else {
+                                    //if it only detects 2 minerals
+                                    telemetry.addData("Status", "Two minerals detected");
+                                    telemetry.update();
+                                    if (recognition.getLabel().equals(LABEL_SILVER_MINERAL)) {
+                                        if (silverMineral1X == -1) {
+                                            silverMineral1X = (int) recognition.getLeft();
+                                            silverMineral1Y = (int) recognition.getTop();
+                                            mineral1Type = 0;
+                                        } else if (silverMineral2X == -1) {
+                                            silverMineral2X = (int) recognition.getLeft();
+                                            silverMineral2Y = (int) recognition.getTop();
+                                            mineral2Type = 0;
+                                        }
+                                    } else {
+                                        if (goldMineralX == -1) {
+                                            goldMineralX = (int) recognition.getLeft();
+                                            goldMineralY = (int) recognition.getTop();
+                                            if(mineral1Type == -1)
+                                                mineral1Type = 1;
+                                            else
+                                                mineral2Type = 1;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        telemetry.addData("Mineral 1 type" + mineral1Type, "Mineral 2 type" + mineral2Type);
+                        telemetry.update();
+                        //Find the location of the gold mineral based on the relative location to the silver minerals
+                        if (mineral1Type == 0 && mineral2Type == 0) {
+                            //gold mineral not detected among the left 2 positions, so it is at right
+                            telemetry.addData("Gold Mineral Position", "Right");
+                            telemetry.update();
+                            Log.d("Status", "Right");
+                            Log.d("Status", goldMineralX + " " + goldMineralY);
+                            blockLocation = "Right";
+                            break;
+                        } else if (mineral1Type == 0 && mineral2Type == 1) {
+                            if (goldMineralX < silverMineral1X) {
+                                telemetry.addData("Gold Mineral Position", "Left");
+                                telemetry.update();
+                                Log.d("Status", "Left");
+                                Log.d("Status", goldMineralX + " " + goldMineralY);
+                                blockLocation = "Left";
+                                break;
+                            } else {
+                                telemetry.addData("Gold Mineral Position", "Center");
+                                telemetry.update();
+                                Log.d("Status", "Center");
+                                Log.d("Status", goldMineralX + " " + goldMineralY);
+                                blockLocation = "Center";
+                                break;
+                            }
+                        }
+                        else if (mineral1Type == 1 && mineral2Type == 0) {
+                            if (goldMineralX < silverMineral2X) {
+                                telemetry.addData("Gold Mineral Position", "Left");
+                                telemetry.update();
+                                Log.d("Status", "Left");
+                                Log.d("Status", goldMineralX + " " + goldMineralY);
+                                blockLocation = "Left";
+                                break;
+                            } else {
+                                telemetry.addData("Gold Mineral Position", "Center");
+                                telemetry.update();
+                                Log.d("Status", "Center");
+                                Log.d("Status", goldMineralX + " " + goldMineralY);
+                                blockLocation = "Center";
+                                break;
+                            }
+                        }
+                    }
+                    telemetry.update();
+                }
+            }
+        }
+
+        //Turn back to straight based on what turns it has previously made
+        if (turn) {
+            turnDegrees(0.33, -12.5);
+            //sleepTau(750);
+        }
+    }
+
     public void knockBlockOff(String block){
         driveForward(0.25, Math.sqrt(2) * 12);
         sleepTau(1000);
@@ -546,7 +713,7 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
                 robot.backLeftMotor.setPower(0);
                 robot.backRightMotor.setPower(0);
                 dropLift();
-              //  driveForwardToCrater();
+                //  driveForwardToCrater();
                 //turnDegrees(0.5,  );
                 // sleepTau(2000);
             }
@@ -618,12 +785,15 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
         robot.backLeftMotor.setTargetPosition(robot.backLeftMotor.getCurrentPosition()- motorPosition);
         robot.backRightMotor.setTargetPosition(robot.backRightMotor.getCurrentPosition() + motorPosition);
         dropLift();
-        sleepTau(3000);
+        while(robot.frontLeftMotor.isBusy()){
+            sleepTau(50);
+        }
+        speed(0);
     }
 
     public void sleepTau(long milliSec){
-       double start = robot.getTime();
-       double end = start + milliSec/1000.0;
+        double start = robot.getTime();
+        double end = start + milliSec/1000.0;
         while(opModeIsActive()){
             if(robot.getTime() >= end){
                 break;

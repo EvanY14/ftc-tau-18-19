@@ -32,7 +32,7 @@ import java.util.Locale;
 
 @Autonomous(name = "Auto Depot Hardcode", group = "Tau")
 public class AUTO_DEPOT_HARDCODE extends AUTO_METHODS_HARDCODE {
-
+    Hardware hard = new Hardware();
     @Override
     public void runOpMode() throws InterruptedException{
         //set up methods
@@ -68,10 +68,10 @@ public class AUTO_DEPOT_HARDCODE extends AUTO_METHODS_HARDCODE {
                 //sleepTau(1000);*/
 
                 //Drive forward to the middle of the block
-                driveForward(0.25, Math.sqrt(2) * 12);
+                driveForward(0.25, Math.sqrt(2) * 12-6);
 
                 //Turn towards the crater
-                turnDegrees(0.25, 55);
+                turnDegrees(0.25, 60);
 
 
                 //Lower the lift so we don't tip over on the way to the crater
@@ -138,6 +138,11 @@ public class AUTO_DEPOT_HARDCODE extends AUTO_METHODS_HARDCODE {
                 break;
         }
 
+        hard.turnOffFlash();
+        //deactivate the TensorFlow library to free up system resources
+        if (robot.tfod != null) {
+            robot.tfod.shutdown();
+        }
     }
 
 }

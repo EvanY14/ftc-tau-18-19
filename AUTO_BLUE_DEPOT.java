@@ -31,6 +31,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 import java.util.Locale;
 
 @Autonomous(name = "Blue depot", group = "Tau")
+@Disabled
 public class AUTO_BLUE_DEPOT extends AUTO_METHODS {
 
     @Override

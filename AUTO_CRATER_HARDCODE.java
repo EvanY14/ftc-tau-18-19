@@ -80,24 +80,24 @@ public class AUTO_CRATER_HARDCODE extends AUTO_METHODS_HARDCODE{
 
                 driveForward(0.33, -24);
 
-                turnDegrees(0.33, 90);
+                turnDegrees(0.33, 100);
                 //sleepTau(1000);
                 driveForward(0.33, Math.sqrt(2) * 24);
                 //sleepTau(2000);
-                turnDegrees(0.33, 75);
+                turnDegrees(0.33, 78);
                 //sleepTau(1250);
                 driveForward(0.33, 45);
                 //sleepTau(3000);
                 turnDegrees(0.33, 90);
                 //sleepTau(1000);
                 dropArm();
-                turnDegrees(0.33, 95);
+                turnDegrees(0.33, 115);
                 //sleepTau(1500);
                 dropLift();
                 driveForward(0.5, 65);
                 //sleepTau(5000);
                 break;
-            case "Center":
+            default: //Center
                 driveForward(0.33, Math.sqrt(2) * 24 + 1);
                 //sleepTau(1750);
                 driveForward(0.33, -Math.sqrt(2) * 12 - 1);
@@ -113,15 +113,16 @@ public class AUTO_CRATER_HARDCODE extends AUTO_METHODS_HARDCODE{
                 turnDegrees(0.33, 90);
                 //sleepTau(1000);
                 dropArm();
-                turnDegrees(0.33, 100);
+                turnDegrees(0.33, 110);
                 //sleepTau(1000);
                 dropLift();
-                driveForwardAndDropLift( 78);
+                //driveForwardAndDropLift( 78);
+                driveForward(0.5, 75);
                 //sleepTau(5000);
                 break;
         }
 
-        hard.turnOffFlash();
+        //hard.turnOffFlash();
         //deactivate the TensorFlow library to free up system resources
         if (robot.tfod != null) {
             robot.tfod.shutdown();

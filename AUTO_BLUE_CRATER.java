@@ -1,14 +1,16 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 @Autonomous(group = "Tau", name = "Auto Blue Crater")
+@Disabled
 public class AUTO_BLUE_CRATER extends AUTO_METHODS{
 
     @Override
     public void runOpMode(){
         //set up methods
-        setUp(hardwareMap,telemetry); //Thanks for the code Evan
+        setUp(hardwareMap, telemetry); //Thanks for the code Evan
 
         //Call other methods
         driveForward(0.5, 2* Math.sqrt(2) * 12);

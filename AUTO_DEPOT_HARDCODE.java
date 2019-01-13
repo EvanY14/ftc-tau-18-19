@@ -40,49 +40,7 @@ public class AUTO_DEPOT_HARDCODE extends AUTO_METHODS_HARDCODE {
         unhang();
         //Call other methods
         switch (blockLocation){
-            case("Center"):
-                telemetry.addData("Block position", "Center");
-                telemetry.update();
-
-                //Drive forward two blocks diagonals to knock off the center block and move to the depot
-                driveForward(0.25, 4*Math.sqrt(2) * 12);
-
-
-                //back up half a block diagonal to leave the mineral in the depot
-                driveForward(0.25, -Math.sqrt(2) * 12);
-
-
-                //Turn 90 degrees to set up the marker claw
-                turnDegrees(0.25, 75);
-
-
-                //Drop the marker in the depot
-                dropArm();
-
-                //Move five inches forward to give more room to turn so we don't knock off the silver mineral
-                /*driveForward(0.25, 9);
-                //sleepTau(1000);
-
-                //Slight turn to get to the middle of the block
-                turnDegrees(0.25, 7);
-                //sleepTau(1000);*/
-
-                //Drive forward to the middle of the block
-                driveForward(0.25, Math.sqrt(2) * 12-6);
-
-                //Turn towards the crater
-                turnDegrees(0.25, 60);
-
-
-                //Lower the lift so we don't tip over on the way to the crater
-                dropLift();
-
-                //Drive forward until we detect that we are on the crater
-                //driveForwardToCrater();
-                driveForward(0.5, 60);
-
-                break;
-            case ("Left"):
+             case ("Left"):
                 telemetry.addData("Block position", "Left");
                 telemetry.update();
                 //drive forward half a block diagonal to get to the first intersection of blocks
@@ -110,7 +68,7 @@ public class AUTO_DEPOT_HARDCODE extends AUTO_METHODS_HARDCODE {
                 dropArm();
 
                 //Turn to the crater
-                turnDegrees(0.25, 83);
+                turnDegrees(0.25, 87);
 
                 //Drive forward about half a block
                 /*driveForward(0.25, Math.sqrt(2) * 9 + 1);
@@ -136,9 +94,51 @@ public class AUTO_DEPOT_HARDCODE extends AUTO_METHODS_HARDCODE {
                 dropLift();
                 driveForward(0.5 , 70 );
                 break;
+            default: //Center
+                telemetry.addData("Block position", "Center");
+                telemetry.update();
+
+                //Drive forward two blocks diagonals to knock off the center block and move to the depot
+                driveForward(0.25, 4*Math.sqrt(2) * 12);
+
+
+                //back up half a block diagonal to leave the mineral in the depot
+                driveForward(0.25, -Math.sqrt(2) * 12);
+
+
+                //Turn 90 degrees to set up the marker claw
+                turnDegrees(0.25, 75);
+
+
+                //Drop the marker in the depot
+                dropArm();
+
+                //Move five inches forward to give more room to turn so we don't knock off the silver mineral
+                /*driveForward(0.25, 9);
+                //sleepTau(1000);
+
+                //Slight turn to get to the middle of the block
+                turnDegrees(0.25, 7);
+                //sleepTau(1000);*/
+
+                //Drive forward to the middle of the block
+                driveForward(0.25, Math.sqrt(2) * 12-3);
+
+                //Turn towards the crater
+                turnDegrees(0.25, 45);
+
+
+                //Lower the lift so we don't tip over on the way to the crater
+                dropLift();
+
+                //Drive forward until we detect that we are on the crater
+                //driveForwardToCrater();
+                driveForward(0.5, 60);
+
+                break;
         }
 
-        hard.turnOffFlash();
+        //hard.turnOffFlash();
         //deactivate the TensorFlow library to free up system resources
         if (robot.tfod != null) {
             robot.tfod.shutdown();

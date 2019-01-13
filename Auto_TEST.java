@@ -2,10 +2,12 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 @Autonomous(name = "Tau: Test", group = "AUTO_TEST")
+@Disabled
 public class Auto_TEST extends AUTO_METHODS_HARDCODE_ULTRASONIC {
 //    Hardware robot = new Hardware();
     @Override

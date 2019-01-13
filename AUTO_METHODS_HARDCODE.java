@@ -307,7 +307,7 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
 
         speedLift(1);
         robot.resetTime();
-        getBlockLocation2();
+        //getBlockLocation2();
         /*while(targetPosLeft > startPos - 5800){
             while(robot.leftLiftMotor.isBusy()){
                 sleepTau(50);
@@ -324,15 +324,15 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
             telemetry.update();
         }
         speedLift(0);
-        //getBlockLocation2();
-        Log.d("lift position", robot.rightLiftMotor.getCurrentPosition() + "");
+
+        getBlockLocation2();
     }
 
     public void dropLift(){
         robot.stopper.setPosition(0.95);
         //speedLift(0);
-        robot.leftLiftMotor.setTargetPosition(robot.rightLiftMotor.getCurrentPosition() + 5800);
-        robot.rightLiftMotor.setTargetPosition(robot.leftLiftMotor.getCurrentPosition() + 5800);
+        robot.leftLiftMotor.setTargetPosition(robot.rightLiftMotor.getCurrentPosition() + 5850);
+        robot.rightLiftMotor.setTargetPosition(robot.leftLiftMotor.getCurrentPosition() + 5850);
 
         robot.resetTime();
         speedLift(1);
@@ -522,10 +522,13 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
     public void getBlockLocation2() {
         boolean turn = false;
         boolean turn2 = false;
-        while (opModeIsActive() && robot.getTime() < 10) {
+
+        blockLocation = "Center"; //default location is center
+        robot.resetTime();
+        while (opModeIsActive() && robot.getTime() < 4) {
             //Try checking 10 degrees to the left
-            if (robot.getTime() > 5 && turn == false) {
-                turnDegrees(0.33, 12.5);
+            if (robot.getTime() > 2 && turn == false) {
+                turnDegrees(0.25, 15);
                 //sleepTau(500);
                 turn = true;
             }
@@ -538,6 +541,7 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
                 Log.d("Status", "First call");
                 if (updatedRecognitions != null) {
                     telemetry.addData("# Object Detected", updatedRecognitions.size());
+                    telemetry.update();
                     Log.d("Status", "Objects detected");
                     Log.d("# Objects detected", updatedRecognitions.size() + "");
                     if (updatedRecognitions.size() >= 2 && updatedRecognitions != null) {
@@ -554,15 +558,16 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
                         int mineral1Type = -1; //0 - silver; 1 - gold
                         int mineral2Type = -1;
                         for (Recognition recognition : updatedRecognitions) {
-                            //Get the detected 2 minerals with the lowest Y values
+                            //Get the detected 2 minerals with the largest Y values
 
                             if (recognition.getLabel().equals(LABEL_SILVER_MINERAL) || recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
                                 telemetry.addData("status", "detected gold or silver");
                                 telemetry.update();
                                 if (recognition.getTop() > mineral1Y && updatedRecognitions.size() >= 3) {
                                     mineral2X = mineral1X;
-                                    mineral1X = (int) recognition.getLeft();
                                     mineral2Y = mineral1Y;
+                                    mineral2Type = mineral1Type;
+                                    mineral1X = (int) recognition.getLeft();
                                     mineral1Y = (int) recognition.getTop();
                                     if (recognition.getLabel().equals(LABEL_SILVER_MINERAL)) {
                                         silverMineral1X = mineral1X;
@@ -585,7 +590,7 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
                                         goldMineralY = mineral2Y;
                                         mineral2Type = 1;
                                     }
-                                } else {
+                                } else if(updatedRecognitions.size() == 2) {
                                     //if it only detects 2 minerals
                                     telemetry.addData("Status", "Two minerals detected");
                                     telemetry.update();
@@ -665,7 +670,7 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
 
         //Turn back to straight based on what turns it has previously made
         if (turn) {
-            turnDegrees(0.33, -12.5);
+            turnDegrees(0.25, -15);
             //sleepTau(750);
         }
     }

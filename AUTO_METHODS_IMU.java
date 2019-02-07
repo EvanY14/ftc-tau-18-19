@@ -178,11 +178,11 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
         parameters.accelRange = BNO055IMU.AccelRange.G4;
         parameters.accelBandwidth      = BNO055IMU.AccelBandwidth.HZ62_5;
         /** accelerometer power mode. See Section 3.5.2 (p27) and Section 4.2.2 (p77) of the BNO055 specification
-        parameters.accelPowerMode      = BNO055IMU.AccelPowerMode.NORMAL;
+         parameters.accelPowerMode      = BNO055IMU.AccelPowerMode.NORMAL;
 
-        // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
-        // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
-        // and named "imu".*/
+         // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
+         // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
+         // and named "imu".*/
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameters);
 
@@ -340,27 +340,34 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
 
     }
 
-    public void turnDegrees(double speed, double degree){
-        for(DcMotor motor:driveMotors){
+    public void turnDegrees(double speed, double degree) {
+        for (DcMotor motor : driveMotors) {
             motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         }
         initialAngle = imu.getAngularOrientation().firstAngle;
         double heading = initialAngle;
-        finalAngle = initialAngle + degree < 0 ? initialAngle + degree + 360:initialAngle+degree;
+        finalAngle = initialAngle + degree < 0 ? initialAngle + degree + 360 : initialAngle + degree;
         speed(speed);
         double distance = (degree * (2 * robotRotationRadius * Math.PI) / 360);
-        motorPosition = (int)((distance / (6*Math.PI)) * ticksPerRotation);
-        robot.frontLeftMotor.setTargetPosition(robot.frontLeftMotor.getCurrentPosition()+ motorPosition);
+        motorPosition = (int) ((distance / (6 * Math.PI)) * ticksPerRotation);
+        robot.frontLeftMotor.setTargetPosition(robot.frontLeftMotor.getCurrentPosition() + motorPosition);
         robot.frontRightMotor.setTargetPosition(robot.frontRightMotor.getCurrentPosition() + motorPosition);
-        robot.backLeftMotor.setTargetPosition(robot.backLeftMotor.getCurrentPosition()+ motorPosition);
+        robot.backLeftMotor.setTargetPosition(robot.backLeftMotor.getCurrentPosition() + motorPosition);
         robot.backRightMotor.setTargetPosition(robot.backRightMotor.getCurrentPosition() + motorPosition);
-        if(degree > 0) {
+        while (opModeIsActive() && robot.frontLeftMotor.isBusy()) {
+            sleepTau(10);
+        }
+        if (!checkTurns(degree, initialAngle)){
+            driveForward(0.25, -6);
+            turnDegrees(speed, degree - (imu.getAngularOrientation().firstAngle - initialAngle));
+    }
+        /* if(degree > 0) {
             while (opModeIsActive() && heading <= finalAngle && robot.frontLeftMotor.isBusy()) {
                 sleepTau(100);
                 heading = imu.getAngularOrientation().firstAngle;
                 /*if(heading < 0){
                     heading += 360;
-                }*/
+                }
                 telemetry.addData("Heading", heading);
                 Log.d("Heading", heading + "");
                 //Log.d("Adjusted heading", imu.getAngularOrientation().firstAngle - firstAngleZero + "");
@@ -372,11 +379,12 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
                 heading = imu.getAngularOrientation().firstAngle;
                /* if(heading < 0){
                     heading += 360;
-                }*/
+                }
                 telemetry.addData("Heading", heading);
                 telemetry.update();
             }
         }
+        */
         speed(0);
         /*for(DcMotor motor:driveMotors){
             motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -418,7 +426,7 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
                 turnDegrees(0.25, 10);
                 sleepTau(500);
                 turn = true;
-            //try checking 10 degrees to the right
+                //try checking 10 degrees to the right
             } else if (robot.getTime() > 10 && turn2 == false) {
                 turnDegrees(0.25, -20);
                 sleepTau(1000);
@@ -446,14 +454,14 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
                                 //If the y value of the top of the gold mineral is greater than the y value of the next lowest
                                 //make it the new mineral that we are scanning
                                 if(recognition.getTop() > goldMineralY){
-                                        goldMineralX = (int) recognition.getLeft();
-                                        goldMineralY = (int)recognition.getTop();
-                                        Log.d("Width", "" + (Math.abs(recognition.getLeft() - recognition.getRight())));
-                                        Log.d("Status", "In more than 3 detected loop" + updatedRecognitions.size());
-                                        Log.d("Y of top", recognition.getTop() +"");
-                                        Log.d("Gold mineral y", "" + goldMineralY);
-                                    }
-                                    //Same for silver, but getting the two lowest instead of just the lowest
+                                    goldMineralX = (int) recognition.getLeft();
+                                    goldMineralY = (int)recognition.getTop();
+                                    Log.d("Width", "" + (Math.abs(recognition.getLeft() - recognition.getRight())));
+                                    Log.d("Status", "In more than 3 detected loop" + updatedRecognitions.size());
+                                    Log.d("Y of top", recognition.getTop() +"");
+                                    Log.d("Gold mineral y", "" + goldMineralY);
+                                }
+                                //Same for silver, but getting the two lowest instead of just the lowest
                             } else if (recognition.getLabel().equals(LABEL_SILVER_MINERAL)) {
                                 if(recognition.getTop() > silverMineral1Y && updatedRecognitions.size() > 3) {
                                     silverMineral2X = silverMineral1X;
@@ -580,7 +588,7 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
         }
     }
 
-    public void driveForwardToCrater(){
+    public void driveForwardToCrater() {
         robot.frontLeftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         robot.backLeftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         robot.frontRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -599,7 +607,12 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
         }
 
     }
-
+    public boolean checkTurns(double degrees, double initialAngle) {
+        if(imu.getAngularOrientation().firstAngle - initialAngle  >= degrees)
+            return true;
+        else
+            return false;
+    }
     /*public void testAndBackUpIntoCrater(){
         double initialDist = robot.ultrasonicSensor.getDistance(DistanceUnit.INCH);
         stopRobot();
@@ -631,8 +644,8 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
     }
 
     public void sleepTau(long milliSec){
-       double start = robot.getTime();
-       double end = start + milliSec/1000.0;
+        double start = robot.getTime();
+        double end = start + milliSec/1000.0;
         while(opModeIsActive()){
             if(robot.getTime() >= end){
                 break;

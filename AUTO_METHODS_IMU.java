@@ -608,7 +608,7 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
 
     }
     public boolean checkTurns(double degrees, double initialAngle) {
-        if(imu.getAngularOrientation().firstAngle - initialAngle  >= degrees)
+        if(Math.abs(imu.getAngularOrientation().firstAngle - initialAngle - degrees)  < 5)
             return true;
         else
             return false;

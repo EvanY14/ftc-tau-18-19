@@ -959,3 +959,5 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
             return ((imu.getAngularOrientation().firstAngle + imu1.getAngularOrientation().firstAngle) / 2.0);
     }*/
 }
+
+

@@ -386,12 +386,12 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
     }
 
     private void resetAngle() {
-        lastAngle = imu.getAngularOrientation().firstAngle;
+        lastAngle = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
         globalAngle = 0;
     }
 
     private  double getCurrentAngle() {
-        double angle = imu.getAngularOrientation().firstAngle;
+        double angle = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
 
         double deltaAngle = angle - lastAngle;
 
@@ -409,6 +409,7 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
 
     public void turnDegrees(double speed, double degree){
         double currentAngle = 0.0;
+        int i = 0;
         initialAngle = getCurrentAngle();
         finalAngle = initialAngle + degree; //assuming turning left is positive degree
 
@@ -431,7 +432,12 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
 
             currentAngle = getCurrentAngle();
             degree = finalAngle - currentAngle;
-        } while(Math.abs(currentAngle - finalAngle) > 5 && opModeIsActive() && robot.getTime() < 10);
+
+            i++;
+            if(Math.abs(currentAngle - finalAngle) > 5 && i == 2)
+                driveForward(speed, -4); //last try back 4in in case it is stuck at the wall
+
+        } while(Math.abs(currentAngle - finalAngle) > 5 && i<=2);
     }
     /*public void scanMinerals(){
         if(vision.seesSilver()){

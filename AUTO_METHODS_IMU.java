@@ -413,7 +413,7 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
         initialAngle = getCurrentAngle();
         finalAngle = initialAngle + degree; //assuming turning left is positive degree
 
-        double startTime = robot.getTime();
+        robot.resetTime();
         currentAngle = initialAngle;
         do{
             double distance = (degree * (2 * robotRotationRadius * Math.PI) / 360);
@@ -422,7 +422,7 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
             robot.frontRightMotor.setTargetPosition(robot.frontRightMotor.getCurrentPosition() + motorPosition);
             robot.backLeftMotor.setTargetPosition(robot.backLeftMotor.getCurrentPosition() + motorPosition);
             robot.backRightMotor.setTargetPosition(robot.backRightMotor.getCurrentPosition() + motorPosition);
-            robot.resetTime();
+            //robot.resetTime();
             speed(speed);
             while (opModeIsActive() && robot.getTime() < 3 && robot.frontRightMotor.isBusy() && robot.frontLeftMotor.isBusy() && robot.backRightMotor.isBusy() && robot.backLeftMotor.isBusy()) {
                 telemetry.addData("Current Angle::",currentAngle);
@@ -439,11 +439,48 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
 
         } while(Math.abs(currentAngle - finalAngle) > 5 && i<=2);
     }
-    /*public void scanMinerals(){
-        if(vision.seesSilver()){
 
+    /*public void turnDegreesIMU(double speed, double degree){
+        double currentAngle = 0.0;
+        initialAngle = getCurrentAngle();
+        finalAngle = initialAngle + degree; //assuming turning left is positive degree
+        setMotorIMU();
+        robot.resetTime();
+        currentAngle = initialAngle;
+
+        if(degree > 0) //left turn
+            speed(speed);
+        else //right turn
+            speed(-speed);
+
+        while(Math.abs(currentAngle - finalAngle) > 5 && robot.getTime() < 3) {
+            currentAngle = getCurrentAngle();
+            telemetry.addData("Current Angle::", currentAngle);
+            telemetry.update();
         }
+
+        speed(0);
+        if(Math.abs(currentAngle - finalAngle) > 5)
+        {
+            setMotorNoIMU();
+            driveForward(0.25, -4); //last try back 4in in case it is stuck at the wall
+            setMotorIMU();
+            if(degree > 0) //left turn
+                speed(speed);
+            else //right turn
+                speed(-speed);
+
+            while(Math.abs(currentAngle - finalAngle) > 5 && robot.getTime() < 3) {
+                currentAngle = getCurrentAngle();
+                telemetry.addData("Current Angle::", currentAngle);
+                telemetry.update();
+            }
+        }
+
+        speed(0);
+        setMotorNoIMU();
     }*/
+
     public void getBlockLocation(){
         boolean turn = false;
         boolean turn2 = false;

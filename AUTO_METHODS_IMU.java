@@ -195,7 +195,7 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
         telemetry.addData("Readiness", "Press Play to start");
         telemetry.update();
 
-        resetAngle();
+        //resetAngle();
 
         Log.d("status", "wait for start");
         // Wait until we're told to go
@@ -390,7 +390,7 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
         globalAngle = 0;
     }
 
-    private  double getCurrentAngle() {
+    /*private  double getCurrentAngle() {
         double angle = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
 
         double deltaAngle = angle - lastAngle;
@@ -405,18 +405,29 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
         lastAngle = angle;
 
         return globalAngle;
+    }*/
+    private double convertToIMUDegree(double degree)
+    {
+        if(degree < -180)
+            degree += 360;
+        else if(degree > 180)
+            degree -= 360;
+
+        return degree;
     }
 
     public void turnDegrees(double speed, double degree){
         double currentAngle = 0.0;
+        double distance = 0.0;
         int i = 0;
-        initialAngle = getCurrentAngle();
-        finalAngle = initialAngle + degree; //assuming turning left is positive degree
+        //initialAngle = getCurrentAngle();
+        initialAngle = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+        finalAngle = convertToIMUDegree(initialAngle - degree); //note that the extension hub is upside down - thus degree is negative when robot turning left
 
         robot.resetTime();
         currentAngle = initialAngle;
         do{
-            double distance = (degree * (2 * robotRotationRadius * Math.PI) / 360);
+            distance = (degree * (2 * robotRotationRadius * Math.PI) / 360);
             motorPosition = (int) ((distance / (6 * Math.PI)) * ticksPerRotation);
             robot.frontLeftMotor.setTargetPosition(robot.frontLeftMotor.getCurrentPosition() + motorPosition);
             robot.frontRightMotor.setTargetPosition(robot.frontRightMotor.getCurrentPosition() + motorPosition);
@@ -430,8 +441,10 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
             }
             speed(0);
 
-            currentAngle = getCurrentAngle();
-            degree = finalAngle - currentAngle;
+            //currentAngle = getCurrentAngle();
+            //degree = finalAngle - currentAngle;
+            currentAngle = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+            degree = currentAngle - finalAngle;
 
             i++;
             if(Math.abs(currentAngle - finalAngle) > 5 && i == 2)

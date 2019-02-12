@@ -3,6 +3,10 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+
 @Autonomous(group = "Tau", name = "Auto Crater IMU")
 //@Disabled
 public class AUTO_CRATER_IMU extends AUTO_METHODS_IMU{
@@ -14,8 +18,14 @@ public class AUTO_CRATER_IMU extends AUTO_METHODS_IMU{
         setUp(hardwareMap, telemetry); //Thanks for the code Evan
 
         //Call other methods
+        /*while(opModeIsActive())
+        {
+            telemetry.addData("first angle:", imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle);
+            telemetry.update();
+        }*/
 
         unhang();
+        //blockLocation = "Center";
         switch (blockLocation) {
             case "Left":
                 //Drive forward 1/2 block diagonal plus an inch to get the middle of the robot to the first corner

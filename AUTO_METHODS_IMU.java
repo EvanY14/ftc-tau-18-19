@@ -89,7 +89,7 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
     private static final String LABEL_GOLD_MINERAL = "Gold Mineral";
     private static final String LABEL_SILVER_MINERAL = "Silver Mineral";
     private String VUFORIA_KEY = "AUTPgLj/////AAABmftxO0IFGU3urmaLhFDDt+04jQVVUEnMoybqfXkW+2kDybcXkSk00wQ1RARTA6i+W3x8pWjVDY/xcKrLUwZZKYSdeSlSWW+nMK4s5AEaTS8K0Re8OrF3JF3zmHz4julP101iBl7+dpVOEFw10laj2E0q0bvw9vqvXMMjg8J3zdXiDS4zzHPRl0Iwx6iaH4ZmmE4VqXiJ8kXrZ9bc897oR4FcC01mF+cX3x6oi5e8ZpQanSDPp2/IBbvUxi/oe2ImrNpZTczvZLMwYMTQqgfeN9Ewz5KtCbAwfCLARiW5QZ/EOOdlLfGIPXGYesLuVPswhWP5HCCCrberCUZ+y+2OGj7+SlesgFSD8qwWNMQh+Erx";
-    private BNO055IMU imu;
+    public BNO055IMU imu;
     /**
      * {@link #vuforia} is the variable we will use to store our instance of the Vuforia
      * localization engine.
@@ -195,7 +195,7 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
         telemetry.addData("Readiness", "Press Play to start");
         telemetry.update();
 
-        //resetAngle();
+        resetAngle();
 
         Log.d("status", "wait for start");
         // Wait until we're told to go
@@ -343,8 +343,8 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
     public void dropLift(){
         robot.stopper.setPosition(0.95);
         //speedLift(0);
-        robot.leftLiftMotor.setTargetPosition(robot.rightLiftMotor.getCurrentPosition() + 5850);
-        robot.rightLiftMotor.setTargetPosition(robot.leftLiftMotor.getCurrentPosition() + 5850);
+        robot.leftLiftMotor.setTargetPosition(robot.rightLiftMotor.getCurrentPosition() + 5800);
+        robot.rightLiftMotor.setTargetPosition(robot.leftLiftMotor.getCurrentPosition() + 5800);
 
         robot.resetTime();
         speedLift(1);
@@ -390,7 +390,7 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
         globalAngle = 0;
     }
 
-    /*private  double getCurrentAngle() {
+    private  double getCurrentAngle() {
         double angle = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
 
         double deltaAngle = angle - lastAngle;
@@ -405,7 +405,7 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
         lastAngle = angle;
 
         return globalAngle;
-    }*/
+    }
     private double convertToIMUDegree(double degree)
     {
         if(degree < -180)
@@ -420,10 +420,10 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
         double currentAngle = 0.0;
         double distance = 0.0;
         int i = 0;
-        //initialAngle = getCurrentAngle();
-        initialAngle = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
-        finalAngle = convertToIMUDegree(initialAngle - degree); //note that the extension hub is upside down - thus degree is negative when robot turning left
-
+        initialAngle = getCurrentAngle();
+        //initialAngle = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+        //finalAngle = convertToIMUDegree(initialAngle + degree); //note that the extension hub is upside down - thus degree is negative when robot turning left
+        finalAngle = initialAngle + degree;
         robot.resetTime();
         currentAngle = initialAngle;
         do{
@@ -441,16 +441,20 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
             }
             speed(0);
 
-            //currentAngle = getCurrentAngle();
+            currentAngle = getCurrentAngle();
+            degree = finalAngle - currentAngle;
+            //currentAngle = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
             //degree = finalAngle - currentAngle;
-            currentAngle = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
-            degree = currentAngle - finalAngle;
+            //if(degree > 180)
+            //    degree = 360 - degree;
+            //else if(degree < -180)
+            //    degree = 360 + degree;
 
             i++;
-            if(Math.abs(currentAngle - finalAngle) > 5 && i == 2)
+            if(Math.abs(currentAngle - finalAngle) > 10 && i == 2)
                 driveForward(speed, -4); //last try back 4in in case it is stuck at the wall
 
-        } while(Math.abs(currentAngle - finalAngle) > 5 && i<=2);
+        } while(Math.abs(currentAngle - finalAngle) > 10 && i<=2);
     }
 
     /*public void turnDegreesIMU(double speed, double degree){

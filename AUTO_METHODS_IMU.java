@@ -385,6 +385,41 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
 
     }
 
+    //drive forward certain distance at certain speed(speed should be no more than 1), distance is in inches
+    public void driveForwardToCrater(double speed, double distance){
+        double tilt_angle = 0.0;
+        double startTime = robot.getTime();
+        motorPosition = (int)((distance / (6 * Math.PI)) * ticksPerRotation);
+        robot.frontLeftMotor.setTargetPosition(robot.frontLeftMotor.getCurrentPosition()- motorPosition);
+        robot.frontRightMotor.setTargetPosition(robot.frontRightMotor.getCurrentPosition() + motorPosition);
+        robot.backLeftMotor.setTargetPosition(robot.backLeftMotor.getCurrentPosition()- motorPosition);
+        robot.backRightMotor.setTargetPosition(robot.backRightMotor.getCurrentPosition() + motorPosition);
+        robot.resetTime();
+        speed(speed);
+        while(opModeIsActive() && robot.getTime() < 5 && robot.frontRightMotor.isBusy() && robot.frontLeftMotor.isBusy() && robot.backRightMotor.isBusy() && robot.backLeftMotor.isBusy()){
+           //check if tilt angle to detect if it drives above the crater edge
+            tilt_angle = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).thirdAngle;
+
+            telemetry.addData("Tilt angle::", tilt_angle);
+            telemetry.update();
+
+            if(Math.abs(tilt_angle) > 10.0)
+                break;
+        }
+        speed(0);
+        /*while(opModeIsActive() && robot.frontLeftMotor.isBusy()){
+            testDistances();
+        }*/
+        /*while(opModeIsActive()){
+            if(Math.abs(getImuAverageXValue()) >= Math.abs(finalX) && Math.abs(getIMUAverageYValue()) >= Math.abs(finalY)){
+                speed(0);
+                sleepTau(500);
+                break;
+            }
+        }*/
+
+    }
+
     private void resetAngle() {
         lastAngle = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
         globalAngle = 0;

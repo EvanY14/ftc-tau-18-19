@@ -80,7 +80,8 @@ public class AUTO_DEPOT_IMU extends AUTO_METHODS_IMU {
 
                 //Drive forward into the crater
                 //driveForwardToCrater();
-                driveForward(0.25, 78);
+                //driveForward(0.25, 78);
+                driveForwardToCrater(0.25, 78);
                 break;
             case("Right"):
                 telemetry.addData("Block location", "Right");
@@ -93,7 +94,8 @@ public class AUTO_DEPOT_IMU extends AUTO_METHODS_IMU {
                 dropArm();
                 turnDegrees(0.25, 85);
                 dropLift();
-                driveForward(0.25 , 70 );
+                //driveForward(0.25 , 70 );
+                driveForwardToCrater(0.25 , 70 );
                 break;
             default: //Center
                 telemetry.addData("Block position", "Center");
@@ -134,7 +136,8 @@ public class AUTO_DEPOT_IMU extends AUTO_METHODS_IMU {
 
                 //Drive forward until we detect that we are on the crater
                 //driveForwardToCrater();
-                driveForward(0.25, 60);
+                //driveForward(0.25, 60);
+                driveForwardToCrater(0.25, 60);
 
                 break;
         }

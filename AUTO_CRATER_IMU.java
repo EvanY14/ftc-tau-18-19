@@ -77,7 +77,8 @@ public class AUTO_CRATER_IMU extends AUTO_METHODS_IMU{
 
                 //drive forward into the crater by driving forward until a certain angle is met with the IMU
                 //then waiting 1/2 a second to get fully into the crater
-                driveForward(0.25, 81);
+                //driveForward(0.25, 81);
+                driveForwardToCrater(0.25, 81);
 
                 break;
             case "Right":
@@ -107,7 +108,8 @@ public class AUTO_CRATER_IMU extends AUTO_METHODS_IMU{
                 turnDegrees(0.33, 115);
                 //sleepTau(1500);
                 dropLift();
-                driveForward(0.25, 65);
+                //driveForward(0.25, 65);
+                driveForwardToCrater(0.25, 65);
                 //sleepTau(5000);
                 break;
             default: //Center
@@ -130,7 +132,8 @@ public class AUTO_CRATER_IMU extends AUTO_METHODS_IMU{
                 //sleepTau(1000);
                 dropLift();
                 //driveForwardAndDropLift( 78);
-                driveForward(0.25, 75);
+                //driveForward(0.25, 75);
+                driveForwardToCrater(0.25, 75);
                 //sleepTau(5000);
                 break;
         }

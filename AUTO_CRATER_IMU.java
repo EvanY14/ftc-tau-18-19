@@ -21,8 +21,10 @@ public class AUTO_CRATER_IMU extends AUTO_METHODS_IMU{
         /*while(opModeIsActive())
         {
             telemetry.addData("first angle:", imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle);
+            telemetry.addData("second angle:", imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).secondAngle);
+            telemetry.addData("third angle:", imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).thirdAngle);
             telemetry.update();
-        }*/
+        }`*/
 
         unhang();
         //blockLocation = "Center";
@@ -30,6 +32,7 @@ public class AUTO_CRATER_IMU extends AUTO_METHODS_IMU{
             case "Left":
                 //Drive forward 1/2 block diagonal plus an inch to get the middle of the robot to the first corner
                 driveForward(0.33, Math.sqrt(2) * 12 -2);
+
 
 
                 //turn 45 degrees to the left mineral

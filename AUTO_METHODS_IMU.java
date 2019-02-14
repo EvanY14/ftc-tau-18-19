@@ -387,7 +387,9 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
 
     //drive forward certain distance at certain speed(speed should be no more than 1), distance is in inches
     public void driveForwardToCrater(double speed, double distance){
-        double tilt_angle = 0.0;
+        double tilt_angle;
+        double delta_angle;
+        double tilt_angle_start = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).thirdAngle;
         double startTime = robot.getTime();
         motorPosition = (int)((distance / (6 * Math.PI)) * ticksPerRotation);
         robot.frontLeftMotor.setTargetPosition(robot.frontLeftMotor.getCurrentPosition()- motorPosition);
@@ -403,7 +405,13 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
             telemetry.addData("Tilt angle::", tilt_angle);
             telemetry.update();
 
-            if(Math.abs(tilt_angle) > 10.0)
+            delta_angle = tilt_angle - tilt_angle_start;
+            if(delta_angle > 180)
+                delta_angle -= 360;
+            else if(delta_angle < -180)
+                delta_angle += 360;
+
+            if(Math.abs(delta_angle) > 8)
                 break;
         }
         speed(0);

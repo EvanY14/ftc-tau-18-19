@@ -179,9 +179,9 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
         //accelerometer power mode. See Section 3.5.2 (p27) and Section 4.2.2 (p77) of the BNO055 specification
         //parameters.accelPowerMode      = BNO055IMU.AccelPowerMode.NORMAL;
 
-         // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
-         // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
-         // and named "imu".*/
+        // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
+        // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
+        // and named "imu".*/
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameters);
 
@@ -343,18 +343,21 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
     public void dropLift(){
         robot.stopper.setPosition(0.95);
         //speedLift(0);
-        robot.leftLiftMotor.setTargetPosition(robot.rightLiftMotor.getCurrentPosition() + 5800);
-        robot.rightLiftMotor.setTargetPosition(robot.leftLiftMotor.getCurrentPosition() + 5800);
+        robot.leftLiftMotor.setTargetPosition(robot.leftLiftMotor.getCurrentPosition() + 5800);
+        robot.rightLiftMotor.setTargetPosition(robot.rightLiftMotor.getCurrentPosition() + 5800);
 
         robot.resetTime();
         speedLift(1);
+        Log.d("lift position before", robot.rightLiftMotor.getCurrentPosition() + "");
 
         while(opModeIsActive() && robot.getTime() < 5 && robot.rightLiftMotor.isBusy() && robot.leftLiftMotor.isBusy()){
             telemetry.addData("Status", "Lowering lift...");
             telemetry.update();
+
         }
         speedLift(0);
-        Log.d("lift position", robot.rightLiftMotor.getCurrentPosition() + "");
+        Log.d("lift position after", robot.rightLiftMotor.getCurrentPosition() + "");
+
     }
     //drive forward certain distance at certain speed(speed should be no more than 1), distance is in inches
     public void driveForward(double speed, double distance){
@@ -399,7 +402,7 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
         robot.resetTime();
         speed(speed);
         while(opModeIsActive() && robot.getTime() < 5 && robot.frontRightMotor.isBusy() && robot.frontLeftMotor.isBusy() && robot.backRightMotor.isBusy() && robot.backLeftMotor.isBusy()){
-           //check if tilt angle to detect if it drives above the crater edge
+            //check if tilt angle to detect if it drives above the crater edge
             tilt_angle = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).thirdAngle;
 
             telemetry.addData("Tilt angle::", tilt_angle);
@@ -494,10 +497,10 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
             //    degree = 360 + degree;
 
             i++;
-            if(Math.abs(currentAngle - finalAngle) > 10 && i == 2)
+            if(Math.abs(currentAngle - finalAngle) > 5 && i == 2)
                 driveForward(speed, -4); //last try back 4in in case it is stuck at the wall
 
-        } while(Math.abs(currentAngle - finalAngle) > 10 && i<=2);
+        } while(Math.abs(currentAngle - finalAngle) > 5 && i<=2);
     }
 
     /*public void turnDegreesIMU(double speed, double degree){
@@ -988,5 +991,4 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
         tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_GOLD_MINERAL, LABEL_SILVER_MINERAL);
     }
 
- }
-
+}

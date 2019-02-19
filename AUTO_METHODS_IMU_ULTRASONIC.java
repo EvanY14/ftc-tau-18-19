@@ -50,7 +50,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
  * Created by Evan Yu on 9/16/2018.
  */
 
-public class AUTO_METHODS_IMU extends LinearOpMode {
+public class AUTO_METHODS_IMU_ULTRASONIC extends LinearOpMode {
     Hardware robot = new Hardware();
 
     //Vision1 vision = new Vision1();
@@ -133,7 +133,7 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
     Vision variables
      */
 
-    public AUTO_METHODS_IMU(){
+    public AUTO_METHODS_IMU_ULTRASONIC(){
 
     }
 
@@ -237,6 +237,19 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
     public void speedLift(double speed){
         robot.rightLiftMotor.setPower(speed);
         robot.leftLiftMotor.setPower(speed);
+    }
+
+    public void ultracheck(){
+        double initialDist = robot.ultrasonicSensor.getDistance(DistanceUnit.INCH);
+        if(initialDist <= 10) {
+            speed(0);
+            sleepTau(2000);
+            if (robot.ultrasonicSensor.getDistance(DistanceUnit.INCH) <= initialDist - 3) {
+                driveForward(0.25, -18);
+                sleepTau(500);
+                driveForward(0.25, 18);
+            }
+        }
     }
 
     /*Auto methods to call
@@ -373,6 +386,7 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
         while(opModeIsActive() && robot.getTime() < 5 && robot.frontRightMotor.isBusy() && robot.frontLeftMotor.isBusy() && robot.backRightMotor.isBusy() && robot.backLeftMotor.isBusy()){
             telemetry.addData("Position", robot.frontRightMotor.getCurrentPosition());
             telemetry.update();
+            ultracheck();
         }
         speed(0);
         /*while(opModeIsActive() && robot.frontLeftMotor.isBusy()){
@@ -407,6 +421,7 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
 
             telemetry.addData("Tilt angle::", tilt_angle);
             telemetry.update();
+            ultracheck();
 
             delta_angle = tilt_angle - tilt_angle_start;
             if(delta_angle > 180)
@@ -497,10 +512,10 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
             //    degree = 360 + degree;
 
             i++;
-            if(Math.abs(currentAngle - finalAngle) > 8 && i == 2)
+            if(Math.abs(currentAngle - finalAngle) > 5 && i == 2)
                 driveForward(speed, -4); //last try back 4in in case it is stuck at the wall
 
-        } while(Math.abs(currentAngle - finalAngle) > 8 && i<=2);
+        } while(Math.abs(currentAngle - finalAngle) > 5 && i<=2);
     }
 
     /*public void turnDegreesIMU(double speed, double degree){

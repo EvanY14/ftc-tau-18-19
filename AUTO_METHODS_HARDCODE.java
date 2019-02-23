@@ -331,8 +331,8 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
     public void dropLift(){
         robot.stopper.setPosition(0.95);
         //speedLift(0);
-        robot.leftLiftMotor.setTargetPosition(robot.rightLiftMotor.getCurrentPosition() + 5800);
-        robot.rightLiftMotor.setTargetPosition(robot.leftLiftMotor.getCurrentPosition() + 5800);
+        robot.leftLiftMotor.setTargetPosition(robot.rightLiftMotor.getCurrentPosition() + 5850);
+        robot.rightLiftMotor.setTargetPosition(robot.leftLiftMotor.getCurrentPosition() + 5850);
 
         robot.resetTime();
         speedLift(1);
@@ -959,5 +959,3 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
             return ((imu.getAngularOrientation().firstAngle + imu1.getAngularOrientation().firstAngle) / 2.0);
     }*/
 }
-
-

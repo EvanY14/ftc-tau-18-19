@@ -31,7 +31,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 import java.util.Locale;
 
 @Autonomous(name = "Auto Depot IMU Ultrasonic", group = "Tau")
-//@Disabled
+@Disabled
 public class AUTO_DEPOT_IMU_ULTRASONIC extends AUTO_METHODS_IMU_ULTRASONIC {
     Hardware hard = new Hardware();
     @Override

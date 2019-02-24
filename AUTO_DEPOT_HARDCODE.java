@@ -79,7 +79,7 @@ public class AUTO_DEPOT_HARDCODE extends AUTO_METHODS_HARDCODE {
 
                 //Drive forward into the crater
                 //driveForwardToCrater();
-                driveForward(0.5, 78);
+                driveForward(0.25, 78);
                 break;
             case("Right"):
                 telemetry.addData("Block location", "Right");
@@ -92,7 +92,7 @@ public class AUTO_DEPOT_HARDCODE extends AUTO_METHODS_HARDCODE {
                 dropArm();
                 turnDegrees(0.25, 85);
                 dropLift();
-                driveForward(0.5 , 70 );
+                driveForward(0.25 , 70 );
                 break;
             default: //Center
                 telemetry.addData("Block position", "Center");
@@ -133,7 +133,7 @@ public class AUTO_DEPOT_HARDCODE extends AUTO_METHODS_HARDCODE {
 
                 //Drive forward until we detect that we are on the crater
                 //driveForwardToCrater();
-                driveForward(0.5, 60);
+                driveForward(0.25, 60);
 
                 break;
         }

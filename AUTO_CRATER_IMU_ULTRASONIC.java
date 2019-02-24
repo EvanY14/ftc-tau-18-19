@@ -8,7 +8,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 
 @Autonomous(group = "Tau", name = "Auto Crater IMU Ultrasonic")
-//@Disabled
+@Disabled
 public class AUTO_CRATER_IMU_ULTRASONIC extends AUTO_METHODS_IMU_ULTRASONIC{
 
     Hardware hard = new Hardware();

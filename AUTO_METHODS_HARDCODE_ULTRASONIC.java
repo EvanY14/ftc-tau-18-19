@@ -153,6 +153,7 @@ public class AUTO_METHODS_HARDCODE_ULTRASONIC extends LinearOpMode {
         telemetry.addData("Readiness", "NOT READY TO START, PLEASE WAIT");
         telemetry.update();
 //clickity clackity
+
         robot.init_auto(hwMap, telemetry);
         driveMotors.add(robot.backLeftMotor);
         driveMotors.add(robot.frontLeftMotor);

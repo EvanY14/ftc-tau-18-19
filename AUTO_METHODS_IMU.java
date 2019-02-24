@@ -63,6 +63,8 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
     private Position initialPos = null;
     private double initialAngle = 0;
     private double finalAngle = 0;
+    private double globalAngle = 0;
+    private double lastAngle = 0;
     private double finalX = 0;
     private double finalY = 0;
     public String blockLocation = "";
@@ -87,7 +89,7 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
     private static final String LABEL_GOLD_MINERAL = "Gold Mineral";
     private static final String LABEL_SILVER_MINERAL = "Silver Mineral";
     private String VUFORIA_KEY = "AUTPgLj/////AAABmftxO0IFGU3urmaLhFDDt+04jQVVUEnMoybqfXkW+2kDybcXkSk00wQ1RARTA6i+W3x8pWjVDY/xcKrLUwZZKYSdeSlSWW+nMK4s5AEaTS8K0Re8OrF3JF3zmHz4julP101iBl7+dpVOEFw10laj2E0q0bvw9vqvXMMjg8J3zdXiDS4zzHPRl0Iwx6iaH4ZmmE4VqXiJ8kXrZ9bc897oR4FcC01mF+cX3x6oi5e8ZpQanSDPp2/IBbvUxi/oe2ImrNpZTczvZLMwYMTQqgfeN9Ewz5KtCbAwfCLARiW5QZ/EOOdlLfGIPXGYesLuVPswhWP5HCCCrberCUZ+y+2OGj7+SlesgFSD8qwWNMQh+Erx";
-    private BNO055IMU imu;
+    public BNO055IMU imu;
     /**
      * {@link #vuforia} is the variable we will use to store our instance of the Vuforia
      * localization engine.
@@ -152,14 +154,11 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
     public void setUp(HardwareMap hwMap, Telemetry telemetry){
         telemetry.addData("Readiness", "NOT READY TO START, PLEASE WAIT");
         telemetry.update();
-//clickity clackity
-        robot.init_auto_IMU(hwMap, telemetry);
-        driveMotors.add(robot.backLeftMotor);
-        driveMotors.add(robot.backRightMotor);
-        driveMotors.add(robot.frontLeftMotor);
-        driveMotors.add(robot.frontRightMotor);
-        boolean useFullRes = true;
-        Context context = hardwareMap.appContext;
+        //clickity clackity
+        //robot.init_auto_IMU(hwMap, telemetry);
+        robot.init_auto(hwMap, telemetry); //wheel motors default still to RUN_TO_POSITION
+        //boolean useFullRes = true;
+        //Context context = hardwareMap.appContext;
         //cameraManager.initialize(context, useFullRes, this);
         //imageProcessor.initialize(useFullRes, this, true, cameraManager.height, cameraManager.width);
         //robot.imageTrackables.activate();
@@ -177,15 +176,14 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
         //`rometer bandwidth. See Section 3.5.2 (p27) and Table 3-4 (p21) of the BNO055 specification
         parameters.accelRange = BNO055IMU.AccelRange.G4;
         parameters.accelBandwidth      = BNO055IMU.AccelBandwidth.HZ62_5;
-        /** accelerometer power mode. See Section 3.5.2 (p27) and Section 4.2.2 (p77) of the BNO055 specification
-        parameters.accelPowerMode      = BNO055IMU.AccelPowerMode.NORMAL;
+        //accelerometer power mode. See Section 3.5.2 (p27) and Section 4.2.2 (p77) of the BNO055 specification
+        //parameters.accelPowerMode      = BNO055IMU.AccelPowerMode.NORMAL;
 
         // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
         // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
         // and named "imu".*/
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameters);
-
 
         // Set up our telemetry dashboard
         //composeTelemetry();
@@ -196,9 +194,8 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
 
         telemetry.addData("Readiness", "Press Play to start");
         telemetry.update();
-        firstAngleZero = imu.getAngularOrientation().firstAngle;
-        secondAngleZero = imu.getAngularOrientation().secondAngle;
-        thirdAngleZero = imu.getAngularOrientation().thirdAngle;
+
+        resetAngle();
 
         Log.d("status", "wait for start");
         // Wait until we're told to go
@@ -213,6 +210,21 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
         sleepTau(10);
     }
     //Behind the scenes methods
+    //set motor to mode without encoder - used for turns using IMU
+    private void setMotorIMU()
+    {
+        robot.frontLeftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.frontRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.backRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.backLeftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
+    private void setMotorNoIMU()
+    {
+        robot.frontLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        robot.frontRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        robot.backRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        robot.backLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    }
 
     //Sets speeds of motors
     private void speed(double speed){
@@ -294,39 +306,76 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
         robot.stopper.setPosition(0.95);
         //telemetry.addData("Status", "About to wait 5 sec");
         //telemetry.update();
-        sleepTau(500);
+        sleepTau(1000);
         telemetry.addData("Status", "done");
         telemetry.update();
-        speedLift(0);
-        robot.leftLiftMotor.setTargetPosition((int)robot.leftLiftMotor.getCurrentPosition() - 6000);
-        robot.rightLiftMotor.setTargetPosition((int)robot.rightLiftMotor.getCurrentPosition() - 6000);
+        int startPos = robot.leftLiftMotor.getCurrentPosition();
+        double difference = 5800;
+        int targetPosLeft = (int)(robot.leftLiftMotor.getCurrentPosition() - (difference));
+        int targetPosRight = (int)(robot.rightLiftMotor.getCurrentPosition() - (difference));
+
+        robot.leftLiftMotor.setTargetPosition(targetPosLeft);
+        robot.rightLiftMotor.setTargetPosition(targetPosRight);
+
         speedLift(1);
-        getBlockLocation();
-        sleepTau(2000);
-        if(blockLocation.equals("") && robot.leftLiftMotor.getCurrentPosition() < robot.leftLiftMotor.getTargetPosition() + 50){
-            sleepTau(500);
+        robot.resetTime();
+        //getBlockLocation2();
+        /*while(targetPosLeft > startPos - 5800){
+            while(robot.leftLiftMotor.isBusy()){
+                sleepTau(50);
+            }
+            sleepTau(750);
+            targetPosLeft -= difference;
+            targetPosRight -= difference;
+            robot.leftLiftMotor.setTargetPosition(targetPosLeft);
+            robot.rightLiftMotor.setTargetPosition(targetPosRight);
+            speedLift(1);
+        }*/
+        while(opModeIsActive() && robot.getTime() < 10 && robot.leftLiftMotor.isBusy() && robot.rightLiftMotor.isBusy()){
+            telemetry.addData("Status", "Dropping robot...");
+            telemetry.update();
         }
+        speedLift(0);
+
+        //getBlockLocation2();
+        getBlockLocation3();
     }
 
     public void dropLift(){
         robot.stopper.setPosition(0.95);
-        speedLift(0);
-        robot.leftLiftMotor.setTargetPosition(robot.rightLiftMotor.getCurrentPosition() + 6000);
-        robot.rightLiftMotor.setTargetPosition(robot.leftLiftMotor.getCurrentPosition() + 6000);
+        //speedLift(0);
+        robot.leftLiftMotor.setTargetPosition(robot.leftLiftMotor.getCurrentPosition() + 5800);
+        robot.rightLiftMotor.setTargetPosition(robot.rightLiftMotor.getCurrentPosition() + 5800);
+
+        robot.resetTime();
         speedLift(1);
-        sleepTau(3000);
+        Log.d("lift position before", robot.rightLiftMotor.getCurrentPosition() + "");
+
+        while(opModeIsActive() && robot.getTime() < 5 && robot.rightLiftMotor.isBusy() && robot.leftLiftMotor.isBusy()){
+            telemetry.addData("Status", "Lowering lift...");
+            telemetry.update();
+
+        }
+        speedLift(0);
+        Log.d("lift position after", robot.rightLiftMotor.getCurrentPosition() + "");
+
     }
     //drive forward certain distance at certain speed(speed should be no more than 1), distance is in inches
     public void driveForward(double speed, double distance){
-        for(DcMotor motor:driveMotors){
-            motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        }
-        speed(speed);
+        //speed(speed);
+        double startTime = robot.getTime();
         motorPosition = (int)((distance / (6 * Math.PI)) * ticksPerRotation);
         robot.frontLeftMotor.setTargetPosition(robot.frontLeftMotor.getCurrentPosition()- motorPosition);
         robot.frontRightMotor.setTargetPosition(robot.frontRightMotor.getCurrentPosition() + motorPosition);
         robot.backLeftMotor.setTargetPosition(robot.backLeftMotor.getCurrentPosition()- motorPosition);
         robot.backRightMotor.setTargetPosition(robot.backRightMotor.getCurrentPosition() + motorPosition);
+        robot.resetTime();
+        speed(speed);
+        while(opModeIsActive() && robot.getTime() < 5 && robot.frontRightMotor.isBusy() && robot.frontLeftMotor.isBusy() && robot.backRightMotor.isBusy() && robot.backLeftMotor.isBusy()){
+            telemetry.addData("Position", robot.frontRightMotor.getCurrentPosition());
+            telemetry.update();
+        }
+        speed(0);
         /*while(opModeIsActive() && robot.frontLeftMotor.isBusy()){
             testDistances();
         }*/
@@ -340,66 +389,162 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
 
     }
 
-    public void turnDegrees(double speed, double degree){
-        for(DcMotor motor:driveMotors){
-            motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        }
-        initialAngle = imu.getAngularOrientation().firstAngle;
-        double heading = initialAngle;
-        finalAngle = initialAngle + degree < 0 ? initialAngle + degree + 360:initialAngle+degree;
-        speed(speed);
-        double distance = (degree * (2 * robotRotationRadius * Math.PI) / 360);
-        motorPosition = (int)((distance / (6*Math.PI)) * ticksPerRotation);
-        robot.frontLeftMotor.setTargetPosition(robot.frontLeftMotor.getCurrentPosition()+ motorPosition);
+    //drive forward certain distance at certain speed(speed should be no more than 1), distance is in inches
+    public void driveForwardToCrater(double speed, double distance){
+        double tilt_angle;
+        double delta_angle;
+        double tilt_angle_start = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).thirdAngle;
+        double startTime = robot.getTime();
+        motorPosition = (int)((distance / (6 * Math.PI)) * ticksPerRotation);
+        robot.frontLeftMotor.setTargetPosition(robot.frontLeftMotor.getCurrentPosition()- motorPosition);
         robot.frontRightMotor.setTargetPosition(robot.frontRightMotor.getCurrentPosition() + motorPosition);
-        robot.backLeftMotor.setTargetPosition(robot.backLeftMotor.getCurrentPosition()+ motorPosition);
+        robot.backLeftMotor.setTargetPosition(robot.backLeftMotor.getCurrentPosition()- motorPosition);
         robot.backRightMotor.setTargetPosition(robot.backRightMotor.getCurrentPosition() + motorPosition);
-        if(degree > 0) {
-            while (opModeIsActive() && heading <= finalAngle && robot.frontLeftMotor.isBusy()) {
-                sleepTau(100);
-                heading = imu.getAngularOrientation().firstAngle;
-                /*if(heading < 0){
-                    heading += 360;
-                }*/
-                telemetry.addData("Heading", heading);
-                Log.d("Heading", heading + "");
-                //Log.d("Adjusted heading", imu.getAngularOrientation().firstAngle - firstAngleZero + "");
-                telemetry.update();
-            }
-        }else if (degree < 0){
-            while(opModeIsActive() && heading >= finalAngle && robot.frontLeftMotor.isBusy()){
-                sleepTau(100);
-                heading = imu.getAngularOrientation().firstAngle;
-               /* if(heading < 0){
-                    heading += 360;
-                }*/
-                telemetry.addData("Heading", heading);
-                telemetry.update();
-            }
+        robot.resetTime();
+        speed(speed);
+        while(opModeIsActive() && robot.getTime() < 5 && robot.frontRightMotor.isBusy() && robot.frontLeftMotor.isBusy() && robot.backRightMotor.isBusy() && robot.backLeftMotor.isBusy()){
+            //check if tilt angle to detect if it drives above the crater edge
+            tilt_angle = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).thirdAngle;
+
+            telemetry.addData("Tilt angle::", tilt_angle);
+            telemetry.update();
+
+            delta_angle = tilt_angle - tilt_angle_start;
+            if(delta_angle > 180)
+                delta_angle -= 360;
+            else if(delta_angle < -180)
+                delta_angle += 360;
+
+            if(Math.abs(delta_angle) > 8)
+                break;
         }
         speed(0);
-        /*for(DcMotor motor:driveMotors){
-            motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        }
-            speed((degree / Math.abs(degree)) * 0.25);
-            while(imu.getAngularOrientation().firstAngle <= finalAngle && opModeIsActive()){
-                sleepTau(50);
-                telemetry.addData("Heading", imu.getAngularOrientation().firstAngle);
-                telemetry.update();
+        /*while(opModeIsActive() && robot.frontLeftMotor.isBusy()){
+            testDistances();
+        }*/
+        /*while(opModeIsActive()){
+            if(Math.abs(getImuAverageXValue()) >= Math.abs(finalX) && Math.abs(getIMUAverageYValue()) >= Math.abs(finalY)){
+                speed(0);
+                sleepTau(500);
+                break;
             }
-            speed(-(degree / Math.abs(degree)) * 0.25);
-            while(imu.getAngularOrientation().firstAngle >= finalAngle && opModeIsActive()){
-                sleepTau(50);
-                telemetry.addData("Heading", imu.getAngularOrientation().firstAngle);
-                telemetry.update();
-            }*/
+        }*/
 
     }
-    /*public void scanMinerals(){
-        if(vision.seesSilver()){
 
+    private void resetAngle() {
+        lastAngle = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+        globalAngle = 0;
+    }
+
+    private  double getCurrentAngle() {
+        double angle = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+
+        double deltaAngle = angle - lastAngle;
+
+        if (deltaAngle < -180)
+            deltaAngle += 360;
+        else if (deltaAngle > 180)
+            deltaAngle -= 360;
+
+        globalAngle += deltaAngle;
+
+        lastAngle = angle;
+
+        return globalAngle;
+    }
+    private double convertToIMUDegree(double degree)
+    {
+        if(degree < -180)
+            degree += 360;
+        else if(degree > 180)
+            degree -= 360;
+
+        return degree;
+    }
+
+    public void turnDegrees(double speed, double degree){
+        double currentAngle = 0.0;
+        double distance = 0.0;
+        int i = 0;
+        initialAngle = getCurrentAngle();
+        //initialAngle = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+        //finalAngle = convertToIMUDegree(initialAngle + degree); //note that the extension hub is upside down - thus degree is negative when robot turning left
+        finalAngle = initialAngle + degree;
+        robot.resetTime();
+        currentAngle = initialAngle;
+        do{
+            distance = (degree * (2 * robotRotationRadius * Math.PI) / 360);
+            motorPosition = (int) ((distance / (6 * Math.PI)) * ticksPerRotation);
+            robot.frontLeftMotor.setTargetPosition(robot.frontLeftMotor.getCurrentPosition() + motorPosition);
+            robot.frontRightMotor.setTargetPosition(robot.frontRightMotor.getCurrentPosition() + motorPosition);
+            robot.backLeftMotor.setTargetPosition(robot.backLeftMotor.getCurrentPosition() + motorPosition);
+            robot.backRightMotor.setTargetPosition(robot.backRightMotor.getCurrentPosition() + motorPosition);
+            //robot.resetTime();
+            speed(speed);
+            while (opModeIsActive() && robot.getTime() < 3 && robot.frontRightMotor.isBusy() && robot.frontLeftMotor.isBusy() && robot.backRightMotor.isBusy() && robot.backLeftMotor.isBusy()) {
+                telemetry.addData("Current Angle::",currentAngle);
+                telemetry.update();
+            }
+            speed(0);
+
+            currentAngle = getCurrentAngle();
+            degree = finalAngle - currentAngle;
+            //currentAngle = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+            //degree = finalAngle - currentAngle;
+            //if(degree > 180)
+            //    degree = 360 - degree;
+            //else if(degree < -180)
+            //    degree = 360 + degree;
+
+            i++;
+            if(Math.abs(currentAngle - finalAngle) > 8 && i == 2)
+                driveForward(speed, -4); //last try back 4in in case it is stuck at the wall
+
+        } while(Math.abs(currentAngle - finalAngle) > 8 && i<=2);
+    }
+
+    /*public void turnDegreesIMU(double speed, double degree){
+        double currentAngle = 0.0;
+        initialAngle = getCurrentAngle();
+        finalAngle = initialAngle + degree; //assuming turning left is positive degree
+        setMotorIMU();
+        robot.resetTime();
+        currentAngle = initialAngle;
+
+        if(degree > 0) //left turn
+            speed(speed);
+        else //right turn
+            speed(-speed);
+
+        while(Math.abs(currentAngle - finalAngle) > 5 && robot.getTime() < 3) {
+            currentAngle = getCurrentAngle();
+            telemetry.addData("Current Angle::", currentAngle);
+            telemetry.update();
         }
+
+        speed(0);
+        if(Math.abs(currentAngle - finalAngle) > 5)
+        {
+            setMotorNoIMU();
+            driveForward(0.25, -4); //last try back 4in in case it is stuck at the wall
+            setMotorIMU();
+            if(degree > 0) //left turn
+                speed(speed);
+            else //right turn
+                speed(-speed);
+
+            while(Math.abs(currentAngle - finalAngle) > 5 && robot.getTime() < 3) {
+                currentAngle = getCurrentAngle();
+                telemetry.addData("Current Angle::", currentAngle);
+                telemetry.update();
+            }
+        }
+
+        speed(0);
+        setMotorNoIMU();
     }*/
+
     public void getBlockLocation(){
         boolean turn = false;
         boolean turn2 = false;
@@ -418,7 +563,7 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
                 turnDegrees(0.25, 10);
                 sleepTau(500);
                 turn = true;
-            //try checking 10 degrees to the right
+                //try checking 10 degrees to the right
             } else if (robot.getTime() > 10 && turn2 == false) {
                 turnDegrees(0.25, -20);
                 sleepTau(1000);
@@ -427,6 +572,7 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
             if (robot.tfod != null) {
                 // getUpdatedRecognitions() will return null if no new information is available since
                 // the last time that call was made.
+                sleepTau(1500);
                 List<Recognition> updatedRecognitions = robot.tfod.getUpdatedRecognitions();
                 Log.d("Status", "First call");
                 if (updatedRecognitions != null) {
@@ -446,19 +592,24 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
                                 //If the y value of the top of the gold mineral is greater than the y value of the next lowest
                                 //make it the new mineral that we are scanning
                                 if(recognition.getTop() > goldMineralY){
-                                        goldMineralX = (int) recognition.getLeft();
-                                        goldMineralY = (int)recognition.getTop();
-                                        Log.d("Width", "" + (Math.abs(recognition.getLeft() - recognition.getRight())));
-                                        Log.d("Status", "In more than 3 detected loop" + updatedRecognitions.size());
-                                        Log.d("Y of top", recognition.getTop() +"");
-                                        Log.d("Gold mineral y", "" + goldMineralY);
-                                    }
-                                    //Same for silver, but getting the two lowest instead of just the lowest
+                                    goldMineralX = (int) recognition.getLeft();
+                                    goldMineralY = (int)recognition.getTop();
+                                    Log.d("Width", "" + (Math.abs(recognition.getLeft() - recognition.getRight())));
+                                    Log.d("Status", "In more than 3 detected loop" + updatedRecognitions.size());
+                                    Log.d("Y of top", recognition.getTop() +"");
+                                    Log.d("Gold mineral y", "" + goldMineralY);
+                                }
+                                //Same for silver, but getting the two lowest instead of just the lowest
                             } else if (recognition.getLabel().equals(LABEL_SILVER_MINERAL)) {
                                 if(recognition.getTop() > silverMineral1Y && updatedRecognitions.size() > 3) {
                                     silverMineral2X = silverMineral1X;
                                     silverMineral1X = (int) recognition.getLeft();
+                                    silverMineral2Y = silverMineral1Y;
+                                    silverMineral1Y = (int)recognition.getTop();
                                     Log.d("y of Top Silver 1", recognition.getTop() + "");
+                                }else if(recognition.getTop() > silverMineral2Y && updatedRecognitions.size() > 3){
+                                    silverMineral2X = (int) recognition.getLeft();
+                                    silverMineral2Y = (int) recognition.getTop();
                                 }else {
                                     //if it only detects three minerals, just look for the two silvers
                                     if(silverMineral1X == -1){
@@ -477,18 +628,21 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
                                 telemetry.addData("Gold Mineral Position", "Left");
                                 telemetry.update();
                                 Log.d("Status", "Left");
+                                Log.d("Status", goldMineralX + " " + goldMineralY);
                                 blockLocation = "Left";
                                 break;
                             } else if (goldMineralX > silverMineral1X && goldMineralX > silverMineral2X) {
                                 telemetry.addData("Gold Mineral Position", "Right");
                                 telemetry.update();
                                 Log.d("Status", "Right");
+                                Log.d("Status", goldMineralX + " " + goldMineralY);
                                 blockLocation = "Right";
                                 break;
                             } else {
                                 telemetry.addData("Gold Mineral Position", "Center");
                                 telemetry.update();
                                 Log.d("Status", "Center");
+                                Log.d("Status", goldMineralX + " " + goldMineralY);
                                 blockLocation = "Center";
                                 break;
                             }
@@ -512,108 +666,519 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
         }
     }
 
-    public void knockBlockOff(String block){
-        driveForward(0.25, Math.sqrt(2) * 12);
-        sleepTau(1000);
-        if(block.equals("Left") || block.equals("Right")){
-            turnDegrees(0.25, block.equals("Left") ? 50: -40);
-            sleepTau(1500);
-            driveForward(0.25, 25);
-            sleepTau(3500);
-            turnDegrees(0.25, block.equals("Left") ? -80: 80);
-            sleepTau(1000);
-            if(block.equals("Left")){
-                driveForward(0.25, 24);
-                sleepTau(1250);
-                turnDegrees(0.25, 80);
-                sleepTau(1000);
-                dropArm();
-                turnDegrees(0.25, 87);
-                sleepTau(1000);
-                driveForward(0.25, Math.sqrt(2) * 9 + 1);
-                sleepTau(2000);
-                robot.frontLeftMotor.setPower(0);
-                robot.frontRightMotor.setPower(0);
-                robot.backLeftMotor.setPower(0);
-                robot.backRightMotor.setPower(0);
-                dropLift();
-                //calls arm method
-                //dropLift();
-                driveForwardToCrater();
-            }else{
-                driveForward(0.25, 31);
-                sleepTau(3500);
-                dropArm();
-                turnDegrees(0.25, 90);
-                sleepTau(1500);
-                //driveForward(0.5, Math.sqrt(2) * 12);
-                //sleepTau(2000);
-                //turnDegrees(.5, 40);
-                //sleepTau(1000);
-                robot.frontLeftMotor.setPower(0);
-                robot.frontRightMotor.setPower(0);
-                robot.backLeftMotor.setPower(0);
-                robot.backRightMotor.setPower(0);
-                dropLift();
-                driveForwardToCrater();
-                //turnDegrees(0.5,  );
-                // sleepTau(2000);
+    public void getBlockLocation2() {
+        boolean turn = false;
+        boolean turn2 = false;
+
+        blockLocation = "Center"; //default location is center
+        robot.resetTime();
+        while (opModeIsActive() && robot.getTime() < 4) {
+            //Try checking 10 degrees to the left
+            if (robot.getTime() > 2 && turn == false) {
+                turnDegrees(0.25, 15);
+                //sleepTau(500);
+                turn = true;
             }
 
-        } else if(block.equals("Center")){
-            telemetry.addData("Block position", "Center");
-            telemetry.update();
-            driveForward(0.25, 2 * Math.sqrt(2) * 12);
-            sleepTau(1500);
-            turnDegrees(0.25, 90);
-            dropArm();
-            driveForward(0.25, 5);
-            sleepTau(1000);
-            turnDegrees(0.25, 10);
-            sleepTau(1000);
-            driveForward(0.25, 16);
-            sleepTau(1000);
-            turnDegrees(0.25, 30);
-            sleepTau(1000);
-            dropLift();
-            driveForwardToCrater();
+            if (robot.tfod != null) {
+                // getUpdatedRecognitions() will return null if no new information is available since
+                // the last time that call was made.
+                //sleepTau(1500);
+                List<Recognition> updatedRecognitions = robot.tfod.getUpdatedRecognitions();
+                Log.d("Status", "First call");
+                if (updatedRecognitions != null) {
+                    telemetry.addData("# Object Detected", updatedRecognitions.size());
+                    telemetry.update();
+                    Log.d("Status", "Objects detected");
+                    Log.d("# Objects detected", updatedRecognitions.size() + "");
+                    if (updatedRecognitions.size() >= 2 && updatedRecognitions != null) {
+                        int goldMineralX = -1;
+                        int silverMineral1X = -1;
+                        int silverMineral2X = -1;
+                        int goldMineralY = -1;
+                        int silverMineral1Y = -1;
+                        int silverMineral2Y = -1;
+                        int mineral1X = -1;
+                        int mineral2X = -1;
+                        int mineral1Y = -1;
+                        int mineral2Y = -1;
+                        int mineral1Type = -1; //0 - silver; 1 - gold
+                        int mineral2Type = -1;
+                        for (Recognition recognition : updatedRecognitions) {
+                            //Get the detected 2 minerals with the largest Y values
+                            Log.d("Detected element x/y=", recognition.getLabel()+ recognition.getLeft()+" / " + recognition.getTop());
+                            if (recognition.getLabel().equals(LABEL_SILVER_MINERAL) || recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
+                                telemetry.addData("status", "detected gold or silver");
+                                telemetry.update();
+                                if (recognition.getTop() > mineral1Y && updatedRecognitions.size() >= 3) {
+                                    mineral2X = mineral1X;
+                                    mineral2Y = mineral1Y;
+                                    mineral2Type = mineral1Type;
+                                    mineral1X = (int) recognition.getLeft();
+                                    mineral1Y = (int) recognition.getTop();
+                                    if (recognition.getLabel().equals(LABEL_SILVER_MINERAL)) {
+                                        silverMineral1X = mineral1X;
+                                        silverMineral1Y = mineral1Y;
+                                        mineral1Type = 0;
+                                    } else {
+                                        goldMineralX = mineral1X;
+                                        goldMineralY = mineral1Y;
+                                        mineral1Type = 1;
+                                    }
+                                } else if (recognition.getTop() > mineral2Y && updatedRecognitions.size() >= 3) {
+                                    mineral2X = (int) recognition.getLeft();
+                                    mineral2Y = (int) recognition.getTop();
+                                    if (recognition.getLabel().equals(LABEL_SILVER_MINERAL)) {
+                                        silverMineral2X = mineral2X;
+                                        silverMineral2Y = mineral2Y;
+                                        mineral2Type = 0;
+                                    } else {
+                                        goldMineralX = mineral2X;
+                                        goldMineralY = mineral2Y;
+                                        mineral2Type = 1;
+                                    }
+                                } else if(updatedRecognitions.size() == 2) {
+                                    //if it only detects 2 minerals
+                                    telemetry.addData("Status", "Two minerals detected");
+                                    telemetry.update();
+                                    if (recognition.getLabel().equals(LABEL_SILVER_MINERAL)) {
+                                        if (silverMineral1X == -1) {
+                                            silverMineral1X = (int) recognition.getLeft();
+                                            silverMineral1Y = (int) recognition.getTop();
+                                            mineral1Type = 0;
+                                        } else if (silverMineral2X == -1) {
+                                            silverMineral2X = (int) recognition.getLeft();
+                                            silverMineral2Y = (int) recognition.getTop();
+                                            mineral2Type = 0;
+                                        }
+                                    } else {
+                                        if (goldMineralX == -1) {
+                                            goldMineralX = (int) recognition.getLeft();
+                                            goldMineralY = (int) recognition.getTop();
+                                            if(mineral1Type == -1)
+                                                mineral1Type = 1;
+                                            else
+                                                mineral2Type = 1;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        telemetry.addData("Mineral 1 type" + mineral1Type, "Mineral 2 type" + mineral2Type);
+                        telemetry.update();
+                        //Find the location of the gold mineral based on the relative location to the silver minerals
+                        if (mineral1Type == 0 && mineral2Type == 0) {
+                            //gold mineral not detected among the left 2 positions, so it is at right
+                            telemetry.addData("Gold Mineral Position", "Right");
+                            telemetry.update();
+                            Log.d("Status", "Right");
+                            Log.d("Status", goldMineralX + " " + goldMineralY);
+                            blockLocation = "Right";
+                            break;
+                        } else if (mineral1Type == 0 && mineral2Type == 1) {
+                            if (goldMineralX < silverMineral1X) {
+                                telemetry.addData("Gold Mineral Position", "Left");
+                                telemetry.update();
+                                Log.d("Status", "Left");
+                                Log.d("Status", goldMineralX + " " + goldMineralY);
+                                blockLocation = "Left";
+                                break;
+                            } else {
+                                telemetry.addData("Gold Mineral Position", "Center");
+                                telemetry.update();
+                                Log.d("Status", "Center");
+                                Log.d("Status", goldMineralX + " " + goldMineralY);
+                                blockLocation = "Center";
+                                break;
+                            }
+                        }
+                        else if (mineral1Type == 1 && mineral2Type == 0) {
+                            if (goldMineralX < silverMineral2X) {
+                                telemetry.addData("Gold Mineral Position", "Left");
+                                telemetry.update();
+                                Log.d("Status", "Left");
+                                Log.d("Status", goldMineralX + " " + goldMineralY);
+                                blockLocation = "Left";
+                                break;
+                            } else {
+                                telemetry.addData("Gold Mineral Position", "Center");
+                                telemetry.update();
+                                Log.d("Status", "Center");
+                                Log.d("Status", goldMineralX + " " + goldMineralY);
+                                blockLocation = "Center";
+                                break;
+                            }
+                        }
+                    }
+                    telemetry.update();
+                }
+            }
+        }
+
+        //Turn back to straight based on what turns it has previously made
+        if (turn) {
+            turnDegrees(0.25, -15);
+            //sleepTau(750);
         }
     }
 
-    public void driveForwardToCrater(){
-        robot.frontLeftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        robot.backLeftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        robot.frontRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        robot.backRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        robot.frontRightMotor.setPower(0.75);
-        robot.backRightMotor.setPower(0.75);
-        robot.frontLeftMotor.setPower(-0.75);
-        robot.backLeftMotor.setPower(-0.75);
-        while(opModeIsActive()){
-            if(imu.getAngularOrientation().thirdAngle - thirdAngleZero >= 352){
-                sleepTau(500);
-                speed(0);
-                sleepTau(500);
-                break;
-            }
-        }
+    public void getBlockLocation3() {
+        boolean turn = false;
+        int goldMineralX = -1;
+        int silverMineral1X = -1;
+        int silverMineral2X = -1;
+        int goldMineralY = -1;
+        int silverMineral1Y = -1;
+        int silverMineral2Y = -1;
+        int mineral1X = -1;
+        int mineral2X = -1;
+        int mineral1Y = -1;
+        int mineral2Y = -1;
+        int mineral1Type = -1; //0 - silver; 1 - gold
+        int mineral2Type = -1;
+        int MIN_CRATER_Y = 400; //minimum Y coordinate for minerals outside crater - need test
 
+        blockLocation = "Center"; //default location is center
+        robot.resetTime();
+        while (opModeIsActive() && robot.getTime() < 4) {
+            //Try checking 15 degrees to the left if not detecting in 2 seconds
+            if (robot.getTime() > 2 && turn == false) {
+                turnDegrees(0.25, 15);
+                //sleepTau(500);
+                turn = true;
+            }
+
+            if (robot.tfod != null) {
+                // getUpdatedRecognitions() will return null if no new information is available since
+                // the last time that call was made.
+                //sleepTau(1500);
+                List<Recognition> updatedRecognitions = robot.tfod.getUpdatedRecognitions();
+
+                if (updatedRecognitions != null) {
+                    telemetry.addData("# Object Detected", updatedRecognitions.size());
+                    telemetry.update();
+                    Log.d("Status", "Objects detected");
+                    Log.d("# Objects detected", updatedRecognitions.size() + "");
+
+                    if (updatedRecognitions.size() > 3) {
+                        int detected = 0;
+                        for (Recognition recognition : updatedRecognitions) {
+                            Log.d("Detected element x/y=", recognition.getLabel() + recognition.getLeft() + " / " + recognition.getTop());
+                            //ignore detected minerals within crater - Y value smaller than mininum
+                            if (recognition.getTop() > MIN_CRATER_Y) {
+                                if (recognition.getLabel().equals(LABEL_SILVER_MINERAL)) {
+                                    if (silverMineral1X == -1) {
+                                        silverMineral1X = (int) recognition.getLeft();
+                                        detected++;
+                                    }
+                                    else {
+                                        silverMineral2X = (int) recognition.getLeft();
+                                        detected++;
+                                    }
+                                } else {
+                                    goldMineralX = (int) recognition.getLeft();
+                                    detected++;
+                                }
+                            }
+                        }
+                        if(detected == 2) {
+                            if(goldMineralX == -1)
+                            {
+                                blockLocation = "Right";
+                                telemetry.addData("Gold Mineral Position", "Right");
+                                break;
+                            }
+                            else if(silverMineral2X == -1)
+                            {
+                                if(goldMineralX < silverMineral1X)
+                                {
+                                    blockLocation = "Left";
+                                    telemetry.addData("Gold Mineral Position", "Left");
+                                    break;
+                                }
+                                else
+                                {
+                                    blockLocation = "Center";
+                                    telemetry.addData("Gold Mineral Position", "Center");
+                                    break;
+                                }
+                            }
+                        }
+                        else {
+                            if (goldMineralX < silverMineral1X && goldMineralX < silverMineral2X) {
+                                telemetry.addData("Gold Mineral Position", "Left");
+                                blockLocation = "Left";
+                                break;
+                            } else if (goldMineralX > silverMineral1X && goldMineralX > silverMineral2X) {
+                                telemetry.addData("Gold Mineral Position", "Right");
+                                blockLocation = "Right";
+                                break;
+                            } else {
+                                telemetry.addData("Gold Mineral Position", "Center");
+                                blockLocation = "Center";
+                                break;
+                            }
+                        }
+                    }
+                    else if (updatedRecognitions.size() == 3) {
+                        for (Recognition recognition : updatedRecognitions) {
+                            if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
+                                goldMineralX = (int) recognition.getLeft();
+                            } else if (silverMineral1X == -1) {
+                                silverMineral1X = (int) recognition.getLeft();
+                            } else {
+                                silverMineral2X = (int) recognition.getLeft();
+                            }
+                        }
+                        if (goldMineralX != -1 && silverMineral1X != -1 && silverMineral2X != -1) {
+                            if (goldMineralX < silverMineral1X && goldMineralX < silverMineral2X) {
+                                telemetry.addData("Gold Mineral Position", "Left");
+                                blockLocation = "Left";
+                                break;
+                            } else if (goldMineralX > silverMineral1X && goldMineralX > silverMineral2X) {
+                                telemetry.addData("Gold Mineral Position", "Right");
+                                blockLocation = "Right";
+                                break;
+                            } else {
+                                telemetry.addData("Gold Mineral Position", "Center");
+                                blockLocation = "Center";
+                                break;
+                            }
+                        }
+                    } else if (updatedRecognitions.size() == 2) {
+                        for (Recognition recognition : updatedRecognitions) {
+                            if (recognition.getLabel().equals(LABEL_SILVER_MINERAL)) {
+                                if (silverMineral1X == -1) {
+                                    silverMineral1X = (int) recognition.getLeft();
+                                    silverMineral1Y = (int) recognition.getTop();
+                                    mineral1Type = 0;
+                                } else if (silverMineral2X == -1) {
+                                    silverMineral2X = (int) recognition.getLeft();
+                                    silverMineral2Y = (int) recognition.getTop();
+                                    mineral2Type = 0;
+                                }
+                            } else {
+                                if (goldMineralX == -1) {
+                                    goldMineralX = (int) recognition.getLeft();
+                                    goldMineralY = (int) recognition.getTop();
+                                    if (mineral1Type == -1)
+                                        mineral1Type = 1;
+                                    else
+                                        mineral2Type = 1;
+                                }
+                            }
+                        }
+
+                        if (mineral1Type == 0 && mineral2Type == 0) {
+                            //gold mineral not detected among the left 2 positions, so it is at right
+                            telemetry.addData("Gold Mineral Position", "Right");
+                            Log.d("Gold position:", "Right");
+                            blockLocation = "Right";
+                            break;
+                        } else if (mineral1Type == 0 && mineral2Type == 1) {
+                            if (goldMineralX < silverMineral1X) {
+                                telemetry.addData("Gold Mineral Position", "Left");
+                                Log.d("Gold position:", "Left");
+                                blockLocation = "Left";
+                                break;
+                            } else {
+                                telemetry.addData("Gold Mineral Position", "Center");
+                                Log.d("Gold position:", "Center");
+                                blockLocation = "Center";
+                                break;
+                            }
+                        } else if (mineral1Type == 1 && mineral2Type == 0) {
+                            if (goldMineralX < silverMineral2X) {
+                                telemetry.addData("Gold Mineral Position", "Left");
+                                Log.d("Gold position:", "Left");
+                                blockLocation = "Left";
+                                break;
+                            } else {
+                                telemetry.addData("Gold Mineral Position", "Center");
+                                Log.d("Gold position:", "Center");
+                                blockLocation = "Center";
+                                break;
+                            }
+                        }
+                    }
+                } //end if recongnitions not full
+            } //end if tfod not null
+        }//end while loop
+
+        telemetry.update();
+
+        //Turn back to straight based on what turns it has previously made
+        if (turn) {
+            turnDegrees(0.25, -15);
+            //sleepTau(750);
+        }
     }
 
-    /*public void testAndBackUpIntoCrater(){
-        double initialDist = robot.ultrasonicSensor.getDistance(DistanceUnit.INCH);
-        stopRobot();
-        sleepTau(500);
-        if(robot.ultrasonicSensor.getDistance(DistanceUnit.INCH) <= initialDist - 1 && initialDist <= 4){
-            driveForward(0.5, -6);
-            sleepTau(750);
-            turnDegrees(0.5, 180);
-            sleepTau(750);
-            driveForwardToCrater();
-            driveForward(0.5, 12);
-            sleepTau(3000);
+    /*public void getBlockLocation4() {
+        boolean turn = false;
+        int goldMineralX = -1;
+        int silverMineral1X = -1;
+        int silverMineral2X = -1;
+        int goldMineralY = -1;
+        int silverMineral1Y = -1;
+        int silverMineral2Y = -1;
+        int mineral1X = -1;
+        int mineral2X = -1;
+        int mineral1Y = -1;
+        int mineral2Y = -1;
+        int mineral1Type = -1; //0 - silver; 1 - gold
+        int mineral2Type = -1;
+        blockLocation = "Center"; //default location is center
+        robot.resetTime();
+        while (opModeIsActive() && robot.getTime() < 4) {
+            //Try checking 15 degrees to the left if not detecting in 2 seconds
+            if (robot.getTime() > 2 && turn == false) {
+                turnDegrees(0.25, 15);
+                //sleepTau(500);
+                turn = true;
+            }
+
+            if (robot.tfod != null) {
+                // getUpdatedRecognitions() will return null if no new information is available since
+                // the last time that call was made.
+                //sleepTau(1500);
+                List<Recognition> updatedRecognitions = robot.tfod.getUpdatedRecognitions();
+
+                if (updatedRecognitions != null) {
+                    telemetry.addData("# Object Detected", updatedRecognitions.size());
+                    telemetry.update();
+                    Log.d("Status", "Objects detected");
+                    Log.d("# Objects detected", updatedRecognitions.size() + "");
+
+                    if (updatedRecognitions.size() > 3) {
+                        for (Recognition recognition : updatedRecognitions) {
+                            //Get the detected 2 minerals with the largest Y values
+                            Log.d("Detected element x/y=", recognition.getLabel() + recognition.getLeft() + " / " + recognition.getTop());
+                            if (recognition.getTop() > mineral1Y) {
+                                mineral2X = mineral1X;
+                                mineral2Y = mineral1Y;
+                                mineral2Type = mineral1Type;
+                                mineral1X = (int) recognition.getLeft();
+                                mineral1Y = (int) recognition.getTop();
+                                if (recognition.getLabel().equals(LABEL_SILVER_MINERAL)) {
+                                    silverMineral1X = mineral1X;
+                                    silverMineral1Y = mineral1Y;
+                                    mineral1Type = 0;
+                                } else {
+                                    goldMineralX = mineral1X;
+                                    goldMineralY = mineral1Y;
+                                    mineral1Type = 1;
+                                }
+                            } else if (recognition.getTop() > mineral2Y) {
+                                mineral2X = (int) recognition.getLeft();
+                                mineral2Y = (int) recognition.getTop();
+                                if (recognition.getLabel().equals(LABEL_SILVER_MINERAL)) {
+                                    silverMineral2X = mineral2X;
+                                    silverMineral2Y = mineral2Y;
+                                    mineral2Type = 0;
+                                } else {
+                                    goldMineralX = mineral2X;
+                                    goldMineralY = mineral2Y;
+                                    mineral2Type = 1;
+                                }
+                            }
+                        }
+                    } else if (updatedRecognitions.size() == 3) {
+                        for (Recognition recognition : updatedRecognitions) {
+                            if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
+                                goldMineralX = (int) recognition.getLeft();
+                            } else if (silverMineral1X == -1) {
+                                silverMineral1X = (int) recognition.getLeft();
+                            } else {
+                                silverMineral2X = (int) recognition.getLeft();
+                            }
+                        }
+                        if (goldMineralX != -1 && silverMineral1X != -1 && silverMineral2X != -1) {
+                            if (goldMineralX < silverMineral1X && goldMineralX < silverMineral2X) {
+                                telemetry.addData("Gold Mineral Position", "Left");
+                                blockLocation = "Left";
+                                break;
+                            } else if (goldMineralX > silverMineral1X && goldMineralX > silverMineral2X) {
+                                telemetry.addData("Gold Mineral Position", "Right");
+                                blockLocation = "Right";
+                                break;
+                            } else {
+                                telemetry.addData("Gold Mineral Position", "Center");
+                                blockLocation = "Center";
+                                break;
+                            }
+                        }
+                    } else if (updatedRecognitions.size() == 2) {
+                        for (Recognition recognition : updatedRecognitions) {
+                            if (recognition.getLabel().equals(LABEL_SILVER_MINERAL)) {
+                                if (silverMineral1X == -1) {
+                                    silverMineral1X = (int) recognition.getLeft();
+                                    silverMineral1Y = (int) recognition.getTop();
+                                    mineral1Type = 0;
+                                } else if (silverMineral2X == -1) {
+                                    silverMineral2X = (int) recognition.getLeft();
+                                    silverMineral2Y = (int) recognition.getTop();
+                                    mineral2Type = 0;
+                                }
+                            } else {
+                                if (goldMineralX == -1) {
+                                    goldMineralX = (int) recognition.getLeft();
+                                    goldMineralY = (int) recognition.getTop();
+                                    if (mineral1Type == -1)
+                                        mineral1Type = 1;
+                                    else
+                                        mineral2Type = 1;
+                                }
+                            }
+                        }
+                    }
+
+                    if ((updatedRecognitions.size() == 2) || (updatedRecognitions.size() > 3)) {
+                        //Find the location of the gold mineral based on the relative location to the silver minerals
+                        if (mineral1Type == 0 && mineral2Type == 0) {
+                            //gold mineral not detected among the left 2 positions, so it is at right
+                            telemetry.addData("Gold Mineral Position", "Right");
+                            Log.d("Gold position:", "Right");
+                            blockLocation = "Right";
+                            break;
+                        } else if (mineral1Type == 0 && mineral2Type == 1) {
+                            if (goldMineralX < silverMineral1X) {
+                                telemetry.addData("Gold Mineral Position", "Left");
+                                Log.d("Gold position:", "Left");
+                                blockLocation = "Left";
+                                break;
+                            } else {
+                                telemetry.addData("Gold Mineral Position", "Center");
+                                Log.d("Gold position:", "Center");
+                                blockLocation = "Center";
+                                break;
+                            }
+                        } else if (mineral1Type == 1 && mineral2Type == 0) {
+                            if (goldMineralX < silverMineral2X) {
+                                telemetry.addData("Gold Mineral Position", "Left");
+                                Log.d("Gold position:", "Left");
+                                blockLocation = "Left";
+                                break;
+                            } else {
+                                telemetry.addData("Gold Mineral Position", "Center");
+                                Log.d("Gold position:", "Center");
+                                blockLocation = "Center";
+                                break;
+                            }
+                        }
+                    }
+                } //end if recongnitions not full
+            } //end if tfod not null
+        }//end while loop
+
+        telemetry.update();
+
+        //Turn back to straight based on what turns it has previously made
+        if (turn) {
+            turnDegrees(0.25, -15);
+            //sleepTau(750);
         }
-    }*/
+    } */
 
     public void stopRobot() {
         speed(0);
@@ -627,17 +1192,20 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
         robot.backLeftMotor.setTargetPosition(robot.backLeftMotor.getCurrentPosition()- motorPosition);
         robot.backRightMotor.setTargetPosition(robot.backRightMotor.getCurrentPosition() + motorPosition);
         dropLift();
-        sleepTau(3000);
+        while(robot.frontLeftMotor.isBusy()){
+            sleepTau(50);
+        }
+        speed(0);
     }
 
     public void sleepTau(long milliSec){
-       double start = robot.getTime();
-       double end = start + milliSec/1000.0;
+        double start = robot.getTime();
+        double end = start + milliSec/1000.0;
         while(opModeIsActive()){
             if(robot.getTime() >= end){
                 break;
             }
-            telemetry.addData("Waiting",  "");
+            telemetry.addData("Status:",  "Alive");
             telemetry.update();
         }
     }
@@ -678,118 +1246,5 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
         tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
         tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_GOLD_MINERAL, LABEL_SILVER_MINERAL);
     }
-    public double getIMUThirdAngle(){
-        return imu.getAngularOrientation().thirdAngle - thirdAngleZero;
-    }
-    public double getIMUSecondAngle(){
-        return imu.getAngularOrientation().secondAngle-secondAngleZero;
-    }
-    public double getIMUFirstAngle(){
-        return imu.getAngularOrientation().firstAngle-firstAngleZero;
-    }
-    /*public double getDistance(){
-        return robot.ultrasonicSensor.getDistance(DistanceUnit.INCH);
-    }*/
-    /*void composeTelemetry() {
 
-        // At the beginning of each telemetry update, grab a bunch of data
-        // from the IMU that we will then display in separate lines.
-        telemetry.addAction(new Runnable() { @Override public void run()
-        {
-            // Acquiring the angles is relatively expensive; we don't want
-            // to do that in each of the three items that need that info, as that's
-            // three times the necessary expense.
-            angles   = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            gravity  = imu.getGravity();
-            angles1 = imu1.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            gravity1 = imu1.getGravity();
-            position = imu.getPosition();
-            position1 = imu1.getPosition();
-        }
-        });
-
-        telemetry.addLine()
-                .addData("status", new Func<String>() {
-                    @Override public String value() {
-                        return imu.getSystemStatus().toShortString() + " " + imu1.getSystemStatus().toShortString();
-                    }
-                })
-                .addData("calib", new Func<String>() {
-                    @Override public String value() {
-                        return imu.getCalibrationStatus().toString() + " " + imu1.getCalibrationStatus().toString();
-                    }
-                });
-
-        telemetry.addLine()
-                .addData("heading", new Func<String>() {
-                    @Override public String value() {
-                        return formatAngle(angles.angleUnit, angles.firstAngle) + " " + formatAngle(angles1.angleUnit, angles.firstAngle);
-                    }
-                })
-                .addData("roll", new Func<String>() {
-                    @Override public String value() {
-                        return formatAngle(angles.angleUnit, angles.secondAngle) + " " + formatAngle(angles1.angleUnit, angles1.secondAngle);
-                    }
-                })
-                .addData("pitch", new Func<String>() {
-                    @Override public String value() {
-                        return formatAngle(angles.angleUnit, angles.thirdAngle) + " " + formatAngle(angles1.angleUnit, angles1.thirdAngle);
-                    }
-                });
-
-        telemetry.addLine()
-                .addData("grvty", new Func<String>() {
-                    @Override public String value() {
-                        return gravity.toString() + " " + gravity1.toString();
-                    }
-                })
-                .addData("mag", new Func<String>() {
-                    @Override public String value() {
-                        return String.format(Locale.getDefault(), "%.3f",
-                                Math.sqrt(gravity.xAccel*gravity.xAccel
-                                        + gravity.yAccel*gravity.yAccel
-                                        + gravity.zAccel*gravity.zAccel)) + " " + String.format(Locale.getDefault(), "%.3f",
-                                Math.sqrt(gravity1.xAccel*gravity1.xAccel
-                                        + gravity1.yAccel*gravity1.yAccel
-                                        + gravity1.zAccel*gravity1.zAccel));
-                    }
-                });
-        telemetry.addLine()
-                .addData("position", new Func<String>(){
-                    @Override public String value(){
-                        return "" + String.format(Locale.getDefault(), "%.3f", ((position.x + position1.x) / 2.0) ) +" "+ String.format(Locale.getDefault(), "%.3f", ((position.y + position1.y) / 2.0));
-                    }
-                });
-
-        telemetry.update();
-    }
-
-    //----------------------------------------------------------------------------------------------
-    // Formatting
-    //----------------------------------------------------------------------------------------------
-
-    String formatAngle(AngleUnit angleUnit, double angle) {
-        return formatDegrees(AngleUnit.DEGREES.fromUnit(angleUnit, angle));
-    }
-
-    String formatDegrees(double degrees){
-        return String.format(Locale.getDefault(), "%.1f", AngleUnit.DEGREES.normalize(degrees));
-    }
-
-    public double getImuAverageXValue(){
-        updateTelemetry(telemetry);
-        return ((imu.getPosition().x + imu1.getPosition().x)/2.0);
-    }
-    public double getIMUAverageYValue(){
-        updateTelemetry(telemetry);
-        return((imu.getPosition().y + imu1.getPosition().y)/2.0);
-    }
-    public double getIMUAverageZValue(){
-        updateTelemetry(telemetry);
-        return (imu.getPosition().z + imu1.getPosition().z) / 2.0;
-    }
-    public double getImuAverageRotation(){
-        updateTelemetry(telemetry);
-        return ((imu.getAngularOrientation().firstAngle + imu1.getAngularOrientation().firstAngle) / 2.0);
-    }*/
 }

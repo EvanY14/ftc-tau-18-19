@@ -64,7 +64,7 @@ public class AUTO_CRATER_HARDCODE extends AUTO_METHODS_HARDCODE{
 
                 //drive forward into the crater by driving forward until a certain angle is met with the IMU
                 //then waiting 1/2 a second to get fully into the crater
-                driveForward(0.5, 81);
+                driveForward(0.25, 81);
 
                 break;
             case "Right":
@@ -94,7 +94,7 @@ public class AUTO_CRATER_HARDCODE extends AUTO_METHODS_HARDCODE{
                 turnDegrees(0.33, 115);
                 //sleepTau(1500);
                 dropLift();
-                driveForward(0.5, 65);
+                driveForward(0.25, 65);
                 //sleepTau(5000);
                 break;
             default: //Center
@@ -117,7 +117,7 @@ public class AUTO_CRATER_HARDCODE extends AUTO_METHODS_HARDCODE{
                 //sleepTau(1000);
                 dropLift();
                 //driveForwardAndDropLift( 78);
-                driveForward(0.5, 75);
+                driveForward(0.25, 75);
                 //sleepTau(5000);
                 break;
         }

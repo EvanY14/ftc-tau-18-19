@@ -223,11 +223,11 @@ public class Hardware extends OpMode {
         return period.time();
     }
 
-    public void sleepTau(long millis) throws InterruptedException {
+    /*public void sleepTau(long millis) throws InterruptedException {
         period.wait(millis);
         telemetry.addData("Status", "Waited" + millis/1000.0 + "seconds");
         telemetry.update();
-    }
+    }*/
 
     public void initVuforia(HardwareMap hwMap) {
         /*

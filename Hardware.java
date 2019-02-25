@@ -43,6 +43,7 @@ public class Hardware extends OpMode {
     public DcMotor rightLiftMotor = null;
     public DcMotor liftRotationMotor = null;
     public DcMotor liftExtensionMotor = null;
+    public DcMotor liftExtensionMotor2 = null;
     //******************************
 
     //Servos************************
@@ -122,16 +123,18 @@ public class Hardware extends OpMode {
 
         markerArm.setPosition(0);
         stopper.setPosition(1);
+        intakeServo.setPower(0);
 
         //init lift motors
-        leftLiftMotor = hwMap.dcMotor.get("left_lift");
+        //leftLiftMotor = hwMap.dcMotor.get("left_lift");
         rightLiftMotor = hwMap.dcMotor.get("right_lift");
         liftExtensionMotor = hwMap.dcMotor.get("extension_motor");
+        liftExtensionMotor2 = hwMap.dcMotor.get("extension_motor_2");
         liftRotationMotor = hwMap.dcMotor.get("rotation_motor");
 
-        leftLiftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        //leftLiftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightLiftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        leftLiftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        //leftLiftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightLiftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         //liftExtensionMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         //liftRotationMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -139,17 +142,18 @@ public class Hardware extends OpMode {
         liftExtensionMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         liftRotationMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         liftExtensionMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        liftExtensionMotor2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
 
-        leftLiftMotor.setPower(0);
+        //leftLiftMotor.setPower(0);
         rightLiftMotor.setPower(0);
         liftRotationMotor.setPower(0);
         liftExtensionMotor.setPower(0);
 
         //initialize variables
-        leftLiftBottom = leftLiftMotor.getCurrentPosition();
+        //leftLiftBottom = leftLiftMotor.getCurrentPosition();
         rightLiftBottom = rightLiftMotor.getCurrentPosition();
-        leftLiftTop = leftLiftBottom + 6000;
+        //leftLiftTop = leftLiftBottom + 6000;
         rightLiftTop = rightLiftBottom + 6000;
         liftMaxExtension = -6000;
     }
@@ -160,14 +164,14 @@ public class Hardware extends OpMode {
         frontRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backLeftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        leftLiftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        //leftLiftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightLiftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         frontLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         frontRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         backRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         backLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        leftLiftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        //leftLiftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightLiftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         frontLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -175,7 +179,7 @@ public class Hardware extends OpMode {
         backLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         //Sensors
-        ultrasonicSensor = hwMap.get(ModernRoboticsI2cRangeSensor.class, "ultrasonic");
+        //ultrasonicSensor = hwMap.get(ModernRoboticsI2cRangeSensor.class, "ultrasonic");
         /*******/
         //Vision stuff
         /*int cameraMonitorViewId = hwMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hwMap.appContext.getPackageName());
@@ -223,11 +227,11 @@ public class Hardware extends OpMode {
         return period.time();
     }
 
-    /*public void sleepTau(long millis) throws InterruptedException {
+    public void sleepTau(long millis) throws InterruptedException {
         period.wait(millis);
         telemetry.addData("Status", "Waited" + millis/1000.0 + "seconds");
         telemetry.update();
-    }*/
+    }
 
     public void initVuforia(HardwareMap hwMap) {
         /*

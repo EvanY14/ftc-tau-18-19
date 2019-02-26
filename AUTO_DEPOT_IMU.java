@@ -38,7 +38,16 @@ public class AUTO_DEPOT_IMU extends AUTO_METHODS_IMU {
     public void runOpMode() throws InterruptedException{
         //set up methods
         setUp(hardwareMap, telemetry);
+        /*while(opModeIsActive())
+        {
+            getBlockLocation3(false);
+            telemetry.addData("gold position:", blockLocation);
+            telemetry.update();
+            sleepTau(30000);
+        }*/
+
         unhang();
+        getBlockLocation3(false);
 
         //Call other methods
         switch (blockLocation){
@@ -126,7 +135,7 @@ public class AUTO_DEPOT_IMU extends AUTO_METHODS_IMU {
                 //sleepTau(1000);*/
 
                 //Drive forward to the middle of the block
-                driveForward(0.25, Math.sqrt(2) * 12-3);
+                driveForward(0.25, Math.sqrt(2) * 12-5);
 
                 //Turn towards the crater
                 turnDegrees(0.25, 45);
@@ -138,7 +147,7 @@ public class AUTO_DEPOT_IMU extends AUTO_METHODS_IMU {
                 //Drive forward until we detect that we are on the crater
                 //driveForwardToCrater();
                 //driveForward(0.25, 60);
-                driveForwardToCrater(0.25, 60);
+                driveForwardToCrater(0.25, 58);
 
                 break;
         }

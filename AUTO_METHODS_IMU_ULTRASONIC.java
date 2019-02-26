@@ -236,7 +236,7 @@ public class AUTO_METHODS_IMU_ULTRASONIC extends LinearOpMode {
 
     public void speedLift(double speed){
         robot.rightLiftMotor.setPower(speed);
-        robot.leftLiftMotor.setPower(speed);
+        //robot.leftLiftMotor.setPower(speed);
     }
 
     public void ultracheck(){
@@ -322,12 +322,12 @@ public class AUTO_METHODS_IMU_ULTRASONIC extends LinearOpMode {
         sleepTau(1000);
         telemetry.addData("Status", "done");
         telemetry.update();
-        int startPos = robot.leftLiftMotor.getCurrentPosition();
+        //int startPos = robot.leftLiftMotor.getCurrentPosition();
         double difference = 5800;
-        int targetPosLeft = (int)(robot.leftLiftMotor.getCurrentPosition() - (difference));
+        //int targetPosLeft = (int)(robot.leftLiftMotor.getCurrentPosition() - (difference));
         int targetPosRight = (int)(robot.rightLiftMotor.getCurrentPosition() - (difference));
 
-        robot.leftLiftMotor.setTargetPosition(targetPosLeft);
+        //robot.leftLiftMotor.setTargetPosition(targetPosLeft);
         robot.rightLiftMotor.setTargetPosition(targetPosRight);
 
         speedLift(1);
@@ -344,7 +344,7 @@ public class AUTO_METHODS_IMU_ULTRASONIC extends LinearOpMode {
             robot.rightLiftMotor.setTargetPosition(targetPosRight);
             speedLift(1);
         }*/
-        while(opModeIsActive() && robot.getTime() < 10 && robot.leftLiftMotor.isBusy() && robot.rightLiftMotor.isBusy()){
+        while(opModeIsActive() && robot.getTime() < 10 && robot.rightLiftMotor.isBusy()){
             telemetry.addData("Status", "Dropping robot...");
             telemetry.update();
         }
@@ -356,14 +356,14 @@ public class AUTO_METHODS_IMU_ULTRASONIC extends LinearOpMode {
     public void dropLift(){
         robot.stopper.setPosition(0.95);
         //speedLift(0);
-        robot.leftLiftMotor.setTargetPosition(robot.leftLiftMotor.getCurrentPosition() + 5800);
+        //robot.leftLiftMotor.setTargetPosition(robot.leftLiftMotor.getCurrentPosition() + 5800);
         robot.rightLiftMotor.setTargetPosition(robot.rightLiftMotor.getCurrentPosition() + 5800);
 
         robot.resetTime();
         speedLift(1);
         Log.d("lift position before", robot.rightLiftMotor.getCurrentPosition() + "");
 
-        while(opModeIsActive() && robot.getTime() < 5 && robot.rightLiftMotor.isBusy() && robot.leftLiftMotor.isBusy()){
+        while(opModeIsActive() && robot.getTime() < 5 && robot.rightLiftMotor.isBusy()){
             telemetry.addData("Status", "Lowering lift...");
             telemetry.update();
 

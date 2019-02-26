@@ -18,7 +18,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 @TeleOp(name = "Tau Teleop", group = "Tau")
 public class Teleop extends OpMode{
     Hardware robot = new Hardware();
-    AUTO_METHODS_HARDCODE_ULTRASONIC auto = new AUTO_METHODS_HARDCODE_ULTRASONIC();
+    //AUTO_METHODS_HARDCODE_ULTRASONIC auto = new AUTO_METHODS_HARDCODE_ULTRASONIC();
     ElapsedTime period = new ElapsedTime();
     AUTO_METHODS_IMU autoIMU = new AUTO_METHODS_IMU();
     //Drive variables

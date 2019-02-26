@@ -216,7 +216,7 @@ public class AUTO_METHODS extends LinearOpMode {
 
     public void speedLift(double speed){
         robot.rightLiftMotor.setPower(speed);
-        robot.leftLiftMotor.setPower(speed);
+        //robot.leftLiftMotor.setPower(speed);
     }
 
     /*Auto methods to call
@@ -290,7 +290,7 @@ public class AUTO_METHODS extends LinearOpMode {
         telemetry.addData("Status", "done");
         telemetry.update();
         speedLift(1);
-        robot.leftLiftMotor.setTargetPosition((int)robot.leftLiftMotor.getCurrentPosition() + 5700);
+        //robot.leftLiftMotor.setTargetPosition((int)robot.leftLiftMotor.getCurrentPosition() + 5700);
         robot.rightLiftMotor.setTargetPosition((int)robot.rightLiftMotor.getCurrentPosition() + 5700);
         blockLocation = getBlockLocation();
     }
@@ -298,8 +298,8 @@ public class AUTO_METHODS extends LinearOpMode {
     public void dropLift(){
         robot.stopper.setPosition(0.95);
         speedLift(1);
-        robot.leftLiftMotor.setTargetPosition(robot.rightLiftMotor.getCurrentPosition() - 5600);
-        robot.rightLiftMotor.setTargetPosition(robot.leftLiftMotor.getCurrentPosition() - 5600);
+        //robot.leftLiftMotor.setTargetPosition(robot.rightLiftMotor.getCurrentPosition() - 5600);
+        //robot.rightLiftMotor.setTargetPosition(robot.leftLiftMotor.getCurrentPosition() - 5600);
         sleepTau(3000);
     }
     //drive forward certain distance at certain speed(speed should be no more than 1), distance is in inches

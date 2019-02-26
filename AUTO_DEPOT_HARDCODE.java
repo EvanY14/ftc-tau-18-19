@@ -38,6 +38,7 @@ public class AUTO_DEPOT_HARDCODE extends AUTO_METHODS_HARDCODE {
         //set up methods
         setUp(hardwareMap, telemetry);
         unhang();
+        getBlockLocation3(false);
         //Call other methods
         switch (blockLocation){
              case ("Left"):
@@ -122,7 +123,7 @@ public class AUTO_DEPOT_HARDCODE extends AUTO_METHODS_HARDCODE {
                 //sleepTau(1000);*/
 
                 //Drive forward to the middle of the block
-                driveForward(0.25, Math.sqrt(2) * 12-3);
+                driveForward(0.25, Math.sqrt(2) * 12-5);
 
                 //Turn towards the crater
                 turnDegrees(0.25, 45);
@@ -133,7 +134,7 @@ public class AUTO_DEPOT_HARDCODE extends AUTO_METHODS_HARDCODE {
 
                 //Drive forward until we detect that we are on the crater
                 //driveForwardToCrater();
-                driveForward(0.25, 60);
+                driveForward(0.25, 58);
 
                 break;
         }

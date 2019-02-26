@@ -39,7 +39,7 @@ public class Hardware extends OpMode {
     //******************************
 
     //Lift Motors*******************
-    public DcMotor leftLiftMotor = null;
+    //public DcMotor leftLiftMotor = null;
     public DcMotor rightLiftMotor = null;
     public DcMotor liftRotationMotor = null;
     public DcMotor liftExtensionMotor = null;

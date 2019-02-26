@@ -225,8 +225,8 @@ public class TeleopIMU extends OpMode{
         if(robot.rightLiftMotor.getCurrentPosition() > robot.rightLiftTop && leftGP2Y < 0)
             leftGP2Y = 0;
 
-        if(robot.leftLiftMotor.getCurrentPosition() > robot.leftLiftTop && leftGP2Y < 0)
-            leftGP2Y = 0;
+        //if(robot.leftLiftMotor.getCurrentPosition() > robot.leftLiftTop && leftGP2Y < 0)
+        //leftGP2Y = 0;
 
         //Pressing y on gamepad 2 moves stopper up and down
         if(gamepad2.y && stopperEndTime < robot.getTime()){
@@ -235,10 +235,10 @@ public class TeleopIMU extends OpMode{
         }
         if(robot.stopper.getPosition() > 0.955 && robot.stopper.getPosition() < 0.956) {
             robot.rightLiftMotor.setPower(-leftGP2Y);
-            robot.leftLiftMotor.setPower(-leftGP2Y);
+            //robot.leftLiftMotor.setPower(-leftGP2Y);
         }else{
             robot.rightLiftMotor.setPower(0);
-            robot.leftLiftMotor.setPower(0);
+            //robot.leftLiftMotor.setPower(0);
             telemetry.addData("DRIVERS", "RAISE THE STOPPER!!!!!!!!");
             telemetry.update();
         }
@@ -288,7 +288,7 @@ public class TeleopIMU extends OpMode{
         telemetry.addData("Right game pad 2 power", rightGP2Y);
         telemetry.addData("Slow drive", slowDrive);
         telemetry.addData("Endgame speed", endGameSpeed);
-        telemetry.addData("Left lift location", robot.leftLiftMotor.getCurrentPosition());
+        //telemetry.addData("Left lift location", robot.leftLiftMotor.getCurrentPosition());
         telemetry.addData("Stopper position", robot.stopper.getPosition());
         telemetry.addData("marker arm position", robot.markerArm.getPosition());
         telemetry.addData("Acceleration x", imu.getAcceleration().xAccel);

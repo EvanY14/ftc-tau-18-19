@@ -224,7 +224,7 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
 
     public void speedLift(double speed){
         robot.rightLiftMotor.setPower(speed);
-        robot.leftLiftMotor.setPower(speed);
+        //robot.leftLiftMotor.setPower(speed);
     }
 
     /*Auto methods to call
@@ -297,12 +297,12 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
         sleepTau(1000);
         telemetry.addData("Status", "done");
         telemetry.update();
-        int startPos = robot.leftLiftMotor.getCurrentPosition();
+        //int startPos = robot.leftLiftMotor.getCurrentPosition();
         double difference = 5800;
-        int targetPosLeft = (int)(robot.leftLiftMotor.getCurrentPosition() - (difference));
+        //int targetPosLeft = (int)(robot.leftLiftMotor.getCurrentPosition() - (difference));
         int targetPosRight = (int)(robot.rightLiftMotor.getCurrentPosition() - (difference));
 
-        robot.leftLiftMotor.setTargetPosition(targetPosLeft);
+        //robot.leftLiftMotor.setTargetPosition(targetPosLeft);
         robot.rightLiftMotor.setTargetPosition(targetPosRight);
 
         speedLift(1);
@@ -319,26 +319,25 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
             robot.rightLiftMotor.setTargetPosition(targetPosRight);
             speedLift(1);
         }*/
-        while(opModeIsActive() && robot.getTime() < 10 && robot.leftLiftMotor.isBusy() && robot.rightLiftMotor.isBusy()){
+        while(opModeIsActive() && robot.getTime() < 10 && robot.rightLiftMotor.isBusy()){
             telemetry.addData("Status", "Dropping robot...");
             telemetry.update();
         }
         speedLift(0);
 
         //getBlockLocation2();
-        getBlockLocation3();
     }
 
     public void dropLift(){
         robot.stopper.setPosition(0.95);
         //speedLift(0);
-        robot.leftLiftMotor.setTargetPosition(robot.rightLiftMotor.getCurrentPosition() + 5800);
-        robot.rightLiftMotor.setTargetPosition(robot.leftLiftMotor.getCurrentPosition() + 5800);
+        //robot.leftLiftMotor.setTargetPosition(robot.rightLiftMotor.getCurrentPosition() + 5800);
+        robot.rightLiftMotor.setTargetPosition(robot.rightLiftMotor.getCurrentPosition() + 5800);
 
         robot.resetTime();
         speedLift(1);
 
-        while(opModeIsActive() && robot.getTime() < 5 && robot.rightLiftMotor.isBusy() && robot.leftLiftMotor.isBusy()){
+        while(opModeIsActive() && robot.getTime() < 5 && robot.rightLiftMotor.isBusy()){
             telemetry.addData("Status", "Lowering lift...");
             telemetry.update();
         }
@@ -676,21 +675,10 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
         }
     }
 
-    public void getBlockLocation3() {
+    public void getBlockLocation3(boolean nearCrater) {
         boolean turn = false;
-        int goldMineralX = -1;
-        int silverMineral1X = -1;
-        int silverMineral2X = -1;
-        int goldMineralY = -1;
-        int silverMineral1Y = -1;
-        int silverMineral2Y = -1;
-        int mineral1X = -1;
-        int mineral2X = -1;
-        int mineral1Y = -1;
-        int mineral2Y = -1;
-        int mineral1Type = -1; //0 - silver; 1 - gold
-        int mineral2Type = -1;
-        int MIN_CRATER_Y = 400; //minimum Y coordinate for minerals outside crater - need test
+
+        int MIN_CRATER_Y = 200; //minimum Y coordinate for minerals outside crater - need test
 
         blockLocation = "Center"; //default location is center
         robot.resetTime();
@@ -709,17 +697,30 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
                 List<Recognition> updatedRecognitions = robot.tfod.getUpdatedRecognitions();
 
                 if (updatedRecognitions != null) {
+                    int goldMineralX = -1;
+                    int silverMineral1X = -1;
+                    int silverMineral2X = -1;
+                    int goldMineralY = -1;
+                    int silverMineral1Y = -1;
+                    int silverMineral2Y = -1;
+                    int mineral1X = -1;
+                    int mineral2X = -1;
+                    int mineral1Y = -1;
+                    int mineral2Y = -1;
+                    int mineral1Type = -1; //0 - silver; 1 - gold
+                    int mineral2Type = -1;
+
                     telemetry.addData("# Object Detected", updatedRecognitions.size());
                     telemetry.update();
                     Log.d("Status", "Objects detected");
                     Log.d("# Objects detected", updatedRecognitions.size() + "");
 
-                    if (updatedRecognitions.size() > 3) {
+                    if (nearCrater && (updatedRecognitions.size() >= 3)) {
                         int detected = 0;
                         for (Recognition recognition : updatedRecognitions) {
                             Log.d("Detected element x/y=", recognition.getLabel() + recognition.getLeft() + " / " + recognition.getTop());
                             //ignore detected minerals within crater - Y value smaller than mininum
-                            if (recognition.getTop() > MIN_CRATER_Y) {
+                            if ((int)recognition.getTop() > MIN_CRATER_Y) {
                                 if (recognition.getLabel().equals(LABEL_SILVER_MINERAL)) {
                                     if (silverMineral1X == -1) {
                                         silverMineral1X = (int) recognition.getLeft();
@@ -742,7 +743,7 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
                                 telemetry.addData("Gold Mineral Position", "Right");
                                 break;
                             }
-                            else if(silverMineral2X == -1)
+                            else
                             {
                                 if(goldMineralX < silverMineral1X)
                                 {
@@ -758,7 +759,7 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
                                 }
                             }
                         }
-                        else {
+                        else if(detected == 3) {
                             if (goldMineralX < silverMineral1X && goldMineralX < silverMineral2X) {
                                 telemetry.addData("Gold Mineral Position", "Left");
                                 blockLocation = "Left";
@@ -776,6 +777,7 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
                     }
                     else if (updatedRecognitions.size() == 3) {
                         for (Recognition recognition : updatedRecognitions) {
+                            Log.d("Detected element x/y=", recognition.getLabel() + recognition.getLeft() + " / " + recognition.getTop());
                             if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
                                 goldMineralX = (int) recognition.getLeft();
                             } else if (silverMineral1X == -1) {
@@ -801,6 +803,7 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
                         }
                     } else if (updatedRecognitions.size() == 2) {
                         for (Recognition recognition : updatedRecognitions) {
+                            Log.d("Detected element x/y=", recognition.getLabel() + recognition.getLeft() + " / " + recognition.getTop());
                             if (recognition.getLabel().equals(LABEL_SILVER_MINERAL)) {
                                 if (silverMineral1X == -1) {
                                     silverMineral1X = (int) recognition.getLeft();
@@ -867,6 +870,177 @@ public class AUTO_METHODS_HARDCODE extends LinearOpMode {
             //sleepTau(750);
         }
     }
+
+    /*public void getBlockLocation4(boolean nearCrater) {
+        boolean turn = false;
+
+        blockLocation = "Center"; //default location is center
+        robot.resetTime();
+        while (opModeIsActive() && robot.getTime() < 4) {
+            //Try checking 15 degrees to the left if not detecting in 2 seconds
+            if (robot.getTime() > 2 && turn == false) {
+                turnDegrees(0.25, 15);
+                //sleepTau(500);
+                turn = true;
+            }
+
+            if (robot.tfod != null) {
+                // getUpdatedRecognitions() will return null if no new information is available since
+                // the last time that call was made.
+                //sleepTau(1500);
+                List<Recognition> updatedRecognitions = robot.tfod.getUpdatedRecognitions();
+
+                if (updatedRecognitions != null) {
+                    int goldMineralX = -1;
+                    int silverMineral1X = -1;
+                    int silverMineral2X = -1;
+                    int goldMineralY = -1;
+                    int silverMineral1Y = -1;
+                    int silverMineral2Y = -1;
+                    int mineral1X = -1;
+                    int mineral2X = -1;
+                    int mineral1Y = -1;
+                    int mineral2Y = -1;
+                    int mineral1Type = -1; //0 - silver; 1 - gold
+                    int mineral2Type = -1;
+                    telemetry.addData("# Object Detected", updatedRecognitions.size());
+                    telemetry.update();
+                    Log.d("Status", "Objects detected");
+                    Log.d("# Objects detected", updatedRecognitions.size() + "");
+
+                    if (nearCrater && (updatedRecognitions.size() >= 3)) {
+                        for (Recognition recognition : updatedRecognitions) {
+                            //Get the detected 2 minerals with the largest Y values
+                            Log.d("Detected element x/y=", recognition.getLabel() + recognition.getLeft() + " / " + recognition.getTop());
+                            if (recognition.getTop() > mineral1Y) {
+                                mineral2X = mineral1X;
+                                mineral2Y = mineral1Y;
+                                mineral2Type = mineral1Type;
+                                mineral1X = (int) recognition.getLeft();
+                                mineral1Y = (int) recognition.getTop();
+                                if (recognition.getLabel().equals(LABEL_SILVER_MINERAL)) {
+                                    silverMineral1X = mineral1X;
+                                    silverMineral1Y = mineral1Y;
+                                    mineral1Type = 0;
+                                } else {
+                                    goldMineralX = mineral1X;
+                                    goldMineralY = mineral1Y;
+                                    mineral1Type = 1;
+                                }
+                            } else if (recognition.getTop() > mineral2Y) {
+                                mineral2X = (int) recognition.getLeft();
+                                mineral2Y = (int) recognition.getTop();
+                                if (recognition.getLabel().equals(LABEL_SILVER_MINERAL)) {
+                                    silverMineral2X = mineral2X;
+                                    silverMineral2Y = mineral2Y;
+                                    mineral2Type = 0;
+                                } else {
+                                    goldMineralX = mineral2X;
+                                    goldMineralY = mineral2Y;
+                                    mineral2Type = 1;
+                                }
+                            }
+                        }
+                    } else if (updatedRecognitions.size() == 3) {
+                        for (Recognition recognition : updatedRecognitions) {
+                            Log.d("Detected element x/y=", recognition.getLabel() + recognition.getLeft() + " / " + recognition.getTop());
+                            if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
+                                goldMineralX = (int) recognition.getLeft();
+                            } else if (silverMineral1X == -1) {
+                                silverMineral1X = (int) recognition.getLeft();
+                            } else {
+                                silverMineral2X = (int) recognition.getLeft();
+                            }
+                        }
+                        if (goldMineralX != -1 && silverMineral1X != -1 && silverMineral2X != -1) {
+                            if (goldMineralX < silverMineral1X && goldMineralX < silverMineral2X) {
+                                telemetry.addData("Gold Mineral Position", "Left");
+                                blockLocation = "Left";
+                                break;
+                            } else if (goldMineralX > silverMineral1X && goldMineralX > silverMineral2X) {
+                                telemetry.addData("Gold Mineral Position", "Right");
+                                blockLocation = "Right";
+                                break;
+                            } else {
+                                telemetry.addData("Gold Mineral Position", "Center");
+                                blockLocation = "Center";
+                                break;
+                            }
+                        }
+                    } else if (updatedRecognitions.size() == 2) {
+                        for (Recognition recognition : updatedRecognitions) {
+                            Log.d("Detected element x/y=", recognition.getLabel() + recognition.getLeft() + " / " + recognition.getTop());
+
+                            if (recognition.getLabel().equals(LABEL_SILVER_MINERAL)) {
+                                if (silverMineral1X == -1) {
+                                    silverMineral1X = (int) recognition.getLeft();
+                                    silverMineral1Y = (int) recognition.getTop();
+                                    mineral1Type = 0;
+                                } else if (silverMineral2X == -1) {
+                                    silverMineral2X = (int) recognition.getLeft();
+                                    silverMineral2Y = (int) recognition.getTop();
+                                    mineral2Type = 0;
+                                }
+                            } else {
+                                if (goldMineralX == -1) {
+                                    goldMineralX = (int) recognition.getLeft();
+                                    goldMineralY = (int) recognition.getTop();
+                                    if (mineral1Type == -1)
+                                        mineral1Type = 1;
+                                    else
+                                        mineral2Type = 1;
+                                }
+                            }
+                        }
+                    }
+
+                    if ((updatedRecognitions.size() == 2) || (nearCrater && (updatedRecognitions.size() >= 3))) {
+                        //Find the location of the gold mineral based on the relative location to the silver minerals
+                        if (mineral1Type == 0 && mineral2Type == 0) {
+                            //gold mineral not detected among the left 2 positions, so it is at right
+                            telemetry.addData("Gold Mineral Position", "Right");
+                            Log.d("Gold position:", "Right");
+                            blockLocation = "Right";
+                            break;
+                        } else if (mineral1Type == 0 && mineral2Type == 1) {
+                            if (goldMineralX < silverMineral1X) {
+                                telemetry.addData("Gold Mineral Position", "Left");
+                                Log.d("Gold position:", "Left");
+                                blockLocation = "Left";
+                                break;
+                            } else {
+                                telemetry.addData("Gold Mineral Position", "Center");
+                                Log.d("Gold position:", "Center");
+                                blockLocation = "Center";
+                                break;
+                            }
+                        } else if (mineral1Type == 1 && mineral2Type == 0) {
+                            if (goldMineralX < silverMineral2X) {
+                                telemetry.addData("Gold Mineral Position", "Left");
+                                Log.d("Gold position:", "Left");
+                                blockLocation = "Left";
+                                break;
+                            } else {
+                                telemetry.addData("Gold Mineral Position", "Center");
+                                Log.d("Gold position:", "Center");
+                                blockLocation = "Center";
+                                break;
+                            }
+                        }
+                    }
+                } //end if recongnitions not full
+            } //end if tfod not null
+        }//end while loop
+
+        telemetry.update();
+
+        //Turn back to straight based on what turns it has previously made
+        if (turn) {
+            turnDegrees(0.25, -15);
+            //sleepTau(750);
+        }
+    }*/
+
 
     public void stopRobot() {
         speed(0);

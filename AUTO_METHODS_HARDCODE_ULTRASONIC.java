@@ -225,7 +225,7 @@ public class AUTO_METHODS_HARDCODE_ULTRASONIC extends LinearOpMode {
 
     public void speedLift(double speed){
         robot.rightLiftMotor.setPower(speed);
-        robot.leftLiftMotor.setPower(speed);
+        //robot.leftLiftMotor.setPower(speed);
     }
 
     /*Auto methods to call
@@ -299,30 +299,31 @@ public class AUTO_METHODS_HARDCODE_ULTRASONIC extends LinearOpMode {
         telemetry.addData("Status", "done");
         telemetry.update();
 
-        robot.leftLiftMotor.setTargetPosition((int)robot.leftLiftMotor.getCurrentPosition() - 5800);
+        //robot.leftLiftMotor.setTargetPosition((int)robot.leftLiftMotor.getCurrentPosition() - 5800);
         robot.rightLiftMotor.setTargetPosition((int)robot.rightLiftMotor.getCurrentPosition() - 5800);
 
         speedLift(1);
         robot.resetTime();
-        getBlockLocation();
-        while(opModeIsActive() && robot.getTime() < 15 && robot.leftLiftMotor.isBusy() && robot.rightLiftMotor.isBusy()){
+        //getBlockLocation();
+        while(opModeIsActive() && robot.getTime() < 15 && robot.rightLiftMotor.isBusy()){
             telemetry.addData("Status", "Dropping robot...");
             telemetry.update();
         }
         speedLift(0);
         Log.d("lift position", robot.rightLiftMotor.getCurrentPosition() + "");
+        getBlockLocation();
     }
 
     public void dropLift(){
         robot.stopper.setPosition(0.95);
         //speedLift(0);
-        robot.leftLiftMotor.setTargetPosition(robot.rightLiftMotor.getCurrentPosition() + 5800);
-        robot.rightLiftMotor.setTargetPosition(robot.leftLiftMotor.getCurrentPosition() + 5800);
+        //robot.leftLiftMotor.setTargetPosition(robot.rightLiftMotor.getCurrentPosition() + 5800);
+        robot.rightLiftMotor.setTargetPosition(robot.rightLiftMotor.getCurrentPosition() + 5800);
 
         robot.resetTime();
         speedLift(1);
 
-        while(opModeIsActive() && robot.getTime() < 5 && robot.rightLiftMotor.isBusy() && robot.leftLiftMotor.isBusy()){
+        while(opModeIsActive() && robot.getTime() < 5 && robot.rightLiftMotor.isBusy()){
             telemetry.addData("Status", "Lowering lift...");
             telemetry.update();
         }

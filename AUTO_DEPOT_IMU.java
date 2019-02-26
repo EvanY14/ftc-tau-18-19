@@ -135,7 +135,7 @@ public class AUTO_DEPOT_IMU extends AUTO_METHODS_IMU {
                 //sleepTau(1000);*/
 
                 //Drive forward to the middle of the block
-                driveForward(0.25, Math.sqrt(2) * 12-5);
+                driveForward(0.25, Math.sqrt(2) * 12-4);
 
                 //Turn towards the crater
                 turnDegrees(0.25, 45);

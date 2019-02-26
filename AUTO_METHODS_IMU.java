@@ -338,7 +338,7 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
             telemetry.update();
         }
         speedLift(0);
-
+        sleepTau(500);
         //getBlockLocation2();
     }
 

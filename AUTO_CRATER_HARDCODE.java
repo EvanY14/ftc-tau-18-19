@@ -83,11 +83,11 @@ public class AUTO_CRATER_HARDCODE extends AUTO_METHODS_HARDCODE{
 
                 turnDegrees(0.25, 90);
                 //sleepTau(1000);
-                driveForward(0.25, Math.sqrt(2) * 24);
+                driveForward(0.25, Math.sqrt(2) * 24+2);
                 //sleepTau(2000);
-                turnDegrees(0.25, 78);
+                turnDegrees(0.25, 70);
                 //sleepTau(1250);
-                driveForward(0.25, 45);
+                driveForward(0.25, 55);
                 //sleepTau(3000);
                 turnDegrees(0.25, 90);
                 //sleepTau(1000);
@@ -103,11 +103,11 @@ public class AUTO_CRATER_HARDCODE extends AUTO_METHODS_HARDCODE{
                 //sleepTau(1750);
                 driveForward(0.25, -Math.sqrt(2) * 12 - 1);
                 //sleepTau(1000);
-                turnDegrees(0.25, 75);
+                turnDegrees(0.25, 72);
                 //sleepTau(1000);
-                driveForward(0.25, Math.sqrt(2) * 36 - 13);
+                driveForward(0.25, Math.sqrt(2) * 36 - 10);
                 //sleepTau(2000);
-                turnDegrees(0.25, 65);
+                turnDegrees(0.25, 60);
                 //sleepTau(1500);
                 driveForward(0.25, 50);
                 //sleepTau(3000);

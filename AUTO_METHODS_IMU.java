@@ -841,7 +841,7 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
         }
     }
 
-    public void getBlockLocation3(boolean nearCrater) {
+    /*public void getBlockLocation3(boolean nearCrater) {
         boolean turn = false;
 
         int MIN_CRATER_Y = 200; //minimum Y coordinate for minerals outside crater - need test
@@ -1035,9 +1035,9 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
             turnDegrees(0.25, -15);
             //sleepTau(750);
         }
-    }
+    }*/
 
-    /*public void getBlockLocation4(boolean nearCrater) {
+    public void getBlockLocation3(boolean nearCrater) {
         boolean turn = false;
 
         blockLocation = "Center"; //default location is center
@@ -1205,7 +1205,7 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
             turnDegrees(0.25, -15);
             //sleepTau(750);
         }
-    }*/
+    }
 
     public void stopRobot() {
         speed(0);

@@ -91,30 +91,30 @@ public class AUTO_CRATER_IMU extends AUTO_METHODS_IMU{
 
                 break;
             case "Right":
-                driveForward(0.25, Math.sqrt(2) * 12 - 2);
+                driveForward(0.25, Math.sqrt(2) * 12);
 
                 turnDegrees(0.25, -40);
 
                 driveForward(0.25, 16);
 
-                turnDegrees(0.25, -30);
+                //turnDegrees(0.25, -30);
 
-                turnDegrees(0.25, 30);
+                //turnDegrees(0.25, 30);
 
                 driveForward(0.25, -24);
 
                 turnDegrees(0.25, 90);
                 //sleepTau(1000);
-                driveForward(0.25, Math.sqrt(2) * 24+2);
+                driveForward(0.25, Math.sqrt(2) * 24);
                 //sleepTau(2000);
-                turnDegrees(0.25, 70);
+                turnDegrees(0.25, 75);
                 //sleepTau(1250);
                 driveForward(0.25, 55);
                 //sleepTau(3000);
                 turnDegrees(0.25, 90);
                 //sleepTau(1000);
                 dropArm();
-                turnDegrees(0.25, 105);
+                turnDegrees(0.25, 95);
                 //sleepTau(1500);
                 dropLift();
                 //driveForward(0.25, 65);
@@ -128,16 +128,16 @@ public class AUTO_CRATER_IMU extends AUTO_METHODS_IMU{
                 //sleepTau(1000);
                 turnDegrees(0.25, 72);
                 //sleepTau(1000);
-                driveForward(0.25, Math.sqrt(2) * 36 - 10);
+                driveForward(0.25, Math.sqrt(2) * 36 - 15);
                 //sleepTau(2000);
-                turnDegrees(0.25, 60);
+                turnDegrees(0.25, 65);
                 //sleepTau(1500);
                 driveForward(0.25, 50);
                 //sleepTau(3000);
                 turnDegrees(0.25, 90);
                 //sleepTau(1000);
                 dropArm();
-                turnDegrees(0.25, 105);
+                turnDegrees(0.25, 95);
                 //sleepTau(1000);
                 dropLift();
                 //driveForwardAndDropLift( 78);

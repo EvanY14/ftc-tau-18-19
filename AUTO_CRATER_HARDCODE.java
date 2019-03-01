@@ -33,7 +33,7 @@ public class AUTO_CRATER_HARDCODE extends AUTO_METHODS_HARDCODE{
 
 
                 //drive forward 1/2 a diagonal of a block
-                driveForward(0.25, Math.sqrt(2) * 12 + 7);
+                driveForward(0.25, Math.sqrt(2) * 12 + 9);
 
 
                 //turn towards the depot
@@ -57,7 +57,7 @@ public class AUTO_CRATER_HARDCODE extends AUTO_METHODS_HARDCODE{
                 dropArm();
 
                 //turn back towards the crater, turning a little more than 90 degrees to account for weird starting motion
-                turnDegrees(0.25, 102);
+                turnDegrees(0.25, 92);
 
 
                 //lower the lift so we don't tip over when we go into the crater
@@ -114,7 +114,7 @@ public class AUTO_CRATER_HARDCODE extends AUTO_METHODS_HARDCODE{
                 turnDegrees(0.25, 90);
                 //sleepTau(1000);
                 dropArm();
-                turnDegrees(0.25, 95);
+                turnDegrees(0.25, 97);
                 //sleepTau(1000);
                 dropLift();
                 //driveForwardAndDropLift( 78);

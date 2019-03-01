@@ -11,3 +11,9 @@ Code for FTC team 5628 The Tau Manifesto Rover Ruckus
 1/11/19
 - changed vision code to allow only detecting the left 2 minerals to determine the gold location
 - used in the 3rd competition
+
+2/28/19
+- complete auto testing from all 6 locations near depot and near crater
+- update TeleOp for new arm and intake
+- will be used in regionals
+

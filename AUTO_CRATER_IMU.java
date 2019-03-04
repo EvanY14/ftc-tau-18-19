@@ -78,7 +78,7 @@ public class AUTO_CRATER_IMU extends AUTO_METHODS_IMU{
                 dropArm();
 
                 //turn back towards the crater, turning a little more than 90 degrees to account for weird starting motion
-                turnDegrees(0.25, 92);
+                turnDegrees(0.25, 98);
 
 
                 //lower the lift so we don't tip over when we go into the crater
@@ -95,15 +95,15 @@ public class AUTO_CRATER_IMU extends AUTO_METHODS_IMU{
 
                 turnDegrees(0.25, -40);
 
-                driveForward(0.25, 16);
+                driveForward(0.25, 18);
 
-                //turnDegrees(0.25, -30);
+                turnDegrees(0.25, -30);
 
-                //turnDegrees(0.25, 30);
+                turnDegrees(0.25, 30);
 
-                driveForward(0.25, -24);
+                driveForward(0.25, -26);
 
-                turnDegrees(0.25, 90);
+                turnDegrees(0.25, 95);
                 //sleepTau(1000);
                 driveForward(0.25, Math.sqrt(2) * 24);
                 //sleepTau(2000);

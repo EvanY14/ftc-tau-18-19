@@ -65,6 +65,8 @@ public class Teleop extends OpMode{
     private final double angleToMove = 120;
     private final double ticksPerRotation = 2240;
     private double maxPowerArm = 1;
+    private double setPoint = 0;
+    private final double p = 1;
 
     private boolean reverseDrive = false;
 
@@ -187,11 +189,11 @@ public class Teleop extends OpMode{
             rightGP2Y = 0;
         }
 
-       if(robot.rightLiftMotor.getCurrentPosition() > robot.rightLiftTop && leftGP2Y < 0)
+        if(robot.rightLiftMotor.getCurrentPosition() > robot.rightLiftTop && leftGP2Y < 0)
             leftGP2Y = 0;
 
         //if(robot.leftLiftMotor.getCurrentPosition() > robot.leftLiftTop && leftGP2Y < 0)
-           // leftGP2Y = 0;
+        // leftGP2Y = 0;
 
         //Pressing y on gamepad 2 moves stopper up and down
         if(gamepad2.y && stopperEndTime < robot.getTime()){
@@ -222,14 +224,27 @@ public class Teleop extends OpMode{
         }
 
         //Using the triggers, rotate the arm
-        if((Math.abs(gamepad2.left_trigger) > 0.05)){
+        if((Math.abs(gamepad2.left_trigger) > 0.05) /*&& /*arm position < top*/){
             liftRotationPower = gamepad2.left_trigger;
-        }else if(Math.abs(gamepad2.right_trigger) > 0.05){
-           liftRotationPower = -gamepad2.right_trigger;
+            setPoint = robot.liftRotationMotor.getCurrentPosition();
+        }else if(Math.abs(gamepad2.right_trigger) > 0.05 /*&& /*arm position > bottom*/){
+            liftRotationPower = -gamepad2.right_trigger;
+            setPoint = robot.liftRotationMotor.getCurrentPosition();
         } else{
             liftRotationPower = 0;
         }
 
+        if(robot.liftRotationMotor.getCurrentPosition() > setPoint){
+            double speed = ((setPoint - robot.liftRotationMotor.getCurrentPosition())/10000.0) * p;
+            robot.liftRotationMotor.setPower(speed);
+            while(robot.liftRotationMotor.isBusy()){
+                double pos = robot.liftRotationMotor.getCurrentPosition();
+                if(pos > top || pos < bottom){
+                    robot.liftRotationMotor.setPower(0);
+                    break;
+                }
+            }
+        }
 
         //intake with 'a' button, reverse with 'x' button
         if(gamepad2.a && endTimeIntake < robot.getTime()){
@@ -283,5 +298,4 @@ public class Teleop extends OpMode{
 
 
 }
-
 

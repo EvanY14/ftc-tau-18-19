@@ -54,7 +54,7 @@ public class AUTO_CRATER_IMU extends AUTO_METHODS_IMU{
 
 
                 //drive forward 1/2 a diagonal of a block
-                driveForward(0.25, Math.sqrt(2) * 12 + 9);
+                driveForward(0.25, Math.sqrt(2) * 12 + 7);
 
 
                 //turn towards the depot
@@ -78,7 +78,7 @@ public class AUTO_CRATER_IMU extends AUTO_METHODS_IMU{
                 dropArm();
 
                 //turn back towards the crater, turning a little more than 90 degrees to account for weird starting motion
-                turnDegrees(0.25, 98);
+                turnDegrees(0.25, 102);
 
 
                 //lower the lift so we don't tip over when we go into the crater
@@ -91,30 +91,30 @@ public class AUTO_CRATER_IMU extends AUTO_METHODS_IMU{
 
                 break;
             case "Right":
-                driveForward(0.25, Math.sqrt(2) * 12);
+                driveForward(0.25, Math.sqrt(2) * 12 - 2);
 
                 turnDegrees(0.25, -40);
 
-                driveForward(0.25, 18);
+                driveForward(0.25, 16);
 
                 turnDegrees(0.25, -30);
 
                 turnDegrees(0.25, 30);
 
-                driveForward(0.25, -26);
+                driveForward(0.25, -24);
 
-                turnDegrees(0.25, 95);
+                turnDegrees(0.25, 90);
                 //sleepTau(1000);
-                driveForward(0.25, Math.sqrt(2) * 24);
+                driveForward(0.25, Math.sqrt(2) * 24+2);
                 //sleepTau(2000);
-                turnDegrees(0.25, 75);
+                turnDegrees(0.25, 70);
                 //sleepTau(1250);
                 driveForward(0.25, 55);
                 //sleepTau(3000);
                 turnDegrees(0.25, 90);
                 //sleepTau(1000);
                 dropArm();
-                turnDegrees(0.25, 95);
+                turnDegrees(0.25, 105);
                 //sleepTau(1500);
                 dropLift();
                 //driveForward(0.25, 65);
@@ -128,16 +128,16 @@ public class AUTO_CRATER_IMU extends AUTO_METHODS_IMU{
                 //sleepTau(1000);
                 turnDegrees(0.25, 72);
                 //sleepTau(1000);
-                driveForward(0.25, Math.sqrt(2) * 36 - 15);
+                driveForward(0.25, Math.sqrt(2) * 36 - 10);
                 //sleepTau(2000);
-                turnDegrees(0.25, 65);
+                turnDegrees(0.25, 60);
                 //sleepTau(1500);
                 driveForward(0.25, 50);
                 //sleepTau(3000);
                 turnDegrees(0.25, 90);
                 //sleepTau(1000);
                 dropArm();
-                turnDegrees(0.25, 97);
+                turnDegrees(0.25, 105);
                 //sleepTau(1000);
                 dropLift();
                 //driveForwardAndDropLift( 78);

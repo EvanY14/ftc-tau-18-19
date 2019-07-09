@@ -499,10 +499,10 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
             //    degree = 360 + degree;
 
             i++;
-            if(Math.abs(currentAngle - finalAngle) > 10 && i == 2)
+            if(Math.abs(currentAngle - finalAngle) > 8 && i == 2)
                 driveForward(speed, -4); //last try back 4in in case it is stuck at the wall
 
-        } while(Math.abs(currentAngle - finalAngle) > 10 && i<=2);
+        } while(Math.abs(currentAngle - finalAngle) > 8 && i<=2);
     }
 
     /*public void turnDegreesIMU(double speed, double degree){
@@ -1141,33 +1141,20 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
                                 if (silverMineral1X == -1) {
                                     silverMineral1X = (int) recognition.getLeft();
                                     silverMineral1Y = (int) recognition.getTop();
-                                    if(mineral1Type == -1) {
-                                        mineral1X = silverMineral1X;
-                                        mineral1Type = 0;
-                                    }
-                                    else
-                                    {
-                                        mineral2X = silverMineral1X;
-                                        mineral2Type = 0;
-                                    }
+                                    mineral1Type = 0;
                                 } else if (silverMineral2X == -1) {
                                     silverMineral2X = (int) recognition.getLeft();
                                     silverMineral2Y = (int) recognition.getTop();
-                                    mineral2X = silverMineral2X;
                                     mineral2Type = 0;
                                 }
                             } else {
                                 if (goldMineralX == -1) {
                                     goldMineralX = (int) recognition.getLeft();
                                     goldMineralY = (int) recognition.getTop();
-                                    if (mineral1Type == -1) {
+                                    if (mineral1Type == -1)
                                         mineral1Type = 1;
-                                        mineral1X = goldMineralX;
-                                    }
-                                    else {
+                                    else
                                         mineral2Type = 1;
-                                        mineral2X = goldMineralX;
-                                    }
                                 }
                             }
                         }
@@ -1182,8 +1169,7 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
                             blockLocation = "Right";
                             break;
                         } else if (mineral1Type == 0 && mineral2Type == 1) {
-                            //if (goldMineralX < silverMineral1X) {
-                            if(mineral2X < mineral1X) {
+                            if (goldMineralX < silverMineral1X) {
                                 telemetry.addData("Gold Mineral Position", "Left");
                                 Log.d("Gold position:", "Left");
                                 blockLocation = "Left";
@@ -1195,8 +1181,7 @@ public class AUTO_METHODS_IMU extends LinearOpMode {
                                 break;
                             }
                         } else if (mineral1Type == 1 && mineral2Type == 0) {
-                            //if (goldMineralX < silverMineral2X) {
-                            if(mineral1X < mineral2X) {
+                            if (goldMineralX < silverMineral2X) {
                                 telemetry.addData("Gold Mineral Position", "Left");
                                 Log.d("Gold position:", "Left");
                                 blockLocation = "Left";
